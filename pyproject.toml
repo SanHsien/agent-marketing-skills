@@ -1,0 +1,17 @@
+# Tool configuration only. This repository ships Markdown Agent Skills and
+# zero-dependency Node CLIs, not a Python package, so there is deliberately no
+# [project] or [build-system] table -- the file exists so a bare `ruff check`
+# or `pytest` locally behaves the way CI does.
+#
+# Keep these values in sync with .github/workflows/ci.yml.
+
+[tool.ruff]
+target-version = "py39"
+src = ["tests", "tools"]
+extend-exclude = ["tools/clis", "tools/composio", "tools/integrations"]
+
+[tool.ruff.lint]
+select = ["E9", "F"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

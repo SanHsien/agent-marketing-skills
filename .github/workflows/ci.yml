@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: "utf-8"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Compile
+        run: >-
+          python -m compileall -q tests
+          tools/check_upstream_updates.py
+          tools/check_dependency_freshness.py
+          tools/check_links.py
+          tools/run_skillspector.py
+          tools/validate_skills.py
+
+      - name: Ruff (E9 + F)
+        run: >-
+          python -m ruff check --select E9,F --target-version py39
+          tests
+          tools/check_upstream_updates.py
+          tools/check_dependency_freshness.py
+          tools/check_links.py
+          tools/run_skillspector.py
+          tools/validate_skills.py
+
+      - name: Pytest
+        run: python -m pytest tests -q
+
+      - name: Validate skills
+        run: python tools/validate_skills.py
+
+      - name: Node syntax check
+        run: |
+          shopt -s nullglob
+          files=(tools/clis/*.js)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No CLI scripts found"
+            exit 1
+          fi
+          for file in "${files[@]}"; do
+            node --check "$file"
+          done
+
+      - name: Check Markdown links
+        run: python tools/check_links.py
+
+  test-windows:
+    name: test (windows / py3.13)
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: "utf-8"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+
+      - name: Install test dependencies and pinned SkillSpector
+        run: |
+          python -m pip install -r requirements-dev.txt
+          python -m pip install -r requirements-security.txt
+
+      - name: Canonical Windows development gate
+        shell: pwsh
+        run: pwsh -NoProfile -File tools/dev_check.ps1
