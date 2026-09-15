@@ -56,3 +56,11 @@ README 衝突的解法：上游新英文產品說明翻進 `README.md`，並同�
   贊助商 CTA，維持既有政策
 - 暫緩（open PR，未合併）：#572、#573、#575、#580、#581、#582、#583
 - 理由見 `docs/DECISIONS.md` 2026-09-11 條目
+
+## 2026-09-15：PR #586–#588 判讀
+
+- PR：已看到 **#588**（`reviewed_pr_through`）
+- commit 與 issue 水位不動（`--strict` 實查皆無新項目）
+- 不引用：#586 Glasser 整合指南、#587 AIPM registry 徽章——第三方廠商導流，維持既有政策
+- 暫緩至合併：#588 CLI 目錄補完（純文件對齊，非本 fork 可證缺陷）
+- 理由見 `docs/DECISIONS.md` 2026-09-15 條目

@@ -10,6 +10,12 @@
 
 ---
 
+## 2026-09-15（批次審查）
+
+### 略過
+
+- **上游 PR #586（Glasser 整合指南）與 #587（AIPM registry 徽章）不引用。** 兩筆都是第三方廠商在上游掛自己的導流入口，與 Converly／Ploy 同屬既有的廠商推廣略過政策。#588（補完 `tools/clis/README.md` 的 CLI 目錄）暫緩至上游合併。commit 與 issue 軸實查無新項目，PR 水位推到 #588。理由見 [`docs/DECISIONS.md`](docs/DECISIONS.md)。
+
 ## 2026-09-11（批次審查）
 
 ### 同步

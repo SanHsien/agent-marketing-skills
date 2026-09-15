@@ -11,6 +11,12 @@ adopt/skip reasoning is recorded in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ---
 
+## 2026-09-15 (batch review)
+
+### Skipped
+
+- **Upstream PRs #586 (Glasser integration guide) and #587 (AIPM registry badge) are not adopted.** Both add a third-party vendor's own referral entry point upstream, the same category as the Converly and Ploy listings this fork already skips. #588 (completing the CLI catalog in `tools/clis/README.md`) waits until upstream merges it. The commit and issue axes had nothing new; the PR watermark moves to #588. Reasons in [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
 ## 2026-09-11 (batch review)
 
 ### Synced

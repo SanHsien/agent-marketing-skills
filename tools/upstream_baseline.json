@@ -2,8 +2,8 @@
   "repo": "https://github.com/coreyhaines31/marketingskills.git",
   "branch": "main",
   "reviewed_through": "5b2c0007766c6a1cf1d53fd8fc73e979e0821022",
-  "reviewed_date": "2026-09-11",
-  "notes": "Fork overlay established at upstream merge of PR #569 (partner program rules). No product commits adopted beyond the fork point. Subsequent upstream commits, PRs, and issues require review. 2026-08-30：commit 水位推進到 e55de88、PR 569 → 571。#571（Converly 因未付款下架）採用——本 fork 的 REGISTRY 原本替一個連上游都下架的廠商掛 Verified Partner 背書，而本線與該廠商毫無商業關係；#570（往 repo 塞加密貨幣交易 app）與本 repo 主題無關且上游未合併，不引用。理由見 docs/DECISIONS.md 同日條目。2026-09-11：commit 水位推進到 5b2c000、PR 571 → 583、issue 維持 569（實查為空）。d4ff28a（Converly 二次上架）與 4fbe11f/88de9fd/5cd4a7e（Ploy 上架三部曲）略過——付款清償的是上游與廠商的贊助關係，不是本 fork 的，維持既有的贊助商 CTA 略過政策。5b2c000（ai-seo 2.5.0）cherry-pick 採用——純產品內容與版本號更新，無 README/REGISTRY/gate 衝突。PR #572/#573/#575/#580/#581/#582/#583 全部 OPEN 未合併，暫緩；#580/#581 的連結修正經查證不落在 tools/check_links.py 的掃描範圍（該工具明確排除 skills/ 與 tools/integrations/），不構成『本 fork 工具能證明的缺陷』。理由見 docs/DECISIONS.md 同日條目。",
-  "reviewed_pr_through": 583,
+  "reviewed_date": "2026-09-15",
+  "notes": "Fork overlay established at upstream merge of PR #569 (partner program rules). No product commits adopted beyond the fork point. Subsequent upstream commits, PRs, and issues require review. 2026-08-30：commit 水位推進到 e55de88、PR 569 → 571。#571（Converly 因未付款下架）採用——本 fork 的 REGISTRY 原本替一個連上游都下架的廠商掛 Verified Partner 背書，而本線與該廠商毫無商業關係；#570（往 repo 塞加密貨幣交易 app）與本 repo 主題無關且上游未合併，不引用。理由見 docs/DECISIONS.md 同日條目。2026-09-11：commit 水位推進到 5b2c000、PR 571 → 583、issue 維持 569（實查為空）。d4ff28a（Converly 二次上架）與 4fbe11f/88de9fd/5cd4a7e（Ploy 上架三部曲）略過——付款清償的是上游與廠商的贊助關係，不是本 fork 的，維持既有的贊助商 CTA 略過政策。5b2c000（ai-seo 2.5.0）cherry-pick 採用——純產品內容與版本號更新，無 README/REGISTRY/gate 衝突。PR #572/#573/#575/#580/#581/#582/#583 全部 OPEN 未合併，暫緩；#580/#581 的連結修正經查證不落在 tools/check_links.py 的掃描範圍（該工具明確排除 skills/ 與 tools/integrations/），不構成『本 fork 工具能證明的缺陷』。理由見 docs/DECISIONS.md 同日條目。 2026-09-15：commit 與 issue 軸實查無新項目；PR 583 → 588。#586（Glasser 整合指南）與 #587（AIPM registry 徽章）不引用——第三方廠商導流，與 Converly／Ploy 同一類政策。#588（tools/clis/README.md 補完 CLI 目錄）暫緩至合併，純文件對齊且非本 fork 工具能證明的缺陷。理由見 docs/DECISIONS.md 同日條目。",
+  "reviewed_pr_through": 588,
   "reviewed_issue_through": 569
 }
