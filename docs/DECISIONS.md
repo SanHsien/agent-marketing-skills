@@ -317,3 +317,24 @@ registry 徽章與第 7 種安裝選項。本 fork 對這兩家廠商同樣沒�
 `tools/clis/README.md` 補上 12 個已存在但未列入認證／可用工具表的 CLI，純文件對齊，與繁中入口、
 Windows gate 或測試都不衝突。但它仍是未合併的 PR，而且表格缺項不是本 fork 工具能證明的缺陷——
 `tools/check_links.py` 與 `node --check` 都不看這兩張表。依既有門檻等上游合併後由 commit 軸抵達。
+
+## 2026-09-17：SkillSpector pin 移到 `82bbe8b`，gate 契約跟上新版
+
+**決定**：`requirements-security.txt` 從 `75bd6f3` 換到 `82bbe8b`（SanHsien/SkillSpector 同步上游 53 個
+commit，版本號仍 2.11.2）；`tests/test_docs.py` 的 pin 斷言跟著前進。
+
+**為什麼現在換**：SkillSpector fork 在 2026-09-13 把歷史壓成單一 commit，舊 pin 此後只靠兩個 Dependabot
+分支撐著可及，那兩個 PR 關閉後全新安裝可能拉不到。本機 gate 用的 venv 是 editable 安裝、指向 fork checkout，
+已經在跑新版，不換 pin 會讓本機與 CI 用不同掃描器。
+
+**連帶調整**：
+- `tools/dev_check.ps1` 的每檔預算改設上游 #522 的
+  `SKILLSPECTOR_MAX_STATIC_ANALYSIS_SECONDS_PER_ARTIFACT`；舊的 `SKILLSPECTOR_MAX_STATIC_SECONDS` 是 fork
+  自有變數，同步時已移除，新版會忽略。參數 `-SkillSpectorMaxStaticSeconds` 的範圍與預設不變。
+- `tools/run_skillspector.py` 的 exact analyzer 契約：新版在 `--no-llm` 下把 3 個 semantic analyzer 以
+  `disabled／disabled_by_configuration`、工作量全 0 列出，舊版是省略。精確集合加入這 3 個，並規定只能是
+  disabled；若它們在 `--no-llm` 掃描中回報做了工作，gate 失敗。新增兩個測試。
+- fingerprint：新版改了 finding 的識別內容，9 筆既有項目漂移（`ad-creative` P5／P2、`ads` P1、`attribution`
+  PE3、`cold-email` AR1、`content-strategy` PE3、`directory-submissions` AR2、`marketing-plan` AR1、
+  `public-relations` AR2），每筆都對應 baseline 裡唯一一筆同規則同檔案的項目，同行同證據，理由不變只換雜湊。
+  沒有新增或消失的 finding；`scoped_rules` 不動。

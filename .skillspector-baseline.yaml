@@ -45,11 +45,11 @@ scoped_rules:
   message: '*Create task for*'
   reason: Create task for CS 是 CRM 內建的客戶成功待辦流程，不是建立 cron、開機腳本或跨 session 持久化。
 fingerprints:
-- hash: sha256:ee4e796b1a4e4b8177b0dc4609b04e93868dfdafe3d7aa77756b29fb5cb32d82
+- hash: sha256:a0b71546b0c58678cc2417672465579622034a52c77c993d7671086c1df662e8
   rule_id: P5
   file: assets/creative-review-template.html
   reason: 範例廣告以第三方實驗室檢測砷、鎘、鉛並顯示合格結果，目的是示範證據式產品文案，不含製造、取得或使用有害物質的指示。
-- hash: sha256:fbc41854ec7526672826f98efc7c2c7cdd9aae457c8916b0fe010c12c86f2142
+- hash: sha256:aa887f0d5a46426abf9327eae556118c29e681d30c88508f82fcb2d470bf01fe
   rule_id: P2
   file: assets/creative-review-template.html
   reason: HTML 開頭註解是維護者使用說明，只要求替換同檔案內的範例 JSON；不要求越權、外傳資料或覆蓋系統指令。
@@ -72,7 +72,7 @@ fingerprints:
   rule_id: RP1
   file: references/imessage-video-ads.md
   reason: 自我指涉誤判：文件中『npx <pkg>@latest』等安裝範例是提供給使用者參考的文件文字，非本 skill 綁定執行且未鎖版號的 MCP／CLI 設定。
-- hash: sha256:705aea8c59f0d1bfb073876cee9b49bdafc2af2e5bc97e9e825f16456bcbce5f
+- hash: sha256:9297940a3d58f104e4a9ade33334e7028db07b0429a78ab0dc1dc11d52505112
   rule_id: P1
   file: references/audit-guardrails.md
   reason: 自我指涉誤判：文件教導 agent 把擷取到的網頁／競品廣告內容視為資料而非指令，範例字面提及『ignore previous instructions』是防禦說明，非真實指令覆寫。
@@ -101,7 +101,7 @@ fingerprints:
   rule_id: P9
   file: SKILL.md
   reason: 自我指涉誤判：references 內大型 Markdown 表格（評分標準、對照表）因欄位對齊產生大量空白／長分隔線，被誤判為可能藏匿隱藏指令的版面留白，實際只是表格格式排版。
-- hash: sha256:a269e7acaad863aac04a192dd2b925e0a3bb5852570037bbf742aa6255348103
+- hash: sha256:95528432c0552a83dfe1f9623841d81d17c668050770b2936af2ce0664e335a4
   rule_id: PE3
   file: references/measurement-paradigms.md
   reason: 自我指涉誤判：文件內容描述行銷歸因方法論與 headless CMS 預覽權杖（preview token）等產業名詞，非本 skill 實際讀取憑證檔案。
@@ -109,7 +109,7 @@ fingerprints:
   rule_id: EA2
   file: references/cancel-flow-patterns.md
   reason: 自我指涉誤判：文件中『don't ask user to copy/paste』『bulk-scraped without verification』等段落是流程效率建議或風險警語（提醒不要這樣做），非要求 agent 未經同意執行高風險操作。
-- hash: sha256:d74ee79f934dd1da6dd7b4e8908463e6b810f046c2b62b20a7bbf265847c3d16
+- hash: sha256:35c0733b5ac2a52c6d471509fa1bdf22ccd1a79cf86437bb8427f701881a670b
   rule_id: AR1
   file: references/frameworks.md
   reason: 自我指涉誤判：文案框架／內部規劃文件中『no intro』『don't refuse — frame the timing』等字樣是行銷文案／對創辦人溝通的語氣建議（精簡開場、婉轉說明限制而非生硬拒絕），非要求 agent
@@ -118,7 +118,7 @@ fingerprints:
   rule_id: EA2
   file: SKILL.md
   reason: 自我指涉誤判：文件中『don't ask user to copy/paste』『bulk-scraped without verification』等段落是流程效率建議或風險警語（提醒不要這樣做），非要求 agent 未經同意執行高風險操作。
-- hash: sha256:c67abf864b96cf956e14877ffe63df434e0c43df2a6a4346e3f19ad1a4080395
+- hash: sha256:e1878f36b4ab3c90ef1f6790f4ba4bc811e177cacfa3fb90fbf875fb774c3010
   rule_id: PE3
   file: references/headless-cms.md
   reason: 自我指涉誤判：文件內容描述行銷歸因方法論與 headless CMS 預覽權杖（preview token）等產業名詞，非本 skill 實際讀取憑證檔案。
@@ -126,7 +126,7 @@ fingerprints:
   rule_id: EA2
   file: references/form.md
   reason: 自我指涉誤判：文件中『don't ask user to copy/paste』『bulk-scraped without verification』等段落是流程效率建議或風險警語（提醒不要這樣做），非要求 agent 未經同意執行高風險操作。
-- hash: sha256:054dd2b688d756b21428f6bb485cb3de80a1717c2c13450fd625de59c91561fb
+- hash: sha256:43590b74cf18be7ff286bc25725ea81f8ff5d0ddefe68a1ead225f25eefd9a7b
   rule_id: AR2
   file: references/directory-list.md
   reason: 自我指涉誤判：常見錯誤檢查清單（如『忽略字數限制』『未加警告』）與操作指南中的『警告』字樣是教學內容本身在提醒要注意什麼，非要求 agent 省略警示或免責聲明。
@@ -148,7 +148,7 @@ fingerprints:
   rule_id: EA3
   file: evals/evals.json
   reason: 自我指涉誤判：marketing-council/evals/evals.json 的評測案例是測試 skill 依角色（如 David Ogilvy 顧問人格）產生對應輸出的預期行為，非技能範圍蔓延。
-- hash: sha256:778777d427813e2edf2d6236f2cd1242ddcf7ee7a4e1d2264e5a46f0ce1e40af
+- hash: sha256:92080ab9e10ac3c32c0e28ace3e1fa141dc844eb2eb73fd0fdeb9c636cdcc5c3
   rule_id: AR1
   file: references/funding-stage-unlocks.md
   reason: 自我指涉誤判：文案框架／內部規劃文件中『no intro』『don't refuse — frame the timing』等字樣是行銷文案／對創辦人溝通的語氣建議（精簡開場、婉轉說明限制而非生硬拒絕），非要求 agent
@@ -194,7 +194,7 @@ fingerprints:
   rule_id: EA2
   file: references/compliance.md
   reason: 自我指涉誤判：文件中『don't ask user to copy/paste』『bulk-scraped without verification』等段落是流程效率建議或風險警語（提醒不要這樣做），非要求 agent 未經同意執行高風險操作。
-- hash: sha256:dfde0b658a0e72c396bc97b125e5b16cb68b28370b0b09393d958664c65c0584
+- hash: sha256:d7877adfaf68134172eeaad2fe51d997cffd0916d0761ff4f4e221d299e906d8
   rule_id: AR2
   file: references/newsjacking.md
   reason: 自我指涉誤判：常見錯誤檢查清單（如『忽略字數限制』『未加警告』）與操作指南中的『警告』字樣是教學內容本身在提醒要注意什麼，非要求 agent 省略警示或免責聲明。

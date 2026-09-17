@@ -11,6 +11,12 @@ adopt/skip reasoning is recorded in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ---
 
+## 2026-09-17
+
+### Changed
+
+- **SkillSpector pin moved to `82bbe8b` (53 upstream commits synced, still 2.11.2).** The old pin had been reachable only through Dependabot branches since the fork's history was squashed. The per-artifact budget now uses upstream's `SKILLSPECTOR_MAX_STATIC_ANALYSIS_SECONDS_PER_ARTIFACT`; the analyzer contract adds the three semantic analyzers the new build lists under `--no-llm` and accepts them only as disabled; the new finding identity rehashed 9 fingerprints, with no new findings. See [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
 ## 2026-09-15 (batch review)
 
 ### Skipped

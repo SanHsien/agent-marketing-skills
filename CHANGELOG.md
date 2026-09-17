@@ -10,6 +10,12 @@
 
 ---
 
+## 2026-09-17
+
+### 變更
+
+- **SkillSpector pin 移到 `82bbe8b`（同步上游 53 個 commit，仍 2.11.2）。** 舊 pin 在 fork 歷史壓平後只靠 Dependabot 分支撐著可及。每檔預算改用上游變數名 `SKILLSPECTOR_MAX_STATIC_ANALYSIS_SECONDS_PER_ARTIFACT`；analyzer 契約納入新版在 `--no-llm` 下列出的 3 個 semantic analyzer，且只准是 disabled；9 筆 fingerprint 因新版識別方式換雜湊，無新增 finding。見 [`docs/DECISIONS.md`](docs/DECISIONS.md)。
+
 ## 2026-09-15（批次審查）
 
 ### 略過

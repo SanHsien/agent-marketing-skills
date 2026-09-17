@@ -30,7 +30,10 @@ if ([string]::IsNullOrWhiteSpace($SkillSpectorPython)) {
 
 $env:PYTHONUTF8 = "1"
 $env:PYTHONIOENCODING = "utf-8"
-$env:SKILLSPECTOR_MAX_STATIC_SECONDS = [string]$SkillSpectorMaxStaticSeconds
+# Per-artifact static budget. SKILLSPECTOR_MAX_STATIC_ANALYSIS_SECONDS_PER_ARTIFACT is
+# upstream's variable since #522 (positive finite values only); it replaced the SanHsien
+# fork's SKILLSPECTOR_MAX_STATIC_SECONDS on 2026-09-17.
+$env:SKILLSPECTOR_MAX_STATIC_ANALYSIS_SECONDS_PER_ARTIFACT = [string]$SkillSpectorMaxStaticSeconds
 
 function Invoke-PythonStep {
     param(
