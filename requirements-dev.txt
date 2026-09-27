@@ -1,0 +1,4 @@
+# pytest 9 需要 Python >= 3.10，而 CI 仍測 3.9；這個下限被支援範圍卡住，不是漏升級。
+pytest>=8.3.0  # freshness-hold: pytest 9 requires Python >=3.10, CI still tests 3.9
+ruff>=0.16
+PyYAML>=6.0

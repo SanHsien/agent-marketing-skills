@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Agent Skills Specification
+    url: https://agentskills.io/specification.md
+    about: Learn the skill format before creating or requesting a skill
+  - name: 本 fork 貢獻指南
+    url: https://github.com/SanHsien/agent-marketing-skills/blob/main/CONTRIBUTING.md
+    about: Windows-first 維護線。產品 skill／CLI 變更請走上游，不要開到這個 fork
+  - name: 上游產品貢獻
+    url: https://github.com/coreyhaines31/marketingskills/blob/main/CONTRIBUTING.md
+    about: 新 skill、CLI、整合指南請開到原作者倉庫

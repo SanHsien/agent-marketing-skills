@@ -1,0 +1,23 @@
+# The index is LF throughout. Without this file a global core.autocrlf=true makes
+# the working tree CRLF, which shows tracked files as modified with an empty diff.
+* text=auto eol=lf
+
+*.md        text eol=lf
+*.py        text eol=lf
+*.ps1       text eol=lf
+*.sh        text eol=lf
+*.js        text eol=lf
+*.mjs       text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.json      text eol=lf
+*.txt       text eol=lf
+*.csv       text eol=lf
+*.html      text eol=lf
+
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.woff binary

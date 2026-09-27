@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Skill install artifacts (npx skills add)
+.agents/
+.claude/
+skills-lock.json
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# macOS / iCloud duplicate files
+* 2.*
+* 2/
+
+# Remotion video project (root only, not skills/video/)
+/video/
+
+# Editor
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Fork maintenance (Python gate)
+__pycache__/
+*.pyc
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Generated local / CI reports
+upstream-review-report.md
+dependency-freshness-report.md
+release-notes.md
+release-title.txt
+
+# SkillSpector self-scan reports (generated locally by tools/dev_check.ps1)
+.skillspector-reports/
