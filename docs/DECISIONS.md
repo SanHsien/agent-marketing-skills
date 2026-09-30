@@ -338,3 +338,23 @@ commit，版本號仍 2.11.2）；`tests/test_docs.py` 的 pin 斷言跟著前�
   PE3、`cold-email` AR1、`content-strategy` PE3、`directory-submissions` AR2、`marketing-plan` AR1、
   `public-relations` AR2），每筆都對應 baseline 裡唯一一筆同規則同檔案的項目，同行同證據，理由不變只換雜湊。
   沒有新增或消失的 finding；`scoped_rules` 不動。
+
+## 2026-09-30：PR #590–#598、issue #592–#600 判讀，commit 軸無新增
+
+commit 軸實查無新提交（`5b2c000` 仍是上游 `main` 頭）。以下 6 個 PR 全部尚未合併進上游 `main`，
+issue 4 筆全部 open。產品 skill 以上游為準（`AGENTS.md`），未合併項目一律等 commit 軸抵達，不先行摘取。
+
+| 項目 | 判定 | 理由 |
+| --- | --- | --- |
+| PR #590（schema eval id 1 可執行檢查，`skills/schema/evals/check.py` 等 10 檔 +612/-4） | 不適用 | 上游關閉未合併；只新增上游 eval 工具與版本號，本 fork 無對應 gate |
+| PR #593（`raco/` 5 檔 +535） | 不適用 | 上游關閉未合併；個人事業的產品行銷檔，與 skill 無關 |
+| PR #591（`tools/clis/README.md` 1 行連結） | 跟隨上游 | 純文件連結，`tools/` 以上游為準；等合併 |
+| PR #598（Converly 整合指南，`tools/integrations/converly.md`、`REGISTRY.md`） | 不適用 | 與 #571 同一類：第三方廠商導流，本 fork 不引用 |
+| PR #597（conversion-tracking skill，75 檔 +8218） | 跟隨上游 | 大型新 skill 且含 marketplace／版本檔；本機 gate 無法驗證其內容；等合併 |
+| PR #595（移除 Sora 2／gpt-image-1 建議，5 檔 +12/-37） | 跟隨上游（暫緩，非採用） | 內容屬實：本 fork `skills/video/SKILL.md`、`skills/ad-creative/SKILL.md`、`skills/ad-creative/references/generative-tools.md` 仍含 Sora 字樣；但屬產品 skill 內容，`check_links.py` 與 gate 都不涵蓋，未合併不摘取。觸發條件：上游合併 #595 即由 commit 軸抵達 |
+| issue #594 | 跟隨上游 | 同 PR #595（Sora API 2026-09-24 停用） |
+| issue #599（ai-seo robots.txt 把訓練爬蟲當引用爬蟲） | 跟隨上游 | 本 fork `skills/ai-seo/SKILL.md:428` 確有此描述；產品內容，等上游修正 |
+| issue #600（video skill 的 `import { render } from "hyperframes"` 不可執行） | 跟隨上游 | 本 fork `skills/video/SKILL.md:65` 確有此範例；產品內容，等上游修正 |
+| issue #592（`creative-review-template.html` JSON 形狀錯誤崩潰、tab ARIA） | 跟隨上游 | 上游資產檔缺陷，本 fork 未修改該檔；等上游修正 |
+
+無採用項目。水位：PR `588` → `598`，issue `569` → `600`，commit 不變（`5b2c000`）。日期 2026-09-30。
