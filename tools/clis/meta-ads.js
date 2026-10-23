@@ -2,14 +2,26 @@
 
 const { writeJson } = require('./_safe-output')
 
+const rawArgs = process.argv.slice(2)
 const TOKEN = process.env.META_ACCESS_TOKEN
 const DEFAULT_ACCOUNT_ID = process.env.META_AD_ACCOUNT_ID
 const BASE_URL = 'https://graph.facebook.com/v18.0'
 
-if (!TOKEN) {
+if ((!TOKEN) && rawArgs.length > 0) {
   console.error(JSON.stringify({ error: 'META_ACCESS_TOKEN environment variable required' }))
   process.exit(1)
 }
+
+
+function requestSignal() {
+  const raw = args['timeout-ms'] ?? '120000'
+  const ms = Number(raw)
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw) || !Number.isSafeInteger(ms) || ms < 1 || ms > 600000) {
+    throw new Error('--timeout-ms must be an integer from 1 to 600000')
+  }
+  return AbortSignal.timeout(ms)
+}
+
 
 async function api(method, path, body) {
   const url = `${BASE_URL}${path}`
@@ -24,7 +36,8 @@ async function api(method, path, body) {
   if (args['dry-run']) {
     return { _dry_run: true, method, url, headers: { ...opts.headers, Authorization: '***' }, body: body || undefined }
   }
-  const res = await fetch(url, opts)
+  const res = await fetch(url, { ...opts, signal: requestSignal() })
+  if (!res.ok) process.exitCode = 1
   const text = await res.text()
   try {
     return JSON.parse(text)
@@ -53,11 +66,13 @@ function parseArgs(args) {
   return result
 }
 
-const args = parseArgs(process.argv.slice(2))
+const args = parseArgs(rawArgs)
 const [cmd, sub, ...rest] = args._
 
 function getAccountId() {
-  return args['account-id'] || DEFAULT_ACCOUNT_ID
+  const id = args['account-id'] || DEFAULT_ACCOUNT_ID
+  // accounts list returns canonical act_ IDs; callers may also use bare IDs.
+  return id ? id.replace(/^act_/, '') : id
 }
 
 async function main() {
@@ -174,6 +189,7 @@ async function main() {
       }
   }
 
+  if (result?.error && rawArgs.length > 0) process.exitCode = 1
   writeJson(result, [TOKEN])
 }
 

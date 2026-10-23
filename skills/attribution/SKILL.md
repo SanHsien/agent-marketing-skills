@@ -1,8 +1,8 @@
 ---
 name: attribution
-description: When the user wants to figure out which marketing actually drives conversions and revenue, choose or interpret an attribution model, or reconcile conflicting numbers across tools. Also use when the user mentions "attribution," "attribution model," "first-touch vs last-touch," "multi-touch," "which channel drives revenue," "what's my real CAC," "my dashboards disagree," "Google/Meta says X but GA says Y," "media mix model," "MMM," "incrementality," "geo lift," "holdout test," "how did you hear about us," "self-reported attribution," "dark social," or wants to instrument attribution themselves — "stitch my bookings to their source," "SavvyCal/Calendly attribution," "close the identify gap," "track conversions on a third-party domain," "first-party / self-hosted attribution." For event tracking setup and UTMs, see analytics. For ad-platform pixels/CAPI, see ads. For pipeline and CRM revenue reporting, see revops. For the AI-search attribution blind spot, see ai-seo.
+description: When the user wants to figure out which marketing actually drives conversions and revenue, choose or interpret an attribution model, or reconcile conflicting numbers across tools. Also use when the user mentions "attribution," "attribution model," "first-touch vs last-touch," "multi-touch," "which channel drives revenue," "what's my real CAC," "my dashboards disagree," "Google/Meta says X but GA says Y," "media mix model," "MMM," "incrementality," "geo lift," "holdout test," "how did you hear about us," "self-reported attribution," "dark social," or wants to instrument attribution themselves — "stitch my bookings to their source," "SavvyCal/Calendly attribution," "close the identify gap," "track conversions on a third-party domain," "first-party / self-hosted attribution." For event tracking setup and UTMs, see analytics. For ad-platform pixels/CAPI and conversion tracking, see conversion-tracking. For pipeline and CRM revenue reporting, see revops. For the AI-search attribution blind spot, see ai-seo.
 metadata:
-  version: 1.1.0
+  version: 1.1.6
 ---
 
 # Attribution
@@ -23,7 +23,7 @@ Product context: check for `.agents/product-marketing.md` and read it if present
 State these up front so you don't rebuild neighboring skills:
 
 - **General event tracking, tracking plans, UTM setup, GA4/GTM** → **analytics**. Attribution *assumes tracking exists*. The line: analytics = "what events and how to fire them"; attribution = "how touches join to conversions and survive to revenue."
-- **Ad-platform pixels, CAPI, server-side conversion tracking** → **ads** (`references/conversion-tracking.md`). Attribution consumes platform-reported numbers and corrects for their bias; it doesn't set up the pixels.
+- **Ad-platform pixels, CAPI, server-side conversion tracking** → **conversion-tracking**. Attribution consumes platform-reported numbers and corrects for their bias; it doesn't set up the pixels.
 - **Pipeline stages, lead lifecycle, CRM revenue dashboards** → **revops**. Attribution feeds pipeline data; it doesn't define stages.
 - **Showing up in / measuring AI search** → **ai-seo**. Attribution names AI traffic as a blind spot only.
 
@@ -37,13 +37,13 @@ Set expectations before touching a number:
 
 - **Attribution is directional, not truth.** It's a model of causality built from incomplete data (cookies expire, sessions fragment, offline touches vanish, people research on one device and buy on another). Treat it as a strong hint, never a verdict.
 - **Every model is an opinion.** "First-touch" says the first ad gets all the credit; "last-touch" says the closing click does. Both are wrong in opposite directions. Choosing a model is choosing whose story to believe — say so out loud.
-- **The attribution gap is normal.** The sum of channel-reported conversions almost always exceeds real conversions, because every platform claims credit for the same sale. Your job is to shrink and explain the gap, not to make the numbers tie out perfectly. They won't.
+- **The attribution gap is normal, so separate outcomes from credit.** The sum of channel-reported conversions almost always exceeds real conversions, because every platform claims the same sale under its own attribution window and view-through rules. Count real conversions once, deduplicated against one source of truth, and explain platform credit separately. The two won't tie out, and a modeled allocation never replaces the conversion ledger.
 
 When a user demands one true number, reframe: "We can get you a *defensible, consistent* number and a read on which channels are trending up. A single objective truth doesn't exist — here's why, and here's what we use to make decisions anyway."
 
 ### 2. Attribution models
 
-The six standard models and when each one lies:
+The classic rule-based set plus data-driven — and when each one lies. **Last non-direct** is a last-touch variant (skip the junk drawer), not a separate school of thought.
 
 | Model | Credit rule | Best for | How it lies |
 |---|---|---|---|
@@ -55,12 +55,14 @@ The six standard models and when each one lies:
 | **Position-based (U-shaped)** | 40% first, 40% last, 20% middle | B2B with clear "created" + "closed" moments | The 40/40/20 split is arbitrary; middle touches get shortchanged |
 | **Data-driven (algorithmic/Shapley)** | Credit from modeled marginal contribution | High-volume accounts with enough conversions | A black box; needs volume; can't see offline/dark touches it was never fed |
 
+**Platform availability note:** Google Ads and GA4 retired first-click, linear, time-decay, and position-based as selectable reporting models (2023). Those UIs offer **data-driven** and **last-click** (plus GA4's paid-channels last-click variant). Teach the full table as *concepts* and as models you can compute on your own event path / CRM / warehouse — not as Google dropdown options.
+
 **Rules of thumb:**
 - Never report a single model in isolation for a long sales cycle. Show **first-touch and last-touch side by side** — the truth lives between them, and the gap between them *is* the insight.
-- Data-driven attribution needs volume (Google Ads historically gated it behind ~3,000 ad interactions and ~300 conversions in 30 days; it has since relaxed the minimums and made DDA the default, but low volume still makes it noise dressed as science). Use position-based instead when you're thin.
+- Data-driven attribution needs volume. Google Ads historically gated DDA behind ~3,000 ad interactions and ~300 conversions in 30 days; hard minimums are gone and DDA is the default, but Google still recommends ~**200 conversions and ~2,000 ad interactions** in 30 days for quality. Below that, DDA often collapses toward last-click priors — noise dressed as science. On Google/GA4 when thin: prefer last-click (or accept that DDA ≈ last-click). Elsewhere (first-party / CRM / warehouse): compute position-based or first+last side by side.
 - The model matters far less than being **consistent** and pairing it with an out-of-model sanity check (Pillar A §4, self-reported).
 
-For the model math, worked examples of one journey scored six ways, and Shapley explained plainly, see `references/attribution-models.md`.
+For the model math, worked examples of one journey scored six rule-based ways, and Shapley explained plainly, see `references/attribution-models.md`.
 
 ### 3. The three measurement paradigms
 
@@ -68,7 +70,7 @@ Models split credit *within* your tracked data. Paradigms are how you get at *ca
 
 | Paradigm | What it is | Answers | Needs | Watch out |
 |---|---|---|---|---|
-| **MTA** (multi-touch attribution) | Stitch user-level touches, apply a model | "Which touchpoints appear on converting journeys?" | Clean cross-device user-level tracking | Cookie loss + privacy have gutted user-level data; it silently under-measures |
+| **MTA** (multi-touch attribution) | Stitch user-level touches, apply a model | "Which touchpoints appear on converting journeys?" | Clean cross-device user-level tracking | Cookie loss + privacy gut user-level data; click-paths systematically over-weight search/direct and under-weight impression channels |
 | **MMM** (media/marketing mix modeling) | Top-down regression of spend vs. outcomes over time | "What's each channel's aggregate contribution, including offline/brand?" | 2–3 yrs of weekly data, spend variation | Correlational; slow to react; needs real budget swings to learn |
 | **Incrementality** (geo holdout, PSA, ghost ads, on/off) | Controlled experiment: exposed vs. withheld | "Did this channel *cause* lift I wouldn't have gotten anyway?" | Ability to withhold; enough volume for significance | The gold standard, but you can only test a few things at a time |
 
@@ -83,7 +85,7 @@ The most underused signal, and often the most honest for long cycles and dark so
 - **When it beats tracking:** long consideration cycles, high word-of-mouth, brand/community-led, or heavy dark-social (see §5). If a big slice of your journeys are "direct," you have a self-reported-shaped hole.
 - **Ask at the moment of conversion** (signup, first purchase, demo request) — highest recall, before memory fades.
 - **Wording:** open-ended ("How did you first hear about us?") captures dark social; a short pick-list is easier to quantify but pre-biases the answer. Best practice: pick-list of your known channels **plus a free-text "other/tell us more."**
-- **Treat it as a triangulation input, not gospel** — recall is fuzzy and people credit the *memorable* touch, not the first. It's the out-of-model check that keeps your tracked models honest.
+- **Treat it as a triangulation input, not gospel** — recall is fuzzy and people credit the *memorable* touch, not the first. **Discount survey share when turning it into credit** (e.g. 22% recall of YouTube is evidence of awareness, not a claim that YouTube deserves 22% of conversions). Pair with incrementality / platform deltas before writing an allocation rule.
 - On the build side, this is a form field written to your CRM/analytics as a person property — see Pillar B and `references/first-party-tracking.md`.
 
 ### 5. Reconciling conflicting sources
@@ -103,8 +105,9 @@ The request behind most attribution work: **"Google says 50, Meta says 40, GA sa
 1. **Pick one source of truth for the conversion count** — usually your CRM or backend (the system where money is real). Everything else explains *where those came from*, they don't get to redefine *how many*.
 2. **Never sum across platforms.** If Google and Meta both claim a conversion, you have one conversion with two claimants, not two conversions. De-dupe against the source-of-truth total.
 3. **Read directional agreement, not absolute match.** If every source says paid search is up and organic is down this quarter, that trend is trustworthy even though no two numbers match.
-4. **Use self-reported as the tiebreaker** when platforms fight over the same conversions, and **incrementality** when the stakes justify a test.
+4. **Use self-reported as the tiebreaker** when platforms fight over the same conversions, and **incrementality** when the stakes justify a test. Do **not** turn a platform-vs-GA gap into a multiplier rule (Meta claims 2× GA ≠ "double Meta") — investigate windows and view-through, then ground any override in incrementality.
 5. **Expect and budget for the gap.** Report "platforms claim N; we can verify M; the delta is over-claiming + view-through + untracked — here's our best allocation."
+6. **Operationalize triangulation as rules when you can** — once you have a holdout or a trusted survey band for a channel, apply a documented **channel-level override** on reporting (shift credit from Direct/branded into the under-credited channel for the test window) rather than pretending raw MTA is truth. Details in `references/measurement-paradigms.md`.
 
 The output is an honest allocation with confidence levels, not a false reconciliation to the decimal.
 
@@ -112,12 +115,12 @@ The output is an honest allocation with confidence levels, not a false reconcili
 
 Where conversions hide, making real channels look weak:
 
-- **Direct** — the junk drawer. Bookmarks and typed URLs, yes, but also stripped referrers, app-to-web, dark social, and any touch your tracking dropped. A large direct share is a *measurement* problem, not a channel.
+- **Direct** — the junk drawer. Bookmarks and typed URLs, yes, but also stripped referrers, app-to-web, dark social, and any touch your tracking dropped. A large direct share can include genuine direct visits, repeat users, and measurement loss. Investigate its composition before treating it as a tracking defect.
 - **Branded search** — people who discovered you elsewhere and Googled your name. Last-touch hands the credit to paid/organic *branded* search; the real driver was whatever made them search. Segment branded vs. non-branded or you'll defund the top of funnel.
 - **Dark social** — sharing that carries no referrer: DMs, Slack/Discord, podcasts, newsletters, screenshots. Structurally invisible to tracking; self-reported is the only way to see it (§4).
 - **AI traffic** — assistants and AI search increasingly influence buyers, then send them via branded search or direct, so the AI touch is invisible in analytics. Name it and hand deeper work to **ai-seo**.
 
-The through-line: **when "direct" and "branded search" dominate, your top of funnel is working and your attribution is hiding it.** Say that explicitly — it's the single most common misread in marketing.
+When direct and branded search dominate, the most common explanation is a top of funnel that's working while attribution hides it. Confirm before concluding: rule out existing customers, lost referrers, and offline discovery, then check self-reported attribution or run an incrementality test. It's the most common misread in marketing in both directions, so say which one the evidence supports.
 
 ### 7. Business-type fork
 
@@ -200,25 +203,25 @@ Deliver an **attribution readout**, not a data dump:
 
 ## Tool Integrations
 
-For implementation, see the [tools registry](../../tools/REGISTRY.md). Key tools:
+For implementation, see the [tools registry](https://github.com/coreyhaines31/marketingskills/blob/main/tools/REGISTRY.md). Key tools:
 
 | Tool | Best For | MCP | Guide |
 |------|----------|:---:|-------|
-| **PostHog** | First-party attribution, identify/merge, funnels | - | [posthog.md](../../tools/integrations/posthog.md) |
-| **GA4** | Web analytics, model comparison, user-id stitching | ✓ | [ga4.md](../../tools/integrations/ga4.md) |
-| **Dub** | Short-link + click attribution | ✓ | [dub-co.md](../../tools/integrations/dub-co.md) |
-| **Segment** | CDP — route identify/track to every destination | - | [segment.md](../../tools/integrations/segment.md) |
-| **HubSpot** | CRM lead-source + self-reported fields | ✓ | [hubspot.md](../../tools/integrations/hubspot.md) |
-| **Salesforce** | CRM as revenue source of truth | - | [salesforce.md](../../tools/integrations/salesforce.md) |
-| **Supermetrics** | Pull platform numbers into one place to reconcile | ✓ | [supermetrics.md](../../tools/integrations/supermetrics.md) |
-| **RB2B** | De-anonymize B2B website visitors | - | [rb2b.md](../../tools/integrations/rb2b.md) |
+| **PostHog** | First-party attribution, identify/merge, funnels | - | [posthog.md](https://github.com/coreyhaines31/marketingskills/blob/main/tools/integrations/posthog.md) |
+| **GA4** | Web analytics, model comparison, user-id stitching | ✓ | [ga4.md](https://github.com/coreyhaines31/marketingskills/blob/main/tools/integrations/ga4.md) |
+| **Dub** | Short-link + click attribution | ✓ | [dub-co.md](https://github.com/coreyhaines31/marketingskills/blob/main/tools/integrations/dub-co.md) |
+| **Segment** | CDP — route identify/track to every destination | - | [segment.md](https://github.com/coreyhaines31/marketingskills/blob/main/tools/integrations/segment.md) |
+| **HubSpot** | CRM lead-source + self-reported fields | ✓ | [hubspot.md](https://github.com/coreyhaines31/marketingskills/blob/main/tools/integrations/hubspot.md) |
+| **Salesforce** | CRM as revenue source of truth | - | [salesforce.md](https://github.com/coreyhaines31/marketingskills/blob/main/tools/integrations/salesforce.md) |
+| **Supermetrics** | Pull platform numbers into one place to reconcile | ✓ | [supermetrics.md](https://github.com/coreyhaines31/marketingskills/blob/main/tools/integrations/supermetrics.md) |
+| **RB2B** | De-anonymize B2B website visitors | - | [rb2b.md](https://github.com/coreyhaines31/marketingskills/blob/main/tools/integrations/rb2b.md) |
 
 ---
 
 ## Related Skills
 
 - **analytics** — event tracking, tracking plans, UTMs, GA4/GTM setup. Do this *before* attribution.
-- **ads** — ad-platform pixels, CAPI, server-side conversion tracking (`references/conversion-tracking.md`).
+- **conversion-tracking** — ad-platform pixels, CAPI, server-side conversion tracking, and tracking audits.
 - **revops** — pipeline stages, lead lifecycle, CRM revenue reporting. Attribution feeds it.
 - **ai-seo** — the AI-search attribution blind spot in depth.
 - **ab-testing** — controlled experiments; the incrementality mindset applied to on-site changes.

@@ -2,14 +2,26 @@
 
 const { writeJson } = require('./_safe-output')
 
+const rawArgs = process.argv.slice(2)
 const API_SECRET = process.env.KIT_API_SECRET
 const API_KEY = process.env.KIT_API_KEY
 const BASE_URL = 'https://api.convertkit.com/v3'
 
-if (!API_SECRET && !API_KEY) {
+if ((!API_SECRET && !API_KEY) && rawArgs.length > 0) {
   console.error(JSON.stringify({ error: 'KIT_API_SECRET or KIT_API_KEY environment variable required' }))
   process.exit(1)
 }
+
+
+function requestSignal() {
+  const raw = args['timeout-ms'] ?? '120000'
+  const ms = Number(raw)
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw) || !Number.isSafeInteger(ms) || ms < 1 || ms > 600000) {
+    throw new Error('--timeout-ms must be an integer from 1 to 600000')
+  }
+  return AbortSignal.timeout(ms)
+}
+
 
 async function api(method, path, body, useSecret = true) {
   const url = new URL(`${BASE_URL}${path}`)
@@ -39,7 +51,11 @@ async function api(method, path, body, useSecret = true) {
   }
   if (args['dry-run']) {
     const dryRunHeaders = { ...opts.headers }
-    const dryRunUrl = url.toString().replace(API_SECRET, '***').replace(API_KEY, '***')
+    const previewUrl = new URL(url)
+    for (const key of ['api_secret', 'api_key']) {
+      if (previewUrl.searchParams.has(key)) previewUrl.searchParams.set(key, '***')
+    }
+    const dryRunUrl = previewUrl.toString()
     let dryRunBody = undefined
     if (opts.body) {
       const parsed = JSON.parse(opts.body)
@@ -49,7 +65,7 @@ async function api(method, path, body, useSecret = true) {
     }
     return { _dry_run: true, method, url: dryRunUrl, headers: dryRunHeaders, body: dryRunBody }
   }
-  const res = await fetch(url.toString(), opts)
+  const res = await fetch(url.toString(), { ...opts, signal: requestSignal() })
   const text = await res.text()
   try {
     return JSON.parse(text)
@@ -78,8 +94,15 @@ function parseArgs(args) {
   return result
 }
 
-const args = parseArgs(process.argv.slice(2))
+const args = parseArgs(rawArgs)
 const [cmd, sub, ...rest] = args._
+
+function requireFieldObject(fields) {
+  if (fields === null || typeof fields !== 'object' || Array.isArray(fields)) {
+    throw new Error('--fields must be a JSON object')
+  }
+  return fields
+}
 
 async function main() {
   let result
@@ -102,6 +125,7 @@ async function main() {
           if (args['first-name']) body.first_name = args['first-name']
           if (args.fields) {
             try { body.fields = JSON.parse(args.fields) } catch { result = { error: 'Invalid JSON in --fields' }; break }
+            requireFieldObject(body.fields)
           }
           result = await api('PUT', `/subscribers/${rest[0]}`, body)
           break
@@ -129,6 +153,7 @@ async function main() {
           if (args['first-name']) body.first_name = args['first-name']
           if (args.fields) {
             try { body.fields = JSON.parse(args.fields) } catch { result = { error: 'Invalid JSON in --fields' }; break }
+            requireFieldObject(body.fields)
           }
           result = await api('POST', `/forms/${formId}/subscribe`, body, false)
           break
@@ -151,6 +176,7 @@ async function main() {
           if (args['first-name']) body.first_name = args['first-name']
           if (args.fields) {
             try { body.fields = JSON.parse(args.fields) } catch { result = { error: 'Invalid JSON in --fields' }; break }
+            requireFieldObject(body.fields)
           }
           result = await api('POST', `/sequences/${sequenceId}/subscribe`, body, false)
           break
@@ -173,6 +199,7 @@ async function main() {
           if (args['first-name']) body.first_name = args['first-name']
           if (args.fields) {
             try { body.fields = JSON.parse(args.fields) } catch { result = { error: 'Invalid JSON in --fields' }; break }
+            requireFieldObject(body.fields)
           }
           result = await api('POST', `/tags/${tagId}/subscribe`, body, false)
           break
@@ -225,6 +252,7 @@ async function main() {
       }
   }
 
+  if (result?.error && rawArgs.length > 0) process.exitCode = 1
   writeJson(result, [API_SECRET, API_KEY])
 }
 

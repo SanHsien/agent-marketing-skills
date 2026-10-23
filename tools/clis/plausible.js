@@ -1,18 +1,30 @@
 #!/usr/bin/env node
 
+const rawArgs = process.argv.slice(2)
 const API_KEY = process.env.PLAUSIBLE_API_KEY
 const BASE_URL = process.env.PLAUSIBLE_BASE_URL || 'https://plausible.io'
 
-if (!API_KEY) {
+if ((!API_KEY) && rawArgs.length > 0) {
   console.error(JSON.stringify({ error: 'PLAUSIBLE_API_KEY environment variable required' }))
   process.exit(1)
 }
+
+
+function requestSignal() {
+  const raw = args['timeout-ms'] ?? '120000'
+  const ms = Number(raw)
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw) || !Number.isSafeInteger(ms) || ms < 1 || ms > 600000) {
+    throw new Error('--timeout-ms must be an integer from 1 to 600000')
+  }
+  return AbortSignal.timeout(ms)
+}
+
 
 async function api(method, path, body) {
   if (args['dry-run']) {
     return { _dry_run: true, method, url: `${BASE_URL}${path}`, headers: { Authorization: '***', 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: body || undefined }
   }
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${BASE_URL}${path}`, { signal: requestSignal(),
     method,
     headers: {
       'Authorization': `Bearer ${API_KEY}`,
@@ -21,6 +33,7 @@ async function api(method, path, body) {
     },
     body: body ? JSON.stringify(body) : undefined,
   })
+  if (!res.ok) process.exitCode = 1
   const text = await res.text()
   try {
     return JSON.parse(text)
@@ -49,18 +62,44 @@ function parseArgs(args) {
   return result
 }
 
-const args = parseArgs(process.argv.slice(2))
+const args = parseArgs(rawArgs)
 const [cmd, sub, ...rest] = args._
+
+function statsDateRange(value) {
+  if (value === undefined) return '30d'
+  if (typeof value !== 'string') throw new Error('--date-range requires a preset or a JSON array of two date strings')
+  if (!value.trim().startsWith('[')) return value
+  let range
+  try { range = JSON.parse(value) } catch {
+    throw new Error('--date-range must be a valid JSON array of two date strings')
+  }
+  if (!Array.isArray(range) || range.length !== 2 || !range.every(date => typeof date === 'string' && date.trim())) {
+    throw new Error('--date-range must be a JSON array of two nonempty date strings')
+  }
+  return range
+}
+
+function sitesPagination(siteId) {
+  const params = new URLSearchParams()
+  if (siteId !== undefined) params.set('site_id', siteId)
+  if (args.limit !== undefined) params.set('limit', args.limit)
+  if (args.after !== undefined) params.set('after', args.after)
+  if (args.before !== undefined) params.set('before', args.before)
+  const query = params.toString()
+  return query ? `?${query}` : ''
+}
 
 async function main() {
   let result
   const siteId = args['site-id']
-  const dateRange = args['date-range'] || '30d'
   const limit = args.limit ? Number(args.limit) : 100
+  const pagination = { limit }
+  if (args.offset !== undefined) pagination.offset = Number(args.offset)
 
   switch (cmd) {
     case 'stats':
       if (!siteId) { result = { error: '--site-id required (your domain, e.g. example.com)' }; break }
+      const dateRange = sub === 'realtime' ? undefined : statsDateRange(args['date-range'])
       switch (sub) {
         case 'aggregate': {
           const metrics = args.metrics?.split(',') || ['visitors', 'pageviews', 'bounce_rate', 'visit_duration']
@@ -89,7 +128,7 @@ async function main() {
             metrics,
             date_range: dateRange,
             dimensions: ['event:page'],
-            pagination: { limit },
+            pagination,
           })
           break
         }
@@ -100,7 +139,7 @@ async function main() {
             metrics,
             date_range: dateRange,
             dimensions: ['visit:source'],
-            pagination: { limit },
+            pagination,
           })
           break
         }
@@ -111,7 +150,7 @@ async function main() {
             metrics,
             date_range: dateRange,
             dimensions: ['visit:country'],
-            pagination: { limit },
+            pagination,
           })
           break
         }
@@ -122,7 +161,7 @@ async function main() {
             metrics,
             date_range: dateRange,
             dimensions: ['visit:device'],
-            pagination: { limit },
+            pagination,
           })
           break
         }
@@ -134,7 +173,7 @@ async function main() {
             metrics,
             date_range: dateRange,
             dimensions: [`visit:${param}`],
-            pagination: { limit },
+            pagination,
           })
           break
         }
@@ -146,7 +185,7 @@ async function main() {
           if (args.filters) {
             try { body.filters = JSON.parse(args.filters) } catch { result = { error: '--filters must be valid JSON' }; break }
           }
-          body.pagination = { limit }
+          body.pagination = pagination
           result = await api('POST', '/api/v2/query', body)
           break
         }
@@ -161,7 +200,7 @@ async function main() {
     case 'sites':
       switch (sub) {
         case 'list':
-          result = await api('GET', '/api/v1/sites')
+          result = await api('GET', `/api/v1/sites${sitesPagination()}`)
           break
         case 'get': {
           if (!siteId) { result = { error: '--site-id required' }; break }
@@ -190,7 +229,7 @@ async function main() {
       if (!siteId) { result = { error: '--site-id required' }; break }
       switch (sub) {
         case 'list':
-          result = await api('GET', `/api/v1/sites/goals?site_id=${encodeURIComponent(siteId)}`)
+          result = await api('GET', `/api/v1/sites/goals${sitesPagination(siteId)}`)
           break
         case 'create': {
           const goalType = args['goal-type']
@@ -232,14 +271,15 @@ async function main() {
             query: 'stats query --site-id <domain> --metrics <m1,m2> [--dimensions <d1,d2>] [--filters <json>]',
             realtime: 'stats realtime --site-id <domain>',
           },
-          sites: 'sites [list | get --site-id <domain> | create --domain <domain> | delete --site-id <domain>]',
-          goals: 'goals [list | create --goal-type <event|page> --event-name <name> | delete --goal-id <id>] --site-id <domain>',
-          options: '--date-range <day|7d|30d|month|6mo|12mo|year> --limit <n>',
+          sites: 'sites [list [--limit <n>] [--after <cursor> | --before <cursor>] | get --site-id <domain> | create --domain <domain> | delete --site-id <domain>]',
+          goals: 'goals [list [--limit <n>] [--after <cursor> | --before <cursor>] | create --goal-type <event|page> --event-name <name> | delete --goal-id <id>] --site-id <domain>',
+          options: '--date-range <preset|JSON array [start,end]> --limit <n>; stats breakdown/query: --offset <n>; sites/goals list: --after <cursor> | --before <cursor>',
           env: 'PLAUSIBLE_BASE_URL for self-hosted instances (default: https://plausible.io)',
         }
       }
   }
 
+  if (result?.error && rawArgs.length > 0) process.exitCode = 1
   console.log(JSON.stringify(result, null, 2))
 }
 

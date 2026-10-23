@@ -24,7 +24,7 @@
 | `tools/validate_skills.py` | 產品 skill frontmatter 驗證（Windows 可跑，不依賴 bash） |
 | `.github/workflows/ci.yml` | Ubuntu 3.9–3.14 + Windows Python 3.13：pytest / ruff / skill 驗證 / CLI 語法 / 連結 / SkillSpector 安全掃描 |
 | `.github/workflows/upstream-check.yml` | 每週對 `upstream/main` 做未審查 commit 檢查 |
-| `sync-skills.yml` / `release.yml` / `validate-skill.yml` | 加上只在官方 `coreyhaines31/marketingskills` 執行的 guard |
+| `sync-skills.yml` / `release.yml` / `validate-skill.yml` / `check-versions.yml` / `regression-tests.yml` / `skill-packaging.yml` | 加上只在官方 `coreyhaines31/marketingskills` 執行的 guard |
 | `docs/DECISIONS.md`、`docs/UPSTREAM.md`、`docs/DEVELOPMENT.md` | fork 維護文件 |
 | `REVIEW.md` | 風險快照，不是每個一般 bug 的流水帳 |
 

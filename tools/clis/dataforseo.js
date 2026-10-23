@@ -1,21 +1,33 @@
 #!/usr/bin/env node
 
+const rawArgs = process.argv.slice(2)
 const LOGIN = process.env.DATAFORSEO_LOGIN
 const PASSWORD = process.env.DATAFORSEO_PASSWORD
 const BASE_URL = 'https://api.dataforseo.com/v3'
 
-if (!LOGIN || !PASSWORD) {
+if ((!LOGIN || !PASSWORD) && rawArgs.length > 0) {
   console.error(JSON.stringify({ error: 'DATAFORSEO_LOGIN and DATAFORSEO_PASSWORD environment variables required' }))
   process.exit(1)
 }
 
 const AUTH = 'Basic ' + Buffer.from(`${LOGIN}:${PASSWORD}`).toString('base64')
 
+
+function requestSignal() {
+  const raw = args['timeout-ms'] ?? '120000'
+  const ms = Number(raw)
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw) || !Number.isSafeInteger(ms) || ms < 1 || ms > 600000) {
+    throw new Error('--timeout-ms must be an integer from 1 to 600000')
+  }
+  return AbortSignal.timeout(ms)
+}
+
+
 async function api(method, path, body) {
   if (args['dry-run']) {
     return { _dry_run: true, method, url: `${BASE_URL}${path}`, headers: { Authorization: '***', 'Content-Type': 'application/json' }, body: body || undefined }
   }
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${BASE_URL}${path}`, { signal: requestSignal(),
     method,
     headers: {
       'Authorization': AUTH,
@@ -23,9 +35,16 @@ async function api(method, path, body) {
     },
     body: body ? JSON.stringify(body) : undefined,
   })
+  if (!res.ok) process.exitCode = 1
   const text = await res.text()
   try {
-    return JSON.parse(text)
+    const payload = JSON.parse(text)
+    const codes = [payload?.status_code, ...(Array.isArray(payload?.tasks) ? payload.tasks.map(task => task?.status_code) : [])]
+    // 40601/40602 describe accepted tasks that have not finished, not failures.
+    if (codes.some(code => typeof code === 'number' && code >= 40000 && ![40601, 40602].includes(code))) {
+      process.exitCode = 1
+    }
+    return payload
   } catch {
     return { status: res.status, body: text }
   }
@@ -51,7 +70,7 @@ function parseArgs(args) {
   return result
 }
 
-const args = parseArgs(process.argv.slice(2))
+const args = parseArgs(rawArgs)
 const [cmd, sub, ...rest] = args._
 
 async function main() {
@@ -68,11 +87,24 @@ async function main() {
         case 'google': {
           const keyword = args.keyword
           if (!keyword) { result = { error: '--keyword required' }; break }
-          result = await api('POST', '/serp/google/organic/live/regular', [{
-            keyword,
-            location_name: location,
-            language_name: language,
-          }])
+          const task = { keyword }
+          if (args['location-code'] !== undefined) {
+            if (typeof args['location-code'] !== 'string' || !Number.isSafeInteger(locationCode) || locationCode <= 0) {
+              result = { error: '--location-code must be a positive integer' }; break
+            }
+            task.location_code = locationCode
+          } else {
+            task.location_name = location
+          }
+          if (args['language-code'] !== undefined) {
+            if (typeof args['language-code'] !== 'string' || !args['language-code'].trim()) {
+              result = { error: '--language-code requires a language code' }; break
+            }
+            task.language_code = languageCode
+          } else {
+            task.language_name = language
+          }
+          result = await api('POST', '/serp/google/organic/live/regular', [task])
           break
         }
         case 'locations':
@@ -248,6 +280,7 @@ async function main() {
       }
   }
 
+  if (result?.error && rawArgs.length > 0) process.exitCode = 1
   console.log(JSON.stringify(result, null, 2))
 }
 

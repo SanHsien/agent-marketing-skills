@@ -10,6 +10,17 @@
 
 ---
 
+## 2026-10-24
+
+### 同步
+
+- **上游同步到 `e85f3cb`（693 commit；PR #895、issue #856）。** 613 個變更檔：580 個取上游（含 `conversion-tracking`、`link-building` 兩個新 skill）、1 個跟著刪除、21 個本 fork 改過的做三方合併（7 支 CLI 保留輸出遮蔽並納入上游的 exit code 修正）、8 個依政策略過（AIsa、Omnia、Converly、Ploy 的夥伴內容）。產品 skill 本文裡的 ◆ 夥伴提及依「不改寫產品 skill」保留。兩份 README 同步 skill 表與安裝方式。上游新增的三支 workflow 加上 repo 閘門。見 [`docs/DECISIONS.md`](docs/DECISIONS.md)。
+
+### 變更
+
+- **SkillSpector gate 新增 `reviewed_partials`。** 單一檔案碰到解析上限或引號重建無法判定時，可以人工審過後登記例外；每筆綁檔案內容雜湊，檔案一改就要重審。73 筆新 finding 逐筆審閱，全是自我指涉誤判。
+- **SkillSpector pin `82bbe8b` → `fe7adc7`。** SkillSpector 09-27 再次壓平歷史，舊 pin 已無分支指向；兩版掃描器原始碼相同。
+
 ## 2026-09-17
 
 ### 變更

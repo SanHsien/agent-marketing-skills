@@ -1,5 +1,7 @@
+import hashlib
 from pathlib import Path
 
+import pytest
 import yaml
 
 from tools.run_skillspector import (
@@ -7,6 +9,7 @@ from tools.run_skillspector import (
     _exit_code,
     _invoke_graph,
     _merge_scoped_rules,
+    _reviewed_partials,
 )
 
 
@@ -350,3 +353,190 @@ def test_exit_code_accepts_explicit_binary_scope_exclusion():
     )
     analyzer.update(planned_work=2, completed=1, failed=1)
     assert _exit_code(report) == 0
+
+
+# ── Reviewed static parse limits ──────────────────────────────────────────────
+#
+# A bounded static parser can stop inside one oversized expression. The scanner then
+# reports that analyzer as degraded and the file as partially inspected, which this
+# gate treats as incomplete. A maintainer may review that file by hand and record a
+# reviewed partial; the exemption is pinned to the file's SHA-256, so any edit to the
+# file reopens it.
+
+PARTIAL_PATH = "assets/review.html"
+PARTIAL_ANALYZER = "static_patterns_tool_misuse"
+REVIEWED = frozenset({(PARTIAL_PATH, PARTIAL_ANALYZER, "static_parse_limit")})
+
+
+def _report_with_static_partial(*, analyzer=PARTIAL_ANALYZER, path=PARTIAL_PATH):
+    report = _complete_report()
+    completeness = report["analysis_completeness"]
+    completeness.update(
+        total_components=2,
+        scanned_components=1,
+        fully_inspected_files=1,
+        partially_inspected_files=1,
+        coverage_percent=50.0,
+        is_complete=False,
+        status="partial",
+        limitations=[f"Analyzer {analyzer} status: degraded."],
+        ledger_exceptions=[
+            {
+                "outcome": "partial",
+                "phase": "static",
+                "reason_code": "static_parse_limit",
+                "path": path,
+                "start_line": None,
+                "end_line": None,
+                "fatal": False,
+                "analyzers": [analyzer],
+            }
+        ],
+    )
+    row = next(
+        item for item in completeness["analyzer_statuses"] if item["analyzer_id"] == analyzer
+    )
+    row.update(status="degraded", planned_work=2, completed=1, partial=1)
+    return report
+
+
+def test_exit_code_fails_closed_on_unreviewed_static_parse_limit():
+    assert _exit_code(_report_with_static_partial()) == 2
+
+
+def test_exit_code_accepts_reviewed_static_parse_limit():
+    assert _exit_code(_report_with_static_partial(), REVIEWED) == 0
+
+
+def test_reviewed_static_parse_limit_does_not_hide_findings():
+    report = _report_with_static_partial()
+    report["issues"] = [{}]
+    assert _exit_code(report, REVIEWED) == 1
+
+
+def test_reviewed_partial_for_another_analyzer_does_not_apply():
+    report = _report_with_static_partial(analyzer="static_patterns_prompt_injection")
+    assert _exit_code(report, REVIEWED) == 2
+
+
+def test_reviewed_partial_for_another_file_does_not_apply():
+    report = _report_with_static_partial(path="assets/other.html")
+    assert _exit_code(report, REVIEWED) == 2
+
+
+def test_reviewed_partial_still_requires_the_degraded_counts_to_add_up():
+    report = _report_with_static_partial()
+    row = next(
+        item
+        for item in report["analysis_completeness"]["analyzer_statuses"]
+        if item["analyzer_id"] == PARTIAL_ANALYZER
+    )
+    row.update(skipped=1)
+    assert _exit_code(report, REVIEWED) == 2
+
+
+def test_reviewed_partial_rejects_unexplained_limitations():
+    report = _report_with_static_partial()
+    report["analysis_completeness"]["limitations"].append("Something else went wrong.")
+    assert _exit_code(report, REVIEWED) == 2
+
+
+def _baseline_with_partial(sha256, *, skill="demo"):
+    return {
+        "version": 2,
+        "reviewed_partials": [
+            {
+                "skill": skill,
+                "path": PARTIAL_PATH,
+                "analyzer": PARTIAL_ANALYZER,
+                "reason_code": "static_parse_limit",
+                "sha256": sha256,
+                "reason": "Reviewed by hand: renders embedded JSON only.",
+            }
+        ],
+    }
+
+
+def test_reviewed_partials_bind_to_the_file_content(tmp_path):
+    skill = tmp_path / "demo"
+    (skill / "assets").mkdir(parents=True)
+    target = skill / PARTIAL_PATH
+    target.write_bytes(b"<html>reviewed</html>")
+    digest = hashlib.sha256(target.read_bytes()).hexdigest()
+
+    assert _reviewed_partials(_baseline_with_partial(digest), skill) == REVIEWED
+
+    target.write_bytes(b"<html>edited after review</html>")
+    assert _reviewed_partials(_baseline_with_partial(digest), skill) == frozenset()
+
+
+def test_reviewed_partials_only_apply_to_their_skill(tmp_path):
+    skill = tmp_path / "demo"
+    (skill / "assets").mkdir(parents=True)
+    (skill / PARTIAL_PATH).write_bytes(b"x")
+    digest = hashlib.sha256(b"x").hexdigest()
+    assert _reviewed_partials(_baseline_with_partial(digest, skill="other"), skill) == frozenset()
+
+
+def test_reviewed_partials_require_a_reason(tmp_path):
+    baseline = _baseline_with_partial("0" * 64)
+    baseline["reviewed_partials"][0]["reason"] = "  "
+    with pytest.raises(ValueError):
+        _reviewed_partials(baseline, tmp_path / "demo")
+
+
+def test_reviewed_partials_never_reach_the_scanner():
+    merged = _merge_scoped_rules(_baseline_with_partial("0" * 64), "demo")
+    assert "reviewed_partials" not in merged
+
+
+def test_reviewed_partial_explains_only_its_own_partial_unit():
+    report = _report_with_static_partial()
+    row = next(
+        item
+        for item in report["analysis_completeness"]["analyzer_statuses"]
+        if item["analyzer_id"] == PARTIAL_ANALYZER
+    )
+    row.update(planned_work=3, completed=1, partial=2)
+    assert _exit_code(report, REVIEWED) == 2
+
+def test_reviewed_partial_accepts_the_reference_coverage_row_it_causes():
+    report = _report_with_static_partial()
+    report["analysis_completeness"]["analyzer_statuses"].append(
+        _completed_analyzer("reference_coverage")
+    )
+    assert _exit_code(report, REVIEWED) == 0
+
+
+def test_reference_coverage_row_without_a_reviewed_partial_fails_closed():
+    report = _complete_report()
+    report["analysis_completeness"]["analyzer_statuses"].append(
+        _completed_analyzer("reference_coverage")
+    )
+    assert _exit_code(report) == 2
+
+
+def test_reviewed_partial_can_list_several_analyzers(tmp_path):
+    skill = tmp_path / "demo"
+    (skill / "assets").mkdir(parents=True)
+    (skill / PARTIAL_PATH).write_bytes(b"x")
+    baseline = _baseline_with_partial(hashlib.sha256(b"x").hexdigest())
+    entry = baseline["reviewed_partials"][0]
+    del entry["analyzer"]
+    entry["analyzers"] = [PARTIAL_ANALYZER, "static_patterns_ssrf"]
+    entry["reason_code"] = "obfuscated_instruction_text"
+    assert _reviewed_partials(baseline, skill) == frozenset(
+        {
+            (PARTIAL_PATH, PARTIAL_ANALYZER, "obfuscated_instruction_text"),
+            (PARTIAL_PATH, "static_patterns_ssrf", "obfuscated_instruction_text"),
+        }
+    )
+
+
+def test_reviewed_partial_rejects_an_empty_analyzer_list(tmp_path):
+    baseline = _baseline_with_partial("0" * 64)
+    entry = baseline["reviewed_partials"][0]
+    del entry["analyzer"]
+    entry["analyzers"] = []
+    with pytest.raises(ValueError):
+        _reviewed_partials(baseline, tmp_path / "demo")

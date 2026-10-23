@@ -59,9 +59,9 @@ This table shows where Composio adds value compared to what's already in the Mar
 
 | Tool | Native MCP | Native CLI | Composio MCP | Recommendation |
 |------|:----------:|:----------:|:------------:|----------------|
-| HubSpot | - | ✓ | ✓ | **Use Composio** — adds MCP access |
+| HubSpot | ✓ | ✓ | ✓ | Prefer the native HubSpot MCP (GA April 2026); Composio if you already route everything through it |
 | Salesforce | - | ✓ | ✓ | **Use Composio** — adds MCP access |
-| Meta Ads | - | ✓ | ✓ | **Use Composio** — adds MCP access |
+| Meta Ads | ✓ | ✓ | ✓ | Prefer Meta's official Ads MCP (open beta April 2026); Composio if you already route everything through it |
 | LinkedIn Ads | - | ✓ | ✓ | **Use Composio** — adds MCP access |
 | Google Sheets | - | - | ✓ | **Use Composio** — only MCP option |
 | Slack | - | - | ✓ | **Use Composio** — only MCP option |

@@ -1,13 +1,25 @@
 #!/usr/bin/env node
 
+const rawArgs = process.argv.slice(2)
 const API_KEY = process.env.KLAVIYO_API_KEY
 const BASE_URL = 'https://a.klaviyo.com/api'
 const REVISION = '2024-10-15'
 
-if (!API_KEY) {
+if ((!API_KEY) && rawArgs.length > 0) {
   console.error(JSON.stringify({ error: 'KLAVIYO_API_KEY environment variable required' }))
   process.exit(1)
 }
+
+
+function requestSignal() {
+  const raw = args['timeout-ms'] ?? '120000'
+  const ms = Number(raw)
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw) || !Number.isSafeInteger(ms) || ms < 1 || ms > 600000) {
+    throw new Error('--timeout-ms must be an integer from 1 to 600000')
+  }
+  return AbortSignal.timeout(ms)
+}
+
 
 async function api(method, path, body) {
   const headers = {
@@ -19,7 +31,7 @@ async function api(method, path, body) {
   if (args['dry-run']) {
     return { _dry_run: true, method, url: `${BASE_URL}${path}`, headers: { ...headers, Authorization: '***' }, body: body || undefined }
   }
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${BASE_URL}${path}`, { signal: requestSignal(),
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
@@ -52,7 +64,7 @@ function parseArgs(args) {
   return result
 }
 
-const args = parseArgs(process.argv.slice(2))
+const args = parseArgs(rawArgs)
 const [cmd, sub, ...rest] = args._
 
 async function main() {
@@ -112,6 +124,7 @@ async function main() {
         case 'list': {
           const params = new URLSearchParams()
           if (args['page-size']) params.set('page[size]', args['page-size'])
+          if (args['page-cursor']) params.set('page[cursor]', args['page-cursor'])
           const qs = params.toString()
           result = await api('GET', `/lists/${qs ? '?' + qs : ''}`)
           break
@@ -167,6 +180,7 @@ async function main() {
           const params = new URLSearchParams()
           if (args.filter) params.set('filter', args.filter)
           if (args['page-size']) params.set('page[size]', args['page-size'])
+          if (args['page-cursor']) params.set('page[cursor]', args['page-cursor'])
           const qs = params.toString()
           result = await api('GET', `/events/${qs ? '?' + qs : ''}`)
           break
@@ -182,12 +196,25 @@ async function main() {
           const email = args.email
           if (!metric) { result = { error: '--metric required (metric name)' }; break }
           if (!email) { result = { error: '--email required' }; break }
-          const properties = {}
-          if (args.value) properties.value = Number(args.value)
+          let properties = {}
+          if (args.properties !== undefined) {
+            if (args.property !== undefined) throw new Error('Use --property or --properties, not both')
+            if (typeof args.properties !== 'string') throw new Error('--properties must be a JSON object')
+            try { properties = JSON.parse(args.properties) } catch { throw new Error('--properties must be valid JSON object') }
+            if (properties === null || typeof properties !== 'object' || Array.isArray(properties)) throw new Error('--properties must be a JSON object')
+          }
+          let value
+          if (args.value !== undefined) {
+            if (typeof args.value !== 'string' || !args.value.trim() || !Number.isFinite(Number(args.value))) {
+              result = { error: '--value must be a finite number' }; break
+            }
+            value = Number(args.value)
+          }
           if (args.property) {
             const pairs = args.property.split(',')
             for (const pair of pairs) {
-              const [k, v] = pair.split(':')
+              const [k, ...valueParts] = pair.split(':')
+              const v = valueParts.join(':')
               if (k && v) properties[k] = v
             }
           }
@@ -198,6 +225,7 @@ async function main() {
                 metric: { data: { type: 'metric', attributes: { name: metric } } },
                 profile: { data: { type: 'profile', attributes: { email } } },
                 properties,
+                ...(value !== undefined ? { value } : {}),
                 time: new Date().toISOString(),
               }
             }
@@ -215,6 +243,7 @@ async function main() {
           const params = new URLSearchParams()
           if (args.filter) params.set('filter', args.filter)
           if (args['page-size']) params.set('page[size]', args['page-size'])
+          if (args['page-cursor']) params.set('page[cursor]', args['page-cursor'])
           const qs = params.toString()
           result = await api('GET', `/campaigns/${qs ? '?' + qs : ''}`)
           break
@@ -236,6 +265,7 @@ async function main() {
           const params = new URLSearchParams()
           if (args.filter) params.set('filter', args.filter)
           if (args['page-size']) params.set('page[size]', args['page-size'])
+          if (args['page-cursor']) params.set('page[cursor]', args['page-cursor'])
           const qs = params.toString()
           result = await api('GET', `/flows/${qs ? '?' + qs : ''}`)
           break
@@ -266,6 +296,7 @@ async function main() {
         case 'list': {
           const params = new URLSearchParams()
           if (args['page-size']) params.set('page[size]', args['page-size'])
+          if (args['page-cursor']) params.set('page[cursor]', args['page-cursor'])
           const qs = params.toString()
           result = await api('GET', `/metrics/${qs ? '?' + qs : ''}`)
           break
@@ -286,6 +317,7 @@ async function main() {
         case 'list': {
           const params = new URLSearchParams()
           if (args['page-size']) params.set('page[size]', args['page-size'])
+          if (args['page-cursor']) params.set('page[cursor]', args['page-cursor'])
           const qs = params.toString()
           result = await api('GET', `/segments/${qs ? '?' + qs : ''}`)
           break
@@ -307,6 +339,7 @@ async function main() {
           const params = new URLSearchParams()
           if (args.filter) params.set('filter', args.filter)
           if (args['page-size']) params.set('page[size]', args['page-size'])
+          if (args['page-cursor']) params.set('page[cursor]', args['page-cursor'])
           const qs = params.toString()
           result = await api('GET', `/templates/${qs ? '?' + qs : ''}`)
           break
@@ -328,7 +361,7 @@ async function main() {
         usage: {
           profiles: 'profiles [list | get --id <id> | create --email <email> | update --id <id>]',
           lists: 'lists [list | get --id <id> | create --name <name> | delete --id <id> | add-profiles --id <list-id> --profiles <id1,id2> | remove-profiles --id <list-id> --profiles <id1,id2>]',
-          events: 'events [list | get --id <id> | create --metric <name> --email <email>]',
+          events: 'events [list | get --id <id> | create --metric <name> --email <email> [--property <pairs> | --properties <json_object>]]',
           campaigns: 'campaigns [list | get --id <id>]',
           flows: 'flows [list | get --id <id> | update --id <id> --status <status>]',
           metrics: 'metrics [list | get --id <id>]',
@@ -339,6 +372,7 @@ async function main() {
       }
   }
 
+  if (result?.error && rawArgs.length > 0) process.exitCode = 1
   console.log(JSON.stringify(result, null, 2))
 }
 

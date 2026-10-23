@@ -358,3 +358,34 @@ issue 4 筆全部 open。產品 skill 以上游為準（`AGENTS.md`），未合�
 | issue #592（`creative-review-template.html` JSON 形狀錯誤崩潰、tab ARIA） | 跟隨上游 | 上游資產檔缺陷，本 fork 未修改該檔；等上游修正 |
 
 無採用項目。水位：PR `588` → `598`，issue `569` → `600`，commit 不變（`5b2c000`）。日期 2026-09-30。
+
+## 2026-10-24：上游同步到 `e85f3cb`（693 commit；PR #895、issue #856）
+
+**範圍與方法**：自上一個水位 `5b2c000` 起上游動到 613 個檔案。逐檔比對本 fork 與 `5b2c000`，分成四類處理，不逐 commit 重做：
+
+- **直接取上游（580 檔，含 305 個新增檔）**：本 fork 沒有在這些檔案上疊任何修改。新增 `conversion-tracking`、`link-building` 兩個 skill，52 個 skill 驗證全過。
+- **跟上游刪除（1 檔）**：`skills/ads/references/conversion-tracking.md`，內容移進新的 `conversion-tracking` skill。
+- **三方合併（21 檔，本 fork 改過的）**：
+  - 7 支 CLI（amplitude、hunter、instantly、kit、mailchimp、meta-ads、similarweb）保留本 fork 的 `_safe-output.writeJson` 輸出遮蔽，同時納入上游新增的 `rawArgs` 與錯誤時的 `process.exitCode = 1`；對上游的差異只剩遮蔽那兩行。
+  - `release.yml`、`sync-skills.yml`、`validate-skill.yml` 與 4 個 skill 檔乾淨合併。
+  - `.gitignore` 兩邊並存（上游新增 `.partners-pending/`）。
+  - `.github/scripts/sync-skills.js`、`creative-review-template.html`、`first-party-tracking.md`、`marketing-loops/SKILL.md` 的「fork 差異」查不到登記理由，是 clean-repo 初始化時帶進來的上游中間狀態，取上游。上游已修好先前記為「跟隨上游」的 issue #592（審稿頁 JSON 形狀與 ARIA）、#599（ai-seo 訓練爬蟲與引用爬蟲混為一談）、#600（video 的 hyperframes 範例）。
+- **依政策略過（8 檔）**：新的付費 Skill Partner AIsa、Omnia 與既有的 Converly、Ploy——整合指南、`tools/aisa/`、`partners.json` 條目、`tools/REGISTRY.md` 的夥伴列與 AEO／AIsa 段落（對上游少 27 行）、`tools/SETUP.md` 的 AIsa 段落（少 12 行）都不收，理由同 2026-08-30 的 Converly 與 2026-09-11 的 Ploy。
+
+**產品 skill 裡的夥伴提及保留上游原文**：上游開始在 `prospecting`、`programmatic-seo`、`conversion-tracking`、`site-architecture` 等產品 skill 本文用 ◆ 標示付費夥伴，並連回上游 REGISTRY 的揭露頁，`ai-seo` 的監測工具表也把 Omnia 與其他工具並列。`AGENTS.md` 的硬性邊界是「不要改寫產品 skill」，所以這部分照收；本 fork 不背書的界線劃在自己的登錄面（REGISTRY、partners.json、整合指南、SETUP），不延伸到產品 skill 本文。揭露連結仍指向上游的說明，讀者看得到這是贊助關係。
+
+**README**：兩份 README 的 skill 表同步上游（50 → 52 列），分類清單補 `link-building`、`conversion-tracking`，安裝段補 Codex plugin、非互動環境的 `claude plugin` 指令與 `tools/SETUP.md` 帳號連線指引。上游的 Claude Web skill ZIP 下載來自上游自己的 release，本 fork 的 `release.yml` 有 repo 閘門、不發這些 ZIP，所以不寫。夥伴卡片照舊不轉載。
+
+**新 workflow 加 repo 閘門**：上游新增的 `check-versions.yml`、`regression-tests.yml`、`skill-packaging.yml` 每個 job 都加上 `github.repository == 'coreyhaines31/marketingskills'`，比照既有三支；`tests/test_docs.py::test_upstream_workflows_have_repo_guard` 守著。
+
+**自我掃描與 gate**：
+
+- 新增 `reviewed_partials`：掃描器在單一檔案碰到解析上限或無法判定的引號重建時，會把該分析器標成 degraded，gate 依設計判定不完整。`tools/run_skillspector.py` 現在接受人工審過的例外，每筆綁 skill、檔案、分析器、原因碼與**檔案內容 SHA-256**，檔案一改就失效；這個鍵在交給掃描器前就拿掉。共 16 個新測試，雜湊綁定與 partial 計數兩處各做過突變驗證。目前三筆：`ad-creative` 審稿頁（`static_parse_limit`，大段內嵌 JSON）、`marketing-loops/SKILL.md` 與 `prospecting/references/compliance.md`（`obfuscated_instruction_text`，分別由觸發詞 `'ranking drop alert,'` 與退訂話術 `reply 'remove'` 引起，掃描器把「drop／remove + 引號」當成刪字指令）。
+- `reference_coverage` 只在被引用的檔案沒被完整檢查時出現（帶一筆 AE1），gate 只在有已審例外時接受這一列。
+- 52 個 skill 中 21 個出現新 finding，共 73 筆，逐筆讀命中原文後確認全是自我指涉誤判（例如檢驗砷含量的廣告文案、「未經同意不得…」的合規說明、廠商像素範例碼、不帶版本號的 `npx` 範例），以 (skill, 規則, 檔案) 分組寫上具體理由，新增 72 筆 fingerprint。其中 18 筆是 `skillspector baseline` 對近似重複行漏列的，改用掃描器自己的 `finding_fingerprint` 對未過濾的 findings 計算。
+
+**SkillSpector pin**：`82bbe8b` → `fe7adc7`。SkillSpector 在 2026-09-27 又壓平 `main`，`82bbe8b` 已無分支指向；兩者 `src` 與 `pyproject.toml` 完全相同，fingerprint 不受影響。檢查方式見 book-to-skill 同日決策。
+
+**PR／issue 軸**：#599–#895 中 219 筆已合併、隨本次同步進來；15 筆 closed 未合併不處理；36 筆 open 等合併（其中 #857 Precleared、#888 LinkJolt、#895 AgentaOS 是第三方整合指南，合併後依廠商導流政策判斷）。issue #601–#856 共 23 筆，19 筆已關閉，4 筆 open 皆為上游產品討論。
+
+水位：commit `5b2c000` → `e85f3cb`，PR `598` → `895`，issue `600` → `856`。

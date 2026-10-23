@@ -1,19 +1,31 @@
 #!/usr/bin/env node
 
+const rawArgs = process.argv.slice(2)
 const API_KEY = process.env.WISTIA_API_KEY
 const BASE_URL = 'https://api.wistia.com/v1'
 
-if (!API_KEY) {
+if ((!API_KEY) && rawArgs.length > 0) {
   console.error(JSON.stringify({ error: 'WISTIA_API_KEY environment variable required' }))
   process.exit(1)
 }
 
-async function api(method, path, body) {
-  const auth = 'Basic ' + Buffer.from(`${API_KEY}:`).toString('base64')
-  if (args['dry-run']) {
-    return { _dry_run: true, method, url: `${BASE_URL}${path}`, headers: { 'Authorization': '***', 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: body || undefined }
+
+function requestSignal() {
+  const raw = args['timeout-ms'] ?? '120000'
+  const ms = Number(raw)
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw) || !Number.isSafeInteger(ms) || ms < 1 || ms > 600000) {
+    throw new Error('--timeout-ms must be an integer from 1 to 600000')
   }
-  const res = await fetch(`${BASE_URL}${path}`, {
+  return AbortSignal.timeout(ms)
+}
+
+
+async function api(method, path, body) {
+  const auth = `Bearer ${API_KEY}`
+  if (args['dry-run']) {
+    return { _dry_run: true, method, url: `${BASE_URL}${path}`, headers: { 'Authorization': 'Bearer ***', 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: body || undefined }
+  }
+  const res = await fetch(`${BASE_URL}${path}`, { signal: requestSignal(),
     method,
     headers: {
       'Authorization': auth,
@@ -50,7 +62,7 @@ function parseArgs(args) {
   return result
 }
 
-const args = parseArgs(process.argv.slice(2))
+const args = parseArgs(rawArgs)
 const [cmd, sub, ...rest] = args._
 const page = args.page ? Number(args.page) : 1
 const perPage = args['per-page'] ? Number(args['per-page']) : 25
@@ -247,6 +259,7 @@ async function main() {
       }
   }
 
+  if (result?.error && rawArgs.length > 0) process.exitCode = 1
   console.log(JSON.stringify(result, null, 2))
 }
 

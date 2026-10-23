@@ -57,13 +57,14 @@
 | [attribution](skills/attribution/) | When the user wants to figure out which marketing actually drives conversions and revenue, choose or interpret an... |
 | [churn-prevention](skills/churn-prevention/) | When the user wants to reduce churn, build cancellation flows, set up save offers, recover failed payments, or... |
 | [co-marketing](skills/co-marketing/) | When the user wants to find co-marketing partners, plan joint campaigns, or brainstorm partnership opportunities. Use... |
-| [cold-email](skills/cold-email/) | Write B2B cold emails and follow-up sequences that get replies. Use when the user wants to write cold outreach emails,... |
+| [cold-email](skills/cold-email/) | Write and run B2B cold outbound that gets replies, from cold emails and follow-ups to sending setup, LinkedIn,... |
 | [community-marketing](skills/community-marketing/) | Build and leverage online communities to drive product growth and brand loyalty. Use when the user wants to create a... |
 | [competitor-profiling](skills/competitor-profiling/) | When the user wants to research, profile, or analyze competitors from their URLs. Also use when the user mentions... |
-| [competitors](skills/competitors/) | When the user wants to create competitor comparison or alternative pages for SEO and sales enablement. Also use when... |
+| [competitors](skills/competitors/) | When the user wants to create competitor comparison or alternative pages for SEO and buyer-facing use. Also use when... |
 | [content-strategy](skills/content-strategy/) | When the user wants to plan a content strategy, decide what content to create, or figure out what topics to cover. Also... |
+| [conversion-tracking](skills/conversion-tracking/) | Set up, audit, verify, or fix website conversion tracking. Use when the conversion is a form submission, booked... |
 | [copy-editing](skills/copy-editing/) | When the user wants to edit, review, or improve existing marketing copy, or refresh outdated content. Also use when the... |
-| [copywriting](skills/copywriting/) | When the user wants to write, rewrite, or improve marketing copy for any page — including homepage, landing pages,... |
+| [copywriting](skills/copywriting/) | When the user wants to write, rewrite, or improve marketing copy for any page, including homepage, landing pages,... |
 | [cro](skills/cro/) | When the user wants to optimize, improve, or increase conversions on any marketing page or form — including homepage,... |
 | [customer-research](skills/customer-research/) | When the user wants to conduct, analyze, or synthesize customer research. Use when the user mentions "customer... |
 | [directory-submissions](skills/directory-submissions/) | When the user wants to submit their product to startup, SaaS, AI, agent, MCP, no-code, or review directories for... |
@@ -74,6 +75,7 @@
 | [influencer-marketing](skills/influencer-marketing/) | When the user wants to run influencer, creator, or ambassador partnerships to promote their product — finding and... |
 | [launch](skills/launch/) | When the user wants to plan a product launch, feature announcement, or release strategy. Also use when the user... |
 | [lead-magnets](skills/lead-magnets/) | When the user wants to create, plan, or optimize a lead magnet for email capture or lead generation. Also use when the... |
+| [link-building](skills/link-building/) | When the user wants to earn backlinks or third-party mentions that lift rankings and AI citations. Also use when the... |
 | [marketing-council](skills/marketing-council/) | When the user wants multiple expert perspectives on a marketing question — a simulated board of advisors staffed by... |
 | [marketing-ideas](skills/marketing-ideas/) | When the user needs marketing ideas, inspiration, or strategies for their SaaS or software product. Also use when the... |
 | [marketing-loops](skills/marketing-loops/) | When the user wants to set up a recurring, self-running marketing workflow — a repeatable loop an AI agent runs on a... |
@@ -86,7 +88,7 @@
 | [pricing](skills/pricing/) | When the user wants help with pricing decisions, packaging, or monetization strategy. Also use when the user mentions... |
 | [product-marketing](skills/product-marketing/) | When the user wants to create or update their product marketing context document. Also use when the user mentions... |
 | [programmatic-seo](skills/programmatic-seo/) | When the user wants to create SEO-driven pages at scale using templates and data. Also use when the user mentions... |
-| [prospecting](skills/prospecting/) | When the user wants to find, qualify, and build a list of prospects to reach out to — across B2B SaaS, general B2B, or... |
+| [prospecting](skills/prospecting/) | When the user wants to find, qualify, and build a list of prospects to reach out to, across B2B SaaS, general B2B, or... |
 | [public-relations](skills/public-relations/) | When the user wants help with public relations, earned media, press coverage, journalist outreach, or media strategy... |
 | [referrals](skills/referrals/) | When the user wants to create, optimize, or analyze a referral program, affiliate program, or word-of-mouth strategy.... |
 | [revops](skills/revops/) | When the user wants help with revenue operations, lead lifecycle management, or marketing-to-sales handoff processes.... |
@@ -95,7 +97,7 @@
 | [seo-audit](skills/seo-audit/) | When the user wants to audit, review, or diagnose SEO issues on their site. Also use when the user mentions "SEO... |
 | [signup](skills/signup/) | When the user wants to optimize signup, registration, account creation, or trial activation flows. Also use when the... |
 | [site-architecture](skills/site-architecture/) | When the user wants to plan, map, or restructure their website's page hierarchy, navigation, URL structure, or internal... |
-| [sms](skills/sms/) | When the user wants to plan, build, or optimize SMS or MMS marketing — including welcome flows, abandoned cart texts,... |
+| [sms](skills/sms/) | When the user wants to plan, build, or optimize SMS, MMS, or WhatsApp marketing — including welcome flows, abandoned... |
 | [social](skills/social/) | When the user wants help creating, scheduling, or optimizing social media content for LinkedIn, Twitter/X, Instagram,... |
 | [video](skills/video/) | When the user wants to create, generate, or produce video content using AI tools or programmatic frameworks. Also use... |
 <!-- SKILLS:END -->
@@ -130,12 +132,29 @@ npx skills add SanHsien/agent-marketing-skills -a claude-code
 /plugin install marketing-skills
 ```
 
-### 選項 3：複製資料夾
+`/plugin` 只在互動式 Claude Code CLI 裡可用；網頁版、GitHub Actions 等非互動環境請改用：
+
+```powershell
+claude plugin marketplace add SanHsien/agent-marketing-skills
+claude plugin install marketing-skills@marketingskills
+```
+
+### 選項 3：Codex Plugin
+
+```powershell
+codex plugin marketplace add SanHsien/agent-marketing-skills
+```
+
+接著在 Codex session 內執行 `/plugins`，選 **marketing-skills** 安裝全部 skill；之後要更新用 `codex plugin marketplace upgrade`。
+
+### 選項 4：複製資料夾
 
 ```powershell
 git clone https://github.com/SanHsien/agent-marketing-skills.git
 Copy-Item -Recurse agent-marketing-skills\skills\* $HOME\.agents\skills\
 ```
+
+想讓 Agent 讀你的行銷帳號資料，照 [`tools/SETUP.md`](tools/SETUP.md) 的引導流程建立最小權限憑證，並先取得一筆唯讀結果。
 
 開發與驗收指令見 [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)。維護者 clone：
 
@@ -173,9 +192,9 @@ pwsh -NoProfile -File tools\dev_check.ps1
 
 - **轉化優化**：`cro`、`signup`、`onboarding`、`popups`、`paywalls`
 - **內容與文案**：`copywriting`、`copy-editing`、`cold-email`、`emails`、`social`、`image`
-- **SEO 與發現**：`seo-audit`、`ai-seo`、`programmatic-seo`、`site-architecture`、`competitors`、`schema`、`aso`、`content-strategy`
+- **SEO 與發現**：`seo-audit`、`ai-seo`、`programmatic-seo`、`site-architecture`、`competitors`、`link-building`、`schema`、`aso`、`content-strategy`
 - **付費與分發**：`ads`、`events`、`ad-creative`、`social`
-- **衡量與測試**：`analytics`、`ab-testing`、`attribution`
+- **衡量與測試**：`analytics`、`ab-testing`、`attribution`、`conversion-tracking`
 - **留存**：`churn-prevention`
 - **增長工程**：`co-marketing`、`free-tools`、`referrals`、`lead-magnets`、`community-marketing`
 - **策略與變現**：`marketing-ideas`、`marketing-psychology`、`launch`、`pricing`、`offers`、`marketing-plan`、`marketing-loops`、`marketing-council`

@@ -5,6 +5,55 @@
 # Regenerate a skill's entries with: skillspector baseline skills/<name> --no-llm --reason '...'
 version: 2
 scanner_version: 2.11.2
+# reviewed_partials: files a bounded static parser could not finish, reviewed by hand.
+# tools/run_skillspector.py strips this key before the scanner reads the baseline and
+# accepts the matching degraded analyzer only while the file's SHA-256 (as staged, LF)
+# still equals `sha256` -- any edit to the file reopens the review.
+reviewed_partials:
+- skill: ad-creative
+  path: assets/creative-review-template.html
+  analyzer: static_patterns_tool_misuse
+  reason_code: static_parse_limit
+  sha256: 0ca7cce4fa809235aee776606205925d8dc01bde8a8325e2af7197d86394d3b7
+  reason: 2026-10-24 人工審閱上游 7433769 版本：單一自足的審稿頁，只解析頁內 <script id="review-data"> 的 JSON 並渲染；沒有 fetch／XMLHttpRequest、外部 script、shell 或檔案存取，所有 innerHTML 插值都經 esc() 跳脫 &<>"'。解析器跨度上限是被頁內的大段 JSON 與樣板字串觸發，不是工具濫用。
+- skill: marketing-loops
+  path: SKILL.md
+  analyzers:
+  - static_patterns_agent_snooping
+  - static_patterns_anti_refusal
+  - static_patterns_deserialization
+  - static_patterns_excessive_agency
+  - static_patterns_harmful_content
+  - static_patterns_memory_poisoning
+  - static_patterns_privilege_escalation
+  - static_patterns_prompt_injection
+  - static_patterns_rogue_agent
+  - static_patterns_ssrf
+  - static_patterns_supply_chain
+  - static_patterns_system_prompt_leakage
+  - static_patterns_tool_misuse
+  reason_code: obfuscated_instruction_text
+  sha256: 0257b2d5e0ce8664af9fb2d4abc9e3265744931b1d6818610437bb4812ad9fd2
+  reason: 2026-10-24 人工審閱：觸發點是 frontmatter description 第 3 行的觸發詞清單，一長串以單引號包住的使用者說法，其中一則是 'ranking drop alert,'。掃描器把「drop + 引號內容」解讀成「刪掉這些字元」的指令並嘗試重建，結果判為無法確定，所以保守標成混淆。全文沒有零寬或格式字元、沒有 base64 或跳脫編碼，引號內都是一般英文片語；其餘新增內容只是兩個 operator 參考檔的指引段落與數字更新（43 → 58 個 loop）。
+- skill: prospecting
+  path: references/compliance.md
+  analyzers:
+  - static_patterns_agent_snooping
+  - static_patterns_anti_refusal
+  - static_patterns_deserialization
+  - static_patterns_excessive_agency
+  - static_patterns_harmful_content
+  - static_patterns_memory_poisoning
+  - static_patterns_privilege_escalation
+  - static_patterns_prompt_injection
+  - static_patterns_rogue_agent
+  - static_patterns_ssrf
+  - static_patterns_supply_chain
+  - static_patterns_system_prompt_leakage
+  - static_patterns_tool_misuse
+  reason_code: obfuscated_instruction_text
+  sha256: b7f03614af776e90259f28cc1f484ce22a86c71ef35a1e5a4b9e24b6d89aecd4
+  reason: 2026-10-24 人工審閱：觸發點是 EU 段落的退訂話術範例（第 53 行，請對方回覆 'remove' 就刪除資料）。掃描器把「remove + 引號內容」解讀成「刪掉這些字元」的指令並嘗試重建，判為無法確定後保守標成混淆。全文是 GDPR／PECR／CASL／DNC 合規說明，沒有零寬或格式字元、沒有編碼字串。
 rules: []
 scoped_rules:
 - skill: ad-creative
@@ -215,3 +264,291 @@ fingerprints:
   rule_id: RP1
   file: SKILL.md
   reason: 自我指涉誤判：文件中『npx <pkg>@latest』等安裝範例是提供給使用者參考的文件文字，非本 skill 綁定執行且未鎖版號的 MCP／CLI 設定。
+- hash: sha256:acf905f3172ecc9308e1888c3f6504ba0411515698ba477676f5fb34caa4c5a7
+  rule_id: P5
+  file: assets/creative-review-template.html
+  reason: "2026-10-24 上游同步後審閱：範例廣告在講第三方實驗室檢測蛋白粉的砷、鎘、鉛並列出合格結果，是示範證據式產品文案，不含取得或使用有害物質的指示。"
+- hash: sha256:ea0320ea081d517524b26fc7ee81a822718e387da7ee45985aa16dae855dad5e
+  rule_id: P5
+  file: assets/creative-review-template.html
+  reason: "2026-10-24 上游同步後審閱：範例廣告在講第三方實驗室檢測蛋白粉的砷、鎘、鉛並列出合格結果，是示範證據式產品文案，不含取得或使用有害物質的指示。"
+- hash: sha256:baf394a8136e0820adecc7c65716ed2aff1aa4bc81426a8c29969c8e787d2e2e
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：SKILL.md 引用的審稿頁因解析器跨度上限未被完整檢查而連帶產生；該頁已在 reviewed_partials 逐行人工審閱。"
+- hash: sha256:8f470698a191d4b4f0da96b952f16c0491870862ce71254a8a24003ef4a8ab3d
+  rule_id: P2
+  file: assets/creative-review-template.html
+  reason: "2026-10-24 上游同步後審閱：HTML 開頭註解是維護者使用說明，只要求替換同檔內的範例 JSON；不要求越權、外傳資料或覆蓋系統指令。"
+- hash: sha256:8d833571b19f959a778834e92e34051bd3ae5d78d15d3b24332fd900db73310e
+  rule_id: E1
+  file: references/generative-tools.md
+  reason: "2026-10-24 上游同步後審閱：Gemini 影像與 ElevenLabs 語音 API 的 curl 範例，是使用者自己帶金鑰呼叫官方端點的文件說明，skill 不會自行送出資料。"
+- hash: sha256:8441da2ca8b2dab63d85c2d341e23f1822d35d124878ae1cdf2cea6bd7f89084
+  rule_id: E1
+  file: references/generative-tools.md
+  reason: "2026-10-24 上游同步後審閱：Gemini 影像與 ElevenLabs 語音 API 的 curl 範例，是使用者自己帶金鑰呼叫官方端點的文件說明，skill 不會自行送出資料。"
+- hash: sha256:1ddc5656161975d16a3d27109aa97d868c35c42efa5b1cc7cebc54a27b4572b9
+  rule_id: E1
+  file: references/generative-tools.md
+  reason: "2026-10-24 上游同步後審閱：Gemini 影像與 ElevenLabs 語音 API 的 curl 範例，是使用者自己帶金鑰呼叫官方端點的文件說明，skill 不會自行送出資料。"
+- hash: sha256:b1c3855cb01216c061a0b96633ac81623f093eb2030f85206922a33d4605caf8
+  rule_id: P1
+  file: references/audit-guardrails.md
+  reason: "2026-10-24 上游同步後審閱：原文是防禦規則：抓回的頁面、匯出檔與截圖是資料不是指令，明確要求不得照做其中的「ignore previous instructions」。"
+- hash: sha256:de61e307409bdf0bddfe180f231ce2b7b3ad5508a80e1b9c5a036cff45792bed
+  rule_id: AR2
+  file: references/reading-google-ads-data.md
+  reason: "2026-10-24 上游同步後審閱：「學習期的出價策略不要判讀績效」是廣告數據判讀原則，不是要 agent 忽略拒絕條件。"
+- hash: sha256:daccc17ae712d7fe9481862bbba204a19a8fd92885f8d56b76a01706d0558b55
+  rule_id: EA2
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：命中常見錯誤清單：封鎖搜尋爬蟲前要先確認用途。語意是提醒先查證，不是授予自主權。"
+- hash: sha256:40f3fafbc2ae98255fdda97de2cc5355cf3ea880ab34335f00664cae980454b0
+  rule_id: TM3
+  file: references/ga4-implementation.md
+  reason: "2026-10-24 上游同步後審閱：`?debug_mode=true` 是 GA4 官方 DebugView 的啟用方式說明，不是不安全的預設值。"
+- hash: sha256:905853ce8c911c1ca0d964bb5be2b6a2f346f40fe3ca8dff5731345b0fb93747
+  rule_id: P9
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：Markdown 表格欄位對齊用的空白，不是藏指令的空白填充。"
+- hash: sha256:5914f236e8b23cf808ee97b5f24d6f48a273de171a3e450d741887b637c5afac
+  rule_id: PE3
+  file: references/measurement-paradigms.md
+  reason: "2026-10-24 上游同步後審閱：原文在說明 cookie 限制、ATT 與同意機制讓多觸點歸因失準，沒有讀取任何憑證。"
+- hash: sha256:958a85df22be29c647262632c8d2ee5b2751facc64d4b32a6e078373ea1eb245
+  rule_id: AR1
+  file: references/frameworks.md
+  reason: "2026-10-24 上游同步後審閱：「他們幾乎都會回覆」是冷郵件個人化效果的描述，不是叫 agent 不要拒絕。"
+- hash: sha256:95e6bcb2c5282f74024fcc6eba9668db4ca3b6d383c1b603e48124edc44da430
+  rule_id: EA2
+  file: references/multichannel-cadence.md
+  reason: "2026-10-24 上游同步後審閱：合規規則：電話要比對 Do Not Call 名單、未經同意不得對美國手機用 AI 語音。語意是禁止。"
+- hash: sha256:f7ad34d8ed71df1fbafe27a43385013eef03b0f8eb6d5001e9cf4c4263e58829
+  rule_id: EA2
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：「使用者已給 URL 與脈絡時直接開始研究，不必再問」是唯讀研究流程的效率指引，不涉及對外動作。"
+- hash: sha256:7b65befd06aa89c82328cd50ce8b3306305d5c08634e5b0a024f6e5238af58e5
+  rule_id: PE3
+  file: references/headless-cms.md
+  reason: "2026-10-24 上游同步後審閱：說明 Contentful Preview API 使用另一組 access token，是平台設定文件，沒有讀取憑證。"
+- hash: sha256:a38865c63c0e6134ccb5bffd4e82b216549472a9dd42069e39db3f256484ba7b
+  rule_id: AR2
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：「別判讀最近三天的數據」是轉換回填延遲的判讀原則。"
+- hash: sha256:af1e588fab90ce848fc6335f213a0012bfffde80b9df83828ea49e8d3c6d4646
+  rule_id: P2
+  file: references/browser-side.md
+  reason: "2026-10-24 上游同步後審閱：gtag.js 安裝範例裡的 HTML 註解（GA4 已載入就略過），是程式碼註解不是隱藏指令。"
+- hash: sha256:1eb8cf5e85efe49d3dd112791f7c202a6524c5a11a7f5e4306d2d4500a64b422
+  rule_id: P1
+  file: references/browser-side.md
+  reason: "2026-10-24 上游同步後審閱：GA4 DebugView 的操作步驟，沒有覆寫系統指令。"
+- hash: sha256:3d3111ad94de98fcefea82cd50db215f90c24d8ac99aa96b02e6003f681a891f
+  rule_id: AR2
+  file: references/google-ads.md
+  reason: "2026-10-24 上游同步後審閱：Google Ads 轉換回填延遲的判讀原則（三天規則），不是忽略拒絕條件。"
+- hash: sha256:76ec392df4b885039b421201478ac25df2c47311fad21ecb93af8e789340e10f
+  rule_id: AR2
+  file: references/google-ads.md
+  reason: "2026-10-24 上游同步後審閱：Google Ads 轉換回填延遲的判讀原則（三天規則），不是忽略拒絕條件。"
+- hash: sha256:abc929a2d06e0957ee79faee9cc0b011dfd5923b51d2ed7f69a1e9fc6200f1da
+  rule_id: PE3
+  file: references/meta.md
+  reason: "2026-10-24 上游同步後審閱：說明 Meta CAPI 需要 access token 與雜湊後的客戶資料，是平台串接文件，skill 不讀取憑證。"
+- hash: sha256:2b27134318da56c3c3657a58e80fe17655f32481eb262cee8666fd1bf9eba91b
+  rule_id: AR2
+  file: references/other-platforms.md
+  reason: "2026-10-24 上游同步後審閱：LinkedIn 轉換規則未綁 campaign 時會靜默記零的除錯提醒。"
+- hash: sha256:f14e8cfbfa922c7dc8ed62ea28e91f768e75ea4cb1acb08fa29461c2723d236a
+  rule_id: P3
+  file: references/other-platforms.md
+  reason: "2026-10-24 上游同步後審閱：TikTok 事件名稱打錯會靜默不記錄的除錯提醒，沒有外傳指令。"
+- hash: sha256:6c89871cff5a18e20041fd3a56da13a3024fb23c87bb9717453f744d22f856de
+  rule_id: LP3
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：上游產品 frontmatter 沒有 allowed-tools；依 AGENTS.md 不改寫產品 skill。"
+- hash: sha256:aafc30148b819f3c96d1287689221b3e61223ac8e429acd019cd516f0db4c171
+  rule_id: EA2
+  file: assets/gtm-recipes/README.md
+  reason: "2026-10-24 上游同步後審閱：說明有無 Consent Mode 時標籤的行為，語意是尊重同意狀態。"
+- hash: sha256:d69e78ba96290de83641ab1989b942673d4b1eb5ca8c5722d76d9e4f27454ad9
+  rule_id: E1
+  file: assets/gtm-recipes/send/tiktok.json
+  reason: "2026-10-24 上游同步後審閱：TikTok 官方像素基底碼的 GTM 範本，是要使用者裝到自己網站的標準追蹤碼，skill 不在本機執行。"
+- hash: sha256:3c7e50042521c2d1e633aee6917cb74818aaafae500da135170cc64e1517cd53
+  rule_id: EA2
+  file: references/form.md
+  reason: "2026-10-24 上游同步後審閱：表單設計清單項目「單一欄位、免確認」，與 agent 自主權無關。"
+- hash: sha256:594700f8bb632c91f4c8a04c48e66a1c55fc7d0ae6ea8c63b4f3a5a67d6f3006
+  rule_id: AR2
+  file: references/directory-list.md
+  reason: "2026-10-24 上游同步後審閱：「每季重新確認外連是否被改成 nofollow」是 SEO 維運提醒。"
+- hash: sha256:51cbaa1eb5cac32796fe6d4458a6713ad963beba2196509543c4d568547516a3
+  rule_id: E1
+  file: references/submission-tracker-template.csv
+  reason: "2026-10-24 上游同步後審閱：目錄投遞追蹤表的一列（Slack App Directory 網址），只是資料不是請求。"
+- hash: sha256:becdeeca30650b0b267238f84fba803698d5eed7a59c9c412c9ab232a9bbfb5c
+  rule_id: P1
+  file: evals/evals.json
+  reason: "2026-10-24 上游同步後審閱：eval 的測試輸入刻意放入「ignore previous instructions」，期望輸出要求把它當資料拒絕，是防禦測試。"
+- hash: sha256:e390a2360c029377350f06e9c8beb7e6d6281d0f50b33a6aa3813b3a60a2e74d
+  rule_id: YR4
+  file: references/content-to-skill-corpus-design.md
+  reason: "2026-10-24 上游同步後審閱：語料欄位表的一列（處理紀錄：抽取日期、工具版本、人工修正），沒有隱藏指令。"
+- hash: sha256:72bab4cd4e368e56e93d0eef3abb5901580cc9a0a93dc62461b6bc5c2d84f2f3
+  rule_id: P1
+  file: references/content-to-skill-corpus-design.md
+  reason: "2026-10-24 上游同步後審閱：原文是防禦規則：逐字稿裡的「ignore previous instructions」既不是給抽取 agent 的指令，也不是發布許可。"
+- hash: sha256:c1b843a6fdf2f49479459a897c7e26dc2e96a601978868075ce06dd88c422c6b
+  rule_id: EA2
+  file: references/content-to-skill-release.md
+  reason: "2026-10-24 上游同步後審閱：時效性事實的處理規則：保留原日期、未查證不得宣稱至今仍為真。"
+- hash: sha256:d75b576d6a8835d915ba2c787c59f79b85d887a3acd0a0f3a83478dbb6066a56
+  rule_id: AR2
+  file: references/loop-catalog.md
+  reason: "2026-10-24 上游同步後審閱：loop 的停止條件「樣本太少不判讀、不以開信率判斷」，是分析原則。"
+- hash: sha256:9192f2825e9f8749025755bdc60d3e8c333db2dc44b007d62208dde11c741234
+  rule_id: EA2
+  file: evals/evals.json
+  reason: "2026-10-24 上游同步後審閱：eval 期望輸出要求先確認五項設定並預設以 PR 送審，語意是限制自主。"
+- hash: sha256:3b8a23539b54216202f3c8e692ab1d48dc700bcf0b9fc8bff23ddf47cc11a172
+  rule_id: EA2
+  file: references/seo-operator.md
+  reason: "2026-10-24 上游同步後審閱：索引檢查流程：找出未索引原因並修正根因，無法查證就回報「未驗證」。"
+- hash: sha256:0a2d36a0840708de496da33af40f3cc4fcc4a3cde9fad8d56f8fe7553fe338e8
+  rule_id: AE4
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：混合文字來自行銷術語「π-shaped marketer」的希臘字母 π，其餘是破折號與框線字元，不是同形字偽裝。"
+- hash: sha256:fb3becfe7433733e9bb708748b5359346b2b6898fc4918c026dba266cbc1d292
+  rule_id: AE4
+  file: references/methodology.md
+  reason: "2026-10-24 上游同步後審閱：同上：「π-shaped」術語與框線、箭頭字元。"
+- hash: sha256:0e756f303fdb93d246efdffec8b2caf9b6d562025a559d9cfdf7290c431c59d8
+  rule_id: EA2
+  file: references/methodology.md
+  reason: "2026-10-24 上游同步後審閱：「能直接撈的資料不要叫使用者複製貼上」是工作流程效率指引。"
+- hash: sha256:b38ce465ea931fc09ca690fdbc853c780c7413473a37f3bd07a06202839836e4
+  rule_id: EA2
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：列的是 agent 未經核准「不得」做的事（改預算、上下架、改追蹤、發廣告），語意是限制自主。"
+- hash: sha256:6dd7de6bee45eae5127234edb47bf7a6d78e1af372b8218bbad548b21b68d2ff
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：SKILL.md 引用的 compliance.md 因觸發詞誤判未被完整檢查而連帶產生；該檔已在 reviewed_partials 人工審閱。"
+- hash: sha256:f50f533637ffcf0c63ed399d390bbfa2c3e4ea8a739c8b192edd66d350b514b2
+  rule_id: AS2
+  file: evals/evals.json
+  reason: "2026-10-24 上游同步後審閱：eval 期望輸出提到 Truelist 有 MCP server，是工具介紹不是讀取 MCP 設定。"
+- hash: sha256:b72093741a62ef1bcaf2f40f4f7f49644f49de3f4188015ef4a2810aeea4da74
+  rule_id: EA2
+  file: references/compliance.md
+  reason: "2026-10-24 上游同步後審閱：合規文件（GDPR、PECR、CASL、DNC）在說明哪些情況需要或不需要同意，語意是法遵限制。"
+- hash: sha256:df81727ffd68acbf797c60d380a2f047b9505281fdd8ad756c96e5ca7fa5199b
+  rule_id: EA2
+  file: references/compliance.md
+  reason: "2026-10-24 上游同步後審閱：合規文件（GDPR、PECR、CASL、DNC）在說明哪些情況需要或不需要同意，語意是法遵限制。"
+- hash: sha256:89335c8a8e5658b7ba4fe8934f2a7a97c056200e4e513024eae224928b5ed8c2
+  rule_id: EA2
+  file: references/data-sources.md
+  reason: "2026-10-24 上游同步後審閱：轉述廠商說法並提醒同樣的隱私注意事項仍適用、法律判斷在使用者。"
+- hash: sha256:c0dab6d49f46a525835bea5635337f613a64e479db59a32ad62d5074f6eec208
+  rule_id: AR2
+  file: references/newsjacking.md
+  reason: "2026-10-24 上游同步後審閱：「搶快沒判斷比晚到更糟」是公關判斷原則。"
+- hash: sha256:9be9623cce0c4648591f6d07ac05d5a4f395b731cc5d1c98a2e87004e0c815d6
+  rule_id: EA2
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：折扣核准矩陣的一列（標準價自動核准），是 CRM 流程設計範例。"
+- hash: sha256:bd2b856bad19e4b5ce39b67801df2c97bdb532f15678cdd3e07226c0ced29845
+  rule_id: OH1
+  file: references/schema-examples.md
+  reason: "2026-10-24 上游同步後審閱：JSON-LD 標準寫法，`JSON.stringify` 後已把 `<` 跳脫成 \\u003c，正是防注入的做法。"
+- hash: sha256:4891f1947b8be62e31f1a45dd7d7f3b89af84a7688dd45971a00cac03f285969
+  rule_id: RP1
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：hyperframes 與 create-video 的 `npx` 範例是給使用者自己執行的入門指令，skill 不綁定執行。"
+- hash: sha256:a121760e62aa6de2a08c50a1626ff0200d831ebecf844fadd859b98006706010
+  rule_id: RP1
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：hyperframes 與 create-video 的 `npx` 範例是給使用者自己執行的入門指令，skill 不綁定執行。"
+- hash: sha256:36c6dff20ab42026c2dd3bac87d1e677bc490ec62d5c34d304ced2de0e2b7dc4
+  rule_id: RP1
+  file: references/product-demo-recording.md
+  reason: "2026-10-24 上游同步後審閱：`npx playwright install` 是給使用者的環境準備指令。"
+- hash: sha256:18931fa6e40f73bb19bbed86efdeaf2e348bbd21746ef07f5acdb794ff4401b9
+  rule_id: EA2
+  file: references/product-demo-recording.md
+  reason: "2026-10-24 上游同步後審閱：API 金鑰處理規則：放環境變數、不得叫使用者貼進對話、不得寫進 repo。語意是禁止。"
+- hash: sha256:16fd7e6246314d844d4d84fdbf14d64c8e85e01617349955dd4ed82eeb245586
+  rule_id: P5
+  file: assets/creative-review-template.html
+  reason: "2026-10-24 上游同步後審閱：範例廣告在講第三方實驗室檢測蛋白粉的砷、鎘、鉛並列出合格結果，是示範證據式產品文案，不含取得或使用有害物質的指示。"
+- hash: sha256:bdc9dcc06e90275eb5075794dc4bdd4d06d67c602abfce91184cb71ec2fd63d6
+  rule_id: P5
+  file: assets/creative-review-template.html
+  reason: "2026-10-24 上游同步後審閱：範例廣告在講第三方實驗室檢測蛋白粉的砷、鎘、鉛並列出合格結果，是示範證據式產品文案，不含取得或使用有害物質的指示。"
+- hash: sha256:a0e373d21f2bccc35c9ef11fbdea255de20c5a36584a9ccb97212c79d66a74ca
+  rule_id: P5
+  file: assets/creative-review-template.html
+  reason: "2026-10-24 上游同步後審閱：範例廣告在講第三方實驗室檢測蛋白粉的砷、鎘、鉛並列出合格結果，是示範證據式產品文案，不含取得或使用有害物質的指示。"
+- hash: sha256:5f2464c28ef62ed75ecec03e2ea275603e9d4465b3a5256a9dda2a3505330729
+  rule_id: P5
+  file: assets/creative-review-template.html
+  reason: "2026-10-24 上游同步後審閱：範例廣告在講第三方實驗室檢測蛋白粉的砷、鎘、鉛並列出合格結果，是示範證據式產品文案，不含取得或使用有害物質的指示。"
+- hash: sha256:cc3838d4aafaa4a0e3f6db26f10de87ced8d69f18a1ef9a26aafabefc13087d3
+  rule_id: RP1
+  file: references/agent-readiness.md
+  reason: "2026-10-24 上游同步後審閱：表格列出第三方檢測工具，`npx is-agentic` 是給使用者自己執行的範例，skill 不綁定執行。"
+- hash: sha256:1c7bcbb2f61d984b71025bcad38def35c3fb8cce4ab2d24c69cf9dab85e4784e
+  rule_id: AR2
+  file: references/browser-side.md
+  reason: "2026-10-24 上游同步後審閱：「GA4 處理需 24–48 小時，別判讀當天數字」是判讀原則。"
+- hash: sha256:5bfc09f2882a4540bf242e5b319904e901a448f8173961a7fa393997b21fde1f
+  rule_id: E1
+  file: references/browser-side.md
+  reason: "2026-10-24 上游同步後審閱：TikTok 官方像素基底碼範例（載入 analytics.tiktok.com），是安裝說明。"
+- hash: sha256:e860eb90579705115c50a99613ca6fe576991e288ade91b6f715297ec75de41a
+  rule_id: EA2
+  file: scripts/build_recipe.py
+  reason: "2026-10-24 上游同步後審閱：建置腳本印出「廣告標籤需要 ad_storage 同意」的說明文字。"
+- hash: sha256:9839ffea22e312419ec0fbb4b55c2886d4466a00db7a8787cf6e3d91bfdadd6b
+  rule_id: PE3
+  file: references/meta.md
+  reason: "2026-10-24 上游同步後審閱：說明 Meta CAPI 需要 access token 與雜湊後的客戶資料，是平台串接文件，skill 不讀取憑證。"
+- hash: sha256:3c0b65fdcb6889e3989cf9c56c2ef5b30687bd90158f2c8a7ecebabd0363d61d
+  rule_id: PE3
+  file: references/other-platforms.md
+  reason: "2026-10-24 上游同步後審閱：TikTok Events API 需要 access token 的串接說明。"
+- hash: sha256:69d7ee6fe0070a024f1a79b2a5acc6bc5e9aae5650b5639482957a6143fdee1b
+  rule_id: PE3
+  file: references/server-side.md
+  reason: "2026-10-24 上游同步後審閱：用「有沒有 access token／dataset ID」辨別真假伺服器端整合，是判讀指引。"
+- hash: sha256:5c57531de8605b96a6706ad2fcd7664492acbda5300214b54c7270cd7743af8d
+  rule_id: RA2
+  file: references/submission-tracker-template.csv
+  reason: "2026-10-24 上游同步後審閱：目錄投遞追蹤表的一列（OnToplist），只是資料，不涉及 session 持久化。"
+- hash: sha256:5f145c9fe26301927ebe2aaca88e4de326cfa70d7845a2710fd30e382dfa23a8
+  rule_id: EA2
+  file: references/loop-catalog.md
+  reason: "2026-10-24 上游同步後審閱：停止條件明定未經核准不得送出回覆草稿，語意是限制自主。"
+- hash: sha256:23a37e4bde9f6231dcd7230d30e09f77a4548cb41b78b80039cc2f6fde89cb62
+  rule_id: EA2
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：列的是 agent 未經核准「不得」做的事（改預算、上下架、改追蹤、發廣告），語意是限制自主。"
+- hash: sha256:1e041743245447c066ebf17452d7a062866646c7936bb8b3b53eeeaa55a428b0
+  rule_id: EA2
+  file: references/compliance.md
+  reason: "2026-10-24 上游同步後審閱：合規文件（GDPR、PECR、CASL、DNC）在說明哪些情況需要或不需要同意，語意是法遵限制。"
+- hash: sha256:acdc2a775085f68022bb821ca7072ab1ca7db8c472389f441007b6d36c23da7d
+  rule_id: EA2
+  file: references/compliance.md
+  reason: "2026-10-24 上游同步後審閱：合規文件（GDPR、PECR、CASL、DNC）在說明哪些情況需要或不需要同意，語意是法遵限制。"
+- hash: sha256:7aa98b7585a54e8fbc37df4d3ea23634d28dc535a25f36177f9ad8cc2e87c888
+  rule_id: RP1
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：hyperframes 與 create-video 的 `npx` 範例是給使用者自己執行的入門指令，skill 不綁定執行。"
+- hash: sha256:724d10c7d840d04c9324c0343905ee9bf06708dfe40b156343a97fd9ccf58872
+  rule_id: RP1
+  file: SKILL.md
+  reason: "2026-10-24 上游同步後審閱：hyperframes 與 create-video 的 `npx` 範例是給使用者自己執行的入門指令，skill 不綁定執行。"

@@ -1,25 +1,37 @@
 #!/usr/bin/env node
 
+const rawArgs = process.argv.slice(2)
 const API_KEY = process.env.ACTIVECAMPAIGN_API_KEY
 const API_URL = process.env.ACTIVECAMPAIGN_API_URL
 
-if (!API_KEY) {
+if ((!API_KEY) && rawArgs.length > 0) {
   console.error(JSON.stringify({ error: 'ACTIVECAMPAIGN_API_KEY environment variable required' }))
   process.exit(1)
 }
 
-if (!API_URL) {
+if ((!API_URL) && rawArgs.length > 0) {
   console.error(JSON.stringify({ error: 'ACTIVECAMPAIGN_API_URL environment variable required (e.g. https://yourname.api-us1.com)' }))
   process.exit(1)
 }
 
-const BASE_URL = `${API_URL.replace(/\/$/, '')}/api/3`
+const BASE_URL = API_URL ? `${API_URL.replace(/\/$/, '')}/api/3` : ''
+
+
+function requestSignal() {
+  const raw = args['timeout-ms'] ?? '120000'
+  const ms = Number(raw)
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw) || !Number.isSafeInteger(ms) || ms < 1 || ms > 600000) {
+    throw new Error('--timeout-ms must be an integer from 1 to 600000')
+  }
+  return AbortSignal.timeout(ms)
+}
+
 
 async function api(method, path, body) {
   if (args['dry-run']) {
     return { _dry_run: true, method, url: `${BASE_URL}${path}`, headers: { 'Api-Token': '***', 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: body || undefined }
   }
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${BASE_URL}${path}`, { signal: requestSignal(),
     method,
     headers: {
       'Api-Token': API_KEY,
@@ -28,6 +40,7 @@ async function api(method, path, body) {
     },
     body: body ? JSON.stringify(body) : undefined,
   })
+  if (!res.ok) process.exitCode = 1
   const text = await res.text()
   try {
     return JSON.parse(text)
@@ -56,8 +69,20 @@ function parseArgs(args) {
   return result
 }
 
-const args = parseArgs(process.argv.slice(2))
+const args = parseArgs(rawArgs)
 const [cmd, sub, ...rest] = args._
+
+function contactFieldValues() {
+  let values
+  try { values = JSON.parse(args['field-values']) } catch {
+    throw new Error('--field-values must be a JSON array of {field, value} objects')
+  }
+  if (!Array.isArray(values) || values.some(item => !item || typeof item !== 'object' || Array.isArray(item)
+    || !Object.hasOwn(item, 'field') || !Object.hasOwn(item, 'value'))) {
+    throw new Error('--field-values must be a JSON array of {field, value} objects')
+  }
+  return values
+}
 
 async function main() {
   let result
@@ -91,6 +116,7 @@ async function main() {
           if (args['first-name']) contact.firstName = args['first-name']
           if (args['last-name']) contact.lastName = args['last-name']
           if (args.phone) contact.phone = args.phone
+          if (args['field-values'] !== undefined) contact.fieldValues = contactFieldValues()
           result = await api('POST', '/contacts', { contact })
           break
         }
@@ -102,6 +128,7 @@ async function main() {
           if (args['first-name']) contact.firstName = args['first-name']
           if (args['last-name']) contact.lastName = args['last-name']
           if (args.phone) contact.phone = args.phone
+          if (args['field-values'] !== undefined) contact.fieldValues = contactFieldValues()
           result = await api('PUT', `/contacts/${id}`, { contact })
           break
         }
@@ -118,11 +145,21 @@ async function main() {
           if (args['first-name']) contact.firstName = args['first-name']
           if (args['last-name']) contact.lastName = args['last-name']
           if (args.phone) contact.phone = args.phone
+          if (args['field-values'] !== undefined) contact.fieldValues = contactFieldValues()
           result = await api('POST', '/contact/sync', { contact })
           break
         }
         default:
           result = { error: 'Unknown contacts subcommand. Use: list, get, create, update, delete, sync' }
+      }
+      break
+
+    case 'fields':
+      if (sub !== 'list') { result = { error: 'Unknown fields subcommand. Use: list' }; break }
+      {
+        const params = new URLSearchParams({ limit: String(limit), offset: String(offset) })
+        if (args.search) params.set('search', args.search)
+        result = await api('GET', `/fields?${params}`)
       }
       break
 
@@ -412,7 +449,8 @@ async function main() {
       result = {
         error: 'Unknown command',
         usage: {
-          contacts: 'contacts [list | get --id <id> | create --email <email> | update --id <id> | delete --id <id> | sync --email <email>]',
+          contacts: 'contacts [list | get --id <id> | create --email <email> | update --id <id> | delete --id <id> | sync --email <email>]; create/update/sync: [--field-values <JSON array of {field,value}>]',
+          fields: 'fields list [--search <title>] [--limit <n>] [--offset <n>]',
           lists: 'lists [list | get --id <id> | create --name <name> | delete --id <id> | subscribe --list-id <lid> --contact-id <cid> | unsubscribe --list-id <lid> --contact-id <cid>]',
           campaigns: 'campaigns [list | get --id <id>]',
           deals: 'deals [list | get --id <id> | create --title <title> | update --id <id> | delete --id <id>]',
@@ -426,6 +464,7 @@ async function main() {
       }
   }
 
+  if (result?.error && rawArgs.length > 0) process.exitCode = 1
   console.log(JSON.stringify(result, null, 2))
 }
 

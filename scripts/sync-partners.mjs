@@ -30,7 +30,7 @@ const readmeBlock = active.length
   ? active
       .map(
         (p) =>
-          `> ◆ **[${p.name}](${p.url}${REF})** — *${p.categoryShort || p.category}.* ${p.blurb} → [Integration guide](${p.integration})`
+          `> ◆ **[${p.name}](${p.url}${p.noRef ? "" : REF})** — *${p.categoryShort || p.category}.* ${p.blurb} → [Integration guide](${p.integration})`
       )
       .join("\n\n")
   : "_No active partners yet. [Become a partner →](https://marketing-skills.com/sponsorship)_";
@@ -60,7 +60,9 @@ for (const { file, block } of targets) {
     process.exitCode = 1;
     continue;
   }
-  const next = src.slice(0, i + START.length) + "\n" + block + "\n" + src.slice(j);
+  const newline = src.includes("\r\n") ? "\r\n" : "\n";
+  const generatedBlock = block.replaceAll("\n", newline);
+  const next = src.slice(0, i + START.length) + newline + generatedBlock + newline + src.slice(j);
   if (next === src) {
     console.log(`✓ ${file} up to date`);
     continue;

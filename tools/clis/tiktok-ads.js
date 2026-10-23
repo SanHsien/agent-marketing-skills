@@ -1,13 +1,25 @@
 #!/usr/bin/env node
 
+const rawArgs = process.argv.slice(2)
 const TOKEN = process.env.TIKTOK_ACCESS_TOKEN
 const ADVERTISER_ID = process.env.TIKTOK_ADVERTISER_ID
 const BASE_URL = 'https://business-api.tiktok.com/open_api/v1.3'
 
-if (!TOKEN) {
+if ((!TOKEN) && rawArgs.length > 0) {
   console.error(JSON.stringify({ error: 'TIKTOK_ACCESS_TOKEN environment variable required' }))
   process.exit(1)
 }
+
+
+function requestSignal() {
+  const raw = args['timeout-ms'] ?? '120000'
+  const ms = Number(raw)
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw) || !Number.isSafeInteger(ms) || ms < 1 || ms > 600000) {
+    throw new Error('--timeout-ms must be an integer from 1 to 600000')
+  }
+  return AbortSignal.timeout(ms)
+}
+
 
 async function api(method, path, body) {
   if (args['dry-run']) {
@@ -23,13 +35,18 @@ async function api(method, path, body) {
   if (body && method === 'POST') {
     opts.body = JSON.stringify(body)
   }
-  const res = await fetch(`${BASE_URL}${path}`, opts)
+  const res = await fetch(`${BASE_URL}${path}`, { ...opts, signal: requestSignal() })
   const text = await res.text()
+  let result
   try {
-    return JSON.parse(text)
+    result = JSON.parse(text)
   } catch {
-    return { status: res.status, body: text }
+    result = { status: res.status, body: text }
   }
+  if (!res.ok || (typeof result?.code === 'number' && result.code !== 0)) {
+    process.exitCode = 1
+  }
+  return result
 }
 
 function parseArgs(args) {
@@ -52,7 +69,7 @@ function parseArgs(args) {
   return result
 }
 
-const args = parseArgs(process.argv.slice(2))
+const args = parseArgs(rawArgs)
 const [cmd, sub, ...rest] = args._
 
 function getAdvertiserId() {
@@ -122,7 +139,7 @@ async function main() {
           const advId = getAdvertiserId()
           if (!advId) { result = { error: 'TIKTOK_ADVERTISER_ID env or --advertiser-id required' }; break }
           const agParams = new URLSearchParams({ advertiser_id: advId })
-          if (args['campaign-id']) agParams.set('campaign_ids', JSON.stringify([args['campaign-id']]))
+          if (args['campaign-id']) agParams.set('filtering', JSON.stringify({ campaign_ids: [args['campaign-id']] }))
           result = await api('GET', `/adgroup/get/?${agParams}`)
           break
         }
@@ -146,7 +163,10 @@ async function main() {
             start_date: args['start-date'],
             end_date: args['end-date'],
           }
-          result = await api('POST', '/report/integrated/get/', body)
+          const reportParams = new URLSearchParams(Object.entries(body).map(([key, value]) => [
+            key, Array.isArray(value) ? JSON.stringify(value) : String(value),
+          ]))
+          result = await api('GET', `/report/integrated/get/?${reportParams}`)
           break
         }
         default:
@@ -181,6 +201,7 @@ async function main() {
       }
   }
 
+  if (result?.error && rawArgs.length > 0) process.exitCode = 1
   console.log(JSON.stringify(result, null, 2))
 }
 

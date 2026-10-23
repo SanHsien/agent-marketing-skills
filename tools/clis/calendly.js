@@ -1,18 +1,30 @@
 #!/usr/bin/env node
 
+const rawArgs = process.argv.slice(2)
 const API_KEY = process.env.CALENDLY_API_KEY
 const BASE_URL = 'https://api.calendly.com'
 
-if (!API_KEY) {
+if ((!API_KEY) && rawArgs.length > 0) {
   console.error(JSON.stringify({ error: 'CALENDLY_API_KEY environment variable required' }))
   process.exit(1)
 }
+
+
+function requestSignal() {
+  const raw = args['timeout-ms'] ?? '120000'
+  const ms = Number(raw)
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw) || !Number.isSafeInteger(ms) || ms < 1 || ms > 600000) {
+    throw new Error('--timeout-ms must be an integer from 1 to 600000')
+  }
+  return AbortSignal.timeout(ms)
+}
+
 
 async function api(method, path, body) {
   if (args['dry-run']) {
     return { _dry_run: true, method, url: `${BASE_URL}${path}`, headers: { 'Authorization': '***', 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: body || undefined }
   }
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${BASE_URL}${path}`, { signal: requestSignal(),
     method,
     headers: {
       'Authorization': `Bearer ${API_KEY}`,
@@ -21,6 +33,7 @@ async function api(method, path, body) {
     },
     body: body ? JSON.stringify(body) : undefined,
   })
+  if (!res.ok) process.exitCode = 1
   const text = await res.text()
   try {
     return JSON.parse(text)
@@ -49,7 +62,7 @@ function parseArgs(args) {
   return result
 }
 
-const args = parseArgs(process.argv.slice(2))
+const args = parseArgs(rawArgs)
 const [cmd, sub, ...rest] = args._
 
 async function main() {
@@ -182,10 +195,12 @@ async function main() {
           const org = args.organization
           const scope = args.scope || 'organization'
           if (!org) { result = { error: '--organization URI required' }; break }
-          const params = new URLSearchParams({
-            organization: org,
-            scope,
-          })
+          if (!['organization', 'user', 'group'].includes(scope)) { result = { error: '--scope must be organization, user, or group' }; break }
+          if (scope === 'user' && !args.user) { result = { error: '--user URI required for user scope' }; break }
+          if (scope === 'group' && !args.group) { result = { error: '--group URI required for group scope' }; break }
+          const params = new URLSearchParams({ organization: org, scope })
+          if (args.user) params.set('user', args.user)
+          if (args.group) params.set('group', args.group)
           params.set('count', String(count))
           if (args['page-token']) params.set('page_token', args['page-token'])
           result = await api('GET', `/webhook_subscriptions?${params}`)
@@ -197,8 +212,12 @@ async function main() {
           const org = args.organization
           const scope = args.scope || 'organization'
           if (!url || !events || !org) { result = { error: '--url, --events (comma-separated), and --organization required' }; break }
+          if (!['organization', 'user', 'group'].includes(scope)) { result = { error: '--scope must be organization, user, or group' }; break }
+          if (scope === 'user' && !args.user) { result = { error: '--user URI required for user scope' }; break }
+          if (scope === 'group' && !args.group) { result = { error: '--group URI required for group scope' }; break }
           const body = { url, events, organization: org, scope }
           if (args.user) body.user = args.user
+          if (args.group) body.group = args.group
           result = await api('POST', '/webhook_subscriptions', body)
           break
         }
@@ -239,11 +258,12 @@ async function main() {
           availability: 'availability [times --event-type <uri> --start-time <iso> --end-time <iso> | busy --user <uri> --start-time <iso> --end-time <iso>]',
           webhooks: 'webhooks [list --organization <uri> | create --url <url> --events <e1,e2> --organization <uri> | delete --uuid <id>]',
           org: 'org [members --organization <uri>]',
-          options: '--count <n> --page-token <token> --status <active|canceled>',
+          options: '--count <n> --page-token <token> --status <active|canceled> --scope <organization|user|group> --user <uri> --group <uri>',
         }
       }
   }
 
+  if (result?.error && rawArgs.length > 0) process.exitCode = 1
   console.log(JSON.stringify(result, null, 2))
 }
 

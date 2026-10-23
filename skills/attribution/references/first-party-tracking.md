@@ -22,7 +22,7 @@ Everything below serves that join. If `identify()` never fires, every customer l
 
 The most expensive mistake is rebuilding attribution that already works. Many SaaS apps already `identify()` at signup and already carry first-touch on person profiles. **Check the live data first:**
 
-- Do person profiles carry <code>$initial_utm_source</code> / <code>$initial_referring_domain</code>?
+- Do person profiles carry `$initial_utm_source` / `$initial_referring_domain`?
 - Does a conversion event (`Signed up`, `Converted to paid`) break down *cleanly* by channel, or is everything "Direct"?
 - Is identity keyed by **email** or by an internal **UUID**? (This changes every guard below.)
 - Does cross-subdomain stitching work (marketing site → app.yourdomain.com)?
@@ -53,7 +53,7 @@ When the conversion completes on a third-party domain (a booking tool, hosted ch
 One document-level listener rewrites every outbound booking link at click time — no per-CTA edits, and it covers plain clicks, keyboard activation, and middle-click (`auxclick`):
 
 ```js
-// Append the anonymous distinct_id to any SavvyCal link at click time.
+// Refresh anonymous metadata on each SavvyCal activation; clear stale IDs.
 function decorate(e) {
   const anchor = e.target?.closest?.("a[href]");
   if (!(anchor instanceof HTMLAnchorElement)) return;
@@ -64,14 +64,19 @@ function decorate(e) {
   if (host !== "savvycal.com" && !host.endsWith(".savvycal.com")) return;
 
   const distinctId = getPostHogDistinctId();   // anonymous-only — see guard
-  if (!distinctId) return;                       // fail closed
-
-  url.searchParams.set("metadata[ph_distinct_id]", distinctId);
+  if (distinctId) {
+    url.searchParams.set("metadata[ph_distinct_id]", distinctId);
+  } else {
+    // The same anchor may have been decorated before identify() or reset().
+    url.searchParams.delete("metadata[ph_distinct_id]");
+  }
   anchor.href = url.toString();
 }
 document.addEventListener("click", decorate, true);    // capture phase
 document.addEventListener("auxclick", decorate, true);
 ```
+
+An early return when the guard rejects the current ID leaves any previously added metadata on the anchor. Remove that one parameter instead, preserving the booking path, other parameters and fragment. Check both `click` and `auxclick` after an identity change.
 
 For an **inline embed** (e.g. `/demo` with an embedded calendar), pass the same id in the embed's metadata config instead; poll briefly (~2s) for the id on fresh visits, but never block the calendar from rendering.
 
@@ -126,17 +131,27 @@ events.push({
   properties: { booking_id, journey_linked: Boolean(anonId) },  // track the fallback rate
 });
 
-await fetch(`${POSTHOG_HOST}/batch/`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ api_key: POSTHOG_API_KEY, batch: events }),
-  signal: AbortSignal.timeout(3000),   // bound it; never hang the webhook
-});
+// Run after the booking's business-critical work; analytics must not fail it.
+try {
+  const response = await fetch(`${POSTHOG_HOST}/batch/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ api_key: POSTHOG_API_KEY, batch: events }),
+    signal: AbortSignal.timeout(3000),
+  });
+  // fetch resolves for HTTP errors too; a resolved promise isn't acceptance.
+  if (!response.ok) {
+    console.warn("Analytics ingestion rejected", { booking_id, status: response.status });
+  }
+} catch {
+  // Timeouts and network errors stay non-fatal. Never log the payload or email.
+  console.warn("Analytics ingestion unavailable", { booking_id });
+}
 ```
 
 When no id survives (link bypassed the decorator, e.g. a booking link inside a generated email/PDF), fall back to **email-only capture** with `journey_linked: false`. You still get the conversion; you just don't get the journey for that one.
 
-**First-touch survival caveat (PostHog specifics):** the <code>$anon_distinct_id</code> merge carries the anonymous person's *event* history, but with <code>person_profiles: 'identified_only'</code> the anonymous visitor may never have had a person profile, so their <code>$initial_*</code> first-touch props are not guaranteed to land on the merged person. Two robust fixes: call <code>posthog.createPersonProfile()</code> client-side *before* the visitor navigates off to the third-party domain (so the profile and its <code>$initial_*</code> exist to merge into), **or** capture the first-touch values client-side and pass them through the same metadata passthrough, then re-assert them in the webhook with <code>$set_once</code> (<code>$set_once</code> never overwrites an existing value, so it's safe). Without one of these, you can get the booking joined to the journey's *events* but a blank <code>$initial_utm_source</code> on the person — verify on a real booking. ([posthog-js#1524](https://github.com/PostHog/posthog-js/issues/1524).)
+**First-touch survival caveat (PostHog specifics):** the `$anon_distinct_id` merge carries the anonymous person's *event* history, but with `person_profiles: 'identified_only'` the anonymous visitor may never have had a person profile, so their `$initial_*` first-touch props aren't guaranteed to land on the merged person. Two robust fixes: call `posthog.createPersonProfile()` client-side *before* the visitor navigates off to the third-party domain (so the profile and its `$initial_*` exist to merge into), **or** capture the first-touch values client-side and pass them through the same metadata passthrough, then re-assert them in the webhook with `$set_once` (`$set_once` never overwrites an existing value, so it's safe). Without one of these, you can get the booking joined to the journey's *events* but a blank `$initial_utm_source` on the person — verify on a real booking. ([posthog-js#1524](https://github.com/PostHog/posthog-js/issues/1524).)
 
 ## Step 3 — The guardrails (do not skip)
 
@@ -193,16 +208,16 @@ Mark these fallback-attributed conversions with a lower-confidence `basis` (see 
 
 - Verify the provider's **signature** (`SAVVYCAL_WEBHOOK_SECRET` etc.).
 - **Validate** the smuggled id (string, ≤100 chars, no `@`) before merging.
-- Run the analytics call **after** any business-critical work, bounded by a timeout, **non-fatal** on failure.
+- Run the analytics call **after** any business-critical work, bounded by a timeout, **non-fatal** on failure. Check HTTP status and catch timeout/network rejections, as in Step 2c. If delivery needs retry guarantees, enqueue analytics separately with idempotency rather than failing or replaying the booking.
 - **Log the booking id, never the email.**
 
 ## Step 4 — Report
 
-- **Config check:** many tools default to *last-touch* (PostHog's Marketing Analytics scene does). First-party attribution wants first-touch — build insights on <code>$initial_*</code> explicitly, or switch the default.
-- **The payoff insight:** conversion event broken down by <code>$initial_utm_source</code> / <code>$initial_referring_domain</code> — "where does every signup/booking come from."
+- **Config check:** many tools default to *last-touch* (PostHog's Marketing Analytics scene does). First-party attribution wants first-touch — build insights on `$initial_*` explicitly, or switch the default.
+- **The payoff insight:** conversion event broken down by `$initial_utm_source` / `$initial_referring_domain` — "where does every signup/booking come from."
 - **Channel → revenue:** conversion event by channel, joined to revenue/MRR person properties. Note: some tools compute revenue props *at ingest* (person-on-events), so historical events may read 0 — use the persons table for current MRR, or tier by plan.
-- **Track your own coverage:** the <code>journey_linked: false</code> rate tells you how many conversions bypassed the stitch. Watch it after launch.
-- **Store the full touch path, not just <code>$initial_*</code>.** (Refinement from Tessa Kriesel.) First-touch alone lets you break conversions down by *first* channel — but it can't run the multi-touch models from the interpretation track (SKILL.md §2: position-based, linear, time-decay). If you also persist the **ordered sequence of touches** per person (channel + timestamp for each, e.g. an events-table query or a <code>touch_path</code> array on the person), the build track *feeds* the interpretation track: you can now score the same journey six ways on your own data instead of only reading about the models. This is what makes Pillar A and Pillar B shake hands — capture first-touch to ship, capture the full path to model.
+- **Track your own coverage:** the `journey_linked: false` rate tells you how many conversions bypassed the stitch. Watch it after launch.
+- **Store the full touch path, not just `$initial_*`.** (Refinement from Tessa Kriesel.) First-touch alone lets you break conversions down by *first* channel — but it can't run the multi-touch models from the interpretation track (SKILL.md §2: position-based, linear, time-decay). If you also persist the **ordered sequence of touches** per person (channel + timestamp for each, e.g. an events-table query or a `touch_path` array on the person), the build track *feeds* the interpretation track: you can now score the same journey six ways on your own data instead of only reading about the models. This is what makes Pillar A and Pillar B shake hands — capture first-touch to ship, capture the full path to model.
 
 ## Step 5 — The last mile: get attribution into the CRM
 
@@ -219,20 +234,20 @@ A channel breakdown living in your analytics tool is a *report*. The thing sales
 
 ## Verification checklist
 
-- Click a booking CTA → URL shows <code>metadata[&lt;id_param&gt;]=&lt;anon-uuid&gt;</code>.
-- In console: <code>posthog.identify('test@x.com')</code> → click again → the param must **NOT** appear (guard works). Call <code>posthog.reset()</code> after.
-- Hand-POST a webhook <code>/batch/</code> payload → expect <code>{"status":"Ok"}</code>, person appears merged.
-- Post-ship: first real webhook log shows <code>journey_linked: true</code>.
-- Confirm first-touch survives cross-subdomain: start on marketing site, sign up in app, check the person carries the original <code>$initial_utm_source</code>.
+- Click a booking CTA → URL shows `metadata[<id_param>]=<anon-uuid>`.
+- In console: `posthog.identify('test@x.com')` → click again → the param must **NOT** appear (guard works). `posthog.reset()` after.
+- Hand-POST a webhook `/batch/` payload → expect `{"status":"Ok"}`, person appears merged.
+- Post-ship: first real webhook log shows `journey_linked: true`.
+- Confirm first-touch survives cross-subdomain: start on marketing site, sign up in app, check the person carries the original `$initial_utm_source`.
 
 ## Adapting to other stacks
 
 | Piece | PostHog (worked example) | Generalizes to |
 |---|---|---|
-| Anonymous id | <code>distinct_id</code> / <code>$device_id</code> | Segment <code>anonymousId</code>, Amplitude <code>deviceId</code>, GA4 client_id |
-| Merge call | <code>$identify</code> + <code>$anon_distinct_id</code> | Segment <code>identify</code> (known <code>userId</code>, same <code>anonymousId</code>) + <code>alias</code> where needed; Amplitude <code>setUserId</code> on the session that still holds the anonymous <code>deviceId</code> (the stitch is deviceId↔userId — Amplitude's Identify API only sets user *properties*, it does not merge); GA4 <code>user_id</code> on the same <code>client_id</code> |
-| Ingestion | <code>/batch/</code> | Segment HTTP API, Amplitude HTTP v2, GA4 Measurement Protocol |
-| Third-party passthrough | SavvyCal <code>metadata[...]</code> | Calendly UTM/<code>salesforce_uuid</code>, Cal.com metadata, Stripe <code>client_reference_id</code>/metadata |
-| First-touch props | <code>$initial_*</code> | Segment/Amplitude first-touch, GA4 first_user_* dimensions |
+| Anonymous id | `distinct_id` / `$device_id` | Segment `anonymousId`, Amplitude `deviceId`, GA4 client_id |
+| Merge call | `$identify` + `$anon_distinct_id` | Segment `identify` (known `userId`, same `anonymousId`) + `alias` where needed; Amplitude `setUserId` on the session that still holds the anonymous `deviceId` (the stitch is deviceId↔userId — Amplitude's Identify API only sets user *properties*, it does not merge); GA4 `user_id` on the same `client_id` |
+| Ingestion | `/batch/` | Segment HTTP API, Amplitude HTTP v2, GA4 Measurement Protocol |
+| Third-party passthrough | SavvyCal `metadata[...]` | **Calendly:** only standard UTMs (`utm_source`/`medium`/`campaign`/`content`/`term`) plus `salesforce_uuid` — map the anon id into a supported UTM (e.g. `utm_term`), not a free-form `metadata[]` param. Cal.com metadata; Stripe `client_reference_id`/metadata |
+| First-touch props | `$initial_*` | Segment/Amplitude first-touch, GA4 first_user_* dimensions |
 
 The shape never changes: **grab the anonymous id → carry it across the boundary → merge on the far side → break the conversion down by first-touch.**

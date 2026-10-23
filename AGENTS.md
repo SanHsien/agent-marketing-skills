@@ -19,7 +19,7 @@
 - 不提交 `.env`、API key、cookie、帳號資料，或把真實客戶文案／廣告帳號資料當 fixture。
 - 不推送到 `upstream`。上游同步先跑 `python tools/check_upstream_updates.py`，逐筆審查後再 merge / cherry-pick；不盲目覆蓋 fork 文件與 Windows gate。
 - 不把本 fork 包裝成原創專案，不移除原作者與 MIT 標示。
-- 不啟用本 fork 的 skill 自動同步（`sync-skills.yml`）、自動發 release（`release.yml`），以及上游 `validate-skill.yml`；這三支 workflow 已加上游 repo 閘門。
+- 不啟用本 fork 的 skill 自動同步（`sync-skills.yml`）、自動發 release（`release.yml`），以及上游的 `validate-skill.yml`、`check-versions.yml`、`regression-tests.yml`、`skill-packaging.yml`；這六支 workflow 已加上游 repo 閘門。
 - 不在產品 `SKILL.md` 裡加入 Claude Code 專用的 `` !`command` `` 語法；那會讓其他宿主看到字面指令。
 
 ## 技術與資料流

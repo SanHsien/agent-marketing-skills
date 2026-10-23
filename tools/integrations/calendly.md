@@ -7,7 +7,7 @@ Scheduling and booking platform API for managing event types, scheduled events, 
 | Integration | Available | Notes |
 |-------------|-----------|-------|
 | API | ✓ | REST API v2 - event types, scheduled events, invitees, availability |
-| MCP | - | Not available |
+| MCP | ✓ | Official remote server at `https://mcp.calendly.com` (OAuth with dynamic client registration) ([docs](https://developer.calendly.com/docs/mcp/calendly-mcp-server)) |
 | CLI | ✓ | [calendly.js](../clis/calendly.js) |
 | SDK | ✓ | No official SDK; community libraries available |
 
@@ -95,6 +95,12 @@ POST https://api.calendly.com/webhook_subscriptions
 ```bash
 GET https://api.calendly.com/webhook_subscriptions?organization={organization_uri}&scope=organization
 ```
+
+For `scope=user`, include the `user` URI in the list query or creation body.
+For `scope=group`, include the `group` URI. The CLI forwards `--user` and
+`--group` and rejects these scopes when their identifier is missing.
+See [list subscriptions](https://developer.calendly.com/api-docs/calendly-api/webhooks/list-webhook-subscriptions)
+and [create subscription](https://developer.calendly.com/api-docs/calendly-api/webhooks/create-webhook-subscription).
 
 ### Delete webhook subscription
 

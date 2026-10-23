@@ -26,7 +26,7 @@ Composio is an **alternative integration method**, not a replacement. Use this d
 | Scenario | Use |
 |----------|-----|
 | Tool has native MCP server (GA4, Stripe, Mailchimp) | Native MCP server |
-| Tool has CLI but no MCP (Meta Ads, LinkedIn Ads, HubSpot) | Composio for MCP access |
+| Tool has CLI but no MCP (LinkedIn Ads, Salesforce) | Composio for MCP access |
 | OAuth-heavy tool with no CLI (Google Sheets, Slack, Notion) | Composio |
 | Need deep, customized integration | Native API + CLI |
 | Need quick read/write access across many tools | Composio |
@@ -73,7 +73,6 @@ These tools have API guides in this repo but **no native MCP server**. Composio 
 
 | Tool | Composio Toolkit | Auth Type | Coverage Depth |
 |------|-----------------|-----------|----------------|
-| HubSpot | `HUBSPOT` | OAuth 2.0 | Deep (contacts, deals, companies, lists, email) |
 | Salesforce | `SALESFORCE` | OAuth 2.0 | Deep (SOQL, objects, leads, opportunities) |
 | Meta Ads | `FACEBOOKADS` | OAuth 2.0 | Medium (campaigns, ad sets, insights) |
 | LinkedIn Ads | `LINKEDIN` | OAuth 2.0 | Medium (campaigns, analytics, company pages) |
@@ -96,6 +95,7 @@ These tools **already have native MCP or CLI** in this repo. Composio provides a
 | Google Ads | MCP ✓, CLI ✓ | `GOOGLEADS` | If OAuth is simpler via Composio |
 | Stripe | MCP ✓, CLI ✓ | `STRIPE` | Prefer native (deeper coverage) |
 | GA4 | MCP ✓, CLI ✓ | `GOOGLEANALYTICS` | Prefer native (deeper coverage) |
+| HubSpot | MCP ✓ (official remote server, GA April 2026) | `HUBSPOT` | When you want one connector across many apps; prefer native for CRM writes |
 
 ## Common Agent Operations
 
@@ -186,5 +186,5 @@ Agent uses `SALESFORCE` to read leads and `SLACK` to post messages.
 
 - analytics (cross-platform data via Composio connectors)
 - emails (ActiveCampaign, Klaviyo access)
-- ads (Meta Ads, LinkedIn Ads MCP access)
+- ads (LinkedIn Ads MCP access; Meta Ads also has an official MCP)
 - referrals (Shopify integration)

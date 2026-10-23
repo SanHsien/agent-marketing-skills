@@ -19,12 +19,12 @@
     {
       "id": 2,
       "prompt": "Should we use first-touch or last-touch attribution? We're a B2B SaaS with a sales cycle that runs about two months and multiple people involved in each deal.",
-      "expected_output": "Should refuse to pick one in isolation and recommend showing first-touch and last-touch side by side, because the gap between them is the insight for a long cycle. Should explain what each model over/under-credits (first-touch ignores what closed; last-touch over-credits branded search/direct and defunds top of funnel). Should recommend position-based as a defensible primary for B2B (credits created + closed bookends), and lean on self-reported attribution at demo/signup given offline touches. Should point to CRM/pipeline as source of truth (revops) and note data-driven attribution needs volume this business likely lacks. May reference references/attribution-models.md and references/by-business-type.md.",
+      "expected_output": "Should refuse to pick one in isolation and recommend showing first-touch and last-touch side by side, because the gap between them is the insight for a long cycle. Should explain what each model over/under-credits (first-touch ignores what closed; last-touch over-credits branded search/direct and defunds top of funnel). Should recommend position-based as a defensible primary for B2B on the team's own path/CRM data (credits created + closed bookends) — not as a Google Ads/GA4 dropdown option (those UIs retired rule-based models). Should lean on self-reported attribution at demo/signup given offline touches. Should point to CRM/pipeline as source of truth (revops) and note data-driven attribution needs volume this business likely lacks. May reference references/attribution-models.md and references/by-business-type.md.",
       "assertions": [
         "Does not recommend a single model in isolation",
         "Recommends showing first-touch and last-touch together",
         "Explains what first-touch and last-touch each distort",
-        "Recommends position-based as a strong B2B primary",
+        "Recommends position-based as a strong B2B primary on own/CRM data (not as a Google UI model)",
         "Emphasizes self-reported attribution for long/offline B2B cycles",
         "References pipeline/CRM as the revenue source of truth (revops boundary)"
       ],
@@ -95,6 +95,32 @@
         "Recommends a post-purchase self-reported survey for dark social/podcasts",
         "Warns against trusting platform-reported ROAS for budget allocation",
         "References the by-business-type or measurement-paradigms guidance"
+      ],
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "Our capture-phase SavvyCal decorator added metadata[ph_distinct_id]=anonymous-old to a booking anchor. On the same page the visitor identifies by email, then activates that same anchor again (including middle-click). Our helper correctly returns null for the identified email. Is returning early enough to fail closed? Preserve the booking path, campaign query parameter and fragment.",
+      "expected_output": "Should recognize that anchor.href is already mutated: returning early preserves the old anonymous ID. On each supported booking-link activation, set the metadata parameter when a current safe anonymous ID exists, otherwise delete only metadata[ph_distinct_id] and write the refreshed URL back. Apply to click and auxclick, including unavailable identity. Preserve unrelated query parameters, hash, destination and unrelated hosts. Keep the existing identity-model guard; do not use identified email/UUID as a substitute.",
+      "assertions": [
+        "Explains why early return retains stale metadata on a reused anchor",
+        "Deletes only the attribution parameter when identity is rejected or unavailable",
+        "Refreshes the parameter for a new valid anonymous ID",
+        "Covers click and auxclick without changing unrelated destinations or URL components",
+        "Does not substitute an identified user ID"
+      ],
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "Our booking webhook sends PostHog identity and conversion events with fetch and a three-second timeout. When analytics times out it fails the webhook; HTTP 503 resolves without any diagnostic. How should the attribution recipe preserve a successful booking and show ingestion failures without exposing identities?",
+      "expected_output": "Should run analytics after business-critical work, catch network and timeout rejections, inspect response.ok for rejected HTTP ingestion, and emit only a booking identifier plus safe status diagnostics. Keep analytics non-fatal for the booking. Do not log the email, payload or raw exception, or claim a fulfilled fetch means events were accepted. If reliable delivery is required, recommend a separate idempotent queue rather than replaying the booking.",
+      "assertions": [
+        "Catches timeout and network rejection without failing the booking",
+        "Checks HTTP response acceptance separately from promise fulfillment",
+        "Logs only booking identifier and safe status",
+        "Keeps payload, email and raw exception out of diagnostics",
+        "Separates reliable analytics delivery from booking execution"
       ],
       "files": []
     }

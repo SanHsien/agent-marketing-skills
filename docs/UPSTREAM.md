@@ -64,3 +64,7 @@ README 衝突的解法：上游新英文產品說明翻進 `README.md`，並同�
 - 不引用：#586 Glasser 整合指南、#587 AIPM registry 徽章——第三方廠商導流，維持既有政策
 - 暫緩至合併：#588 CLI 目錄補完（純文件對齊，非本 fork 可證缺陷）
 - 理由見 `docs/DECISIONS.md` 2026-09-15 條目
+
+## 2026-10-24：commit `5b2c000` → `e85f3cb`、PR #599–#895、issue #601–#856
+
+逐檔分類同步（取上游 580、刪除 1、三方合併 21、依政策略過 8），不逐 commit 重做。逐項理由、夥伴內容的界線、`reviewed_partials` 機制與 73 筆 finding 的審閱見 [`DECISIONS.md`](DECISIONS.md) 同日條目。open PR 36 筆等合併；#857、#888、#895 為第三方整合指南，合併後依廠商導流政策判斷。

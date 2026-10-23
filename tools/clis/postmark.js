@@ -1,12 +1,24 @@
 #!/usr/bin/env node
 
+const rawArgs = process.argv.slice(2)
 const API_KEY = process.env.POSTMARK_API_KEY
 const BASE_URL = 'https://api.postmarkapp.com'
 
-if (!API_KEY) {
+if ((!API_KEY) && rawArgs.length > 0) {
   console.error(JSON.stringify({ error: 'POSTMARK_API_KEY environment variable required' }))
   process.exit(1)
 }
+
+
+function requestSignal() {
+  const raw = args['timeout-ms'] ?? '120000'
+  const ms = Number(raw)
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw) || !Number.isSafeInteger(ms) || ms < 1 || ms > 600000) {
+    throw new Error('--timeout-ms must be an integer from 1 to 600000')
+  }
+  return AbortSignal.timeout(ms)
+}
+
 
 async function api(method, path, body, useAccountToken) {
   if (args['dry-run']) {
@@ -27,11 +39,12 @@ async function api(method, path, body, useAccountToken) {
   } else {
     headers['X-Postmark-Server-Token'] = API_KEY
   }
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${BASE_URL}${path}`, { signal: requestSignal(),
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
   })
+  if (!res.ok) process.exitCode = 1
   const text = await res.text()
   try {
     return JSON.parse(text)
@@ -60,8 +73,15 @@ function parseArgs(args) {
   return result
 }
 
-const args = parseArgs(process.argv.slice(2))
+const args = parseArgs(rawArgs)
 const [cmd, sub, ...rest] = args._
+
+function booleanArg(name) {
+  const value = args[name]
+  if (value === true || value === 'true') return true
+  if (value === 'false') return false
+  throw new Error(`--${name} must be true or false (or a bare flag for true)`)
+}
 
 async function main() {
   let result
@@ -86,7 +106,7 @@ async function main() {
           if (!args.html && !args.text) body.TextBody = ''
           if (args.tag) body.Tag = args.tag
           if (args.stream) body.MessageStream = args.stream
-          if (args['track-opens']) body.TrackOpens = true
+          if (args['track-opens'] !== undefined) body.TrackOpens = booleanArg('track-opens')
           if (args['track-links']) body.TrackLinks = args['track-links']
           if (args.cc) body.Cc = args.cc
           if (args.bcc) body.Bcc = args.bcc
@@ -112,10 +132,18 @@ async function main() {
           } else {
             body.TemplateAlias = template
           }
+          if (args['model-json'] !== undefined) {
+            if (args.model !== undefined) throw new Error('Use --model or --model-json, not both')
+            let model
+            try { model = JSON.parse(args['model-json']) } catch { throw new Error('--model-json must be a valid JSON object') }
+            if (model === null || typeof model !== 'object' || Array.isArray(model)) throw new Error('--model-json must be a JSON object')
+            body.TemplateModel = model
+          }
           if (args.model) {
             const pairs = args.model.split(',')
             for (const pair of pairs) {
-              const [k, v] = pair.split(':')
+              const [k, ...valueParts] = pair.split(':')
+              const v = valueParts.join(':')
               if (k && v) body.TemplateModel[k] = v
             }
           }
@@ -142,6 +170,9 @@ async function main() {
             Tag: args.tag || undefined,
           }))
           result = await api('POST', '/email/batch', messages)
+          if (Array.isArray(result) && result.some(message => typeof message?.ErrorCode === 'number' && message.ErrorCode !== 0)) {
+            process.exitCode = 1
+          }
           break
         }
         default:
@@ -168,10 +199,11 @@ async function main() {
         case 'create': {
           const name = args.name
           if (!name) { result = { error: '--name required' }; break }
-          const body = {
-            Name: name,
-            Subject: args.subject || '',
+          if (args.type === 'Layout' && args.subject) {
+            result = { error: '--subject is not allowed for Layout templates' }; break
           }
+          const body = { Name: name }
+          if (args.type !== 'Layout') body.Subject = args.subject || ''
           if (args.html) body.HtmlBody = args.html
           if (args.text) body.TextBody = args.text
           if (args.alias) body.Alias = args.alias
@@ -354,18 +386,19 @@ async function main() {
       result = {
         error: 'Unknown command',
         usage: {
-          email: 'email [send --from <from> --to <to> --subject <subj> | send-template --from <from> --to <to> --template <id> | send-batch --from <from> --to <to1,to2> --subject <subj>]',
-          templates: 'templates [list | get --id <id> | create --name <name> | delete --id <id>]',
+          email: 'email [send --from <from> --to <to> --subject <subj> | send-template --from <from> --to <to> --template <id> [--model <pairs> | --model-json <object>] | send-batch --from <from> --to <to1,to2> --subject <subj>]',
+          templates: 'templates [list | get --id <id> | create --name <name> [--type Standard|Layout] [--subject <subject> (Standard only)] | delete --id <id>]',
           bounces: 'bounces [list | get --id <id> | stats | activate --id <id>]',
           messages: 'messages [outbound | inbound | get --id <id>]',
           stats: 'stats [overview | sends | bounces | opens | clicks | spam]',
           server: 'server [get]',
           suppressions: 'suppressions [list | create --email <email> | delete --email <email>]',
-          options: '--tag <tag> --from <date> --to <date> --stream <stream-id>',
+          options: '--tag <tag> --from <date> --to <date> --stream <stream-id> --track-opens [true|false]',
         }
       }
   }
 
+  if (result?.error && rawArgs.length > 0) process.exitCode = 1
   console.log(JSON.stringify(result, null, 2))
 }
 

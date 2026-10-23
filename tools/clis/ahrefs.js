@@ -1,18 +1,30 @@
 #!/usr/bin/env node
 
+const rawArgs = process.argv.slice(2)
 const API_KEY = process.env.AHREFS_API_KEY
 const BASE_URL = 'https://api.ahrefs.com/v3'
 
-if (!API_KEY) {
+if ((!API_KEY) && rawArgs.length > 0) {
   console.error(JSON.stringify({ error: 'AHREFS_API_KEY environment variable required' }))
   process.exit(1)
 }
+
+
+function requestSignal() {
+  const raw = args['timeout-ms'] ?? '120000'
+  const ms = Number(raw)
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw) || !Number.isSafeInteger(ms) || ms < 1 || ms > 600000) {
+    throw new Error('--timeout-ms must be an integer from 1 to 600000')
+  }
+  return AbortSignal.timeout(ms)
+}
+
 
 async function api(method, path) {
   if (args['dry-run']) {
     return { _dry_run: true, method, url: `${BASE_URL}${path}`, headers: { 'Authorization': '***', 'Content-Type': 'application/json' } }
   }
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${BASE_URL}${path}`, { signal: requestSignal(),
     method,
     headers: {
       'Authorization': `Bearer ${API_KEY}`,
@@ -47,8 +59,28 @@ function parseArgs(args) {
   return result
 }
 
-const args = parseArgs(process.argv.slice(2))
+const args = parseArgs(rawArgs)
 const [cmd, sub, ...rest] = args._
+
+function reportDate() {
+  const date = args.date === undefined ? new Date().toISOString().slice(0, 10) : args.date
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error('--date must be a valid YYYY-MM-DD calendar date')
+  }
+  const parsed = new Date(`${date}T00:00:00Z`)
+  if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) {
+    throw new Error('--date must be a valid YYYY-MM-DD calendar date')
+  }
+  return date
+}
+
+function reportSelect(defaultColumns) {
+  if (args.select === undefined) return defaultColumns
+  if (typeof args.select !== 'string' || !args.select.split(',').every(column => column.trim())) {
+    throw new Error('--select must be a comma-separated list of nonempty columns')
+  }
+  return args.select
+}
 
 async function main() {
   let result
@@ -59,7 +91,7 @@ async function main() {
       switch (sub) {
         case 'get': {
           if (!args.target) { result = { error: '--target required (domain)' }; break }
-          const params = new URLSearchParams({ target: args.target })
+          const params = new URLSearchParams({ target: args.target, date: reportDate() })
           result = await api('GET', `/site-explorer/domain-rating?${params}`)
           break
         }
@@ -72,9 +104,9 @@ async function main() {
       switch (sub) {
         case 'list': {
           if (!args.target) { result = { error: '--target required (domain or URL)' }; break }
-          const params = new URLSearchParams({ target: args.target, mode })
+          const params = new URLSearchParams({ target: args.target, mode, select: reportSelect('url_from,url_to,anchor,is_dofollow') })
           if (args.limit) params.set('limit', args.limit)
-          result = await api('GET', `/site-explorer/backlinks?${params}`)
+          result = await api('GET', `/site-explorer/all-backlinks?${params}`)
           break
         }
         default:
@@ -86,7 +118,7 @@ async function main() {
       switch (sub) {
         case 'list': {
           if (!args.target) { result = { error: '--target required (domain or URL)' }; break }
-          const params = new URLSearchParams({ target: args.target, mode })
+          const params = new URLSearchParams({ target: args.target, mode, select: reportSelect('domain,domain_rating,links_to_target') })
           if (args.limit) params.set('limit', args.limit)
           result = await api('GET', `/site-explorer/refdomains?${params}`)
           break
@@ -100,7 +132,7 @@ async function main() {
       switch (sub) {
         case 'organic': {
           if (!args.target) { result = { error: '--target required (domain or URL)' }; break }
-          const params = new URLSearchParams({ target: args.target, mode })
+          const params = new URLSearchParams({ target: args.target, mode, date: reportDate(), select: reportSelect('keyword,volume,best_position,sum_traffic,best_position_url') })
           if (args.country) params.set('country', args.country)
           if (args.limit) params.set('limit', args.limit)
           result = await api('GET', `/site-explorer/organic-keywords?${params}`)
@@ -115,7 +147,7 @@ async function main() {
       switch (sub) {
         case 'list': {
           if (!args.target) { result = { error: '--target required (domain or URL)' }; break }
-          const params = new URLSearchParams({ target: args.target, mode })
+          const params = new URLSearchParams({ target: args.target, mode, date: reportDate(), select: reportSelect('url,sum_traffic,keywords,top_keyword') })
           if (args.country) params.set('country', args.country)
           if (args.limit) params.set('limit', args.limit)
           result = await api('GET', `/site-explorer/top-pages?${params}`)
@@ -170,11 +202,11 @@ async function main() {
       result = {
         error: 'Unknown command',
         usage: {
-          'domain-rating': 'domain-rating get --target <domain>',
-          'backlinks': 'backlinks list --target <domain> [--mode <mode>] [--limit <n>]',
-          'refdomains': 'refdomains list --target <domain> [--mode <mode>] [--limit <n>]',
-          'keywords': 'keywords organic --target <domain> [--country <cc>] [--limit <n>]',
-          'top-pages': 'top-pages list --target <domain> [--country <cc>] [--limit <n>]',
+          'domain-rating': 'domain-rating get --target <domain> [--date <YYYY-MM-DD>]',
+          'backlinks': 'backlinks list --target <domain> [--mode <mode>] [--select <columns>] [--limit <n>]',
+          'refdomains': 'refdomains list --target <domain> [--mode <mode>] [--select <columns>] [--limit <n>]',
+          'keywords': 'keywords organic --target <domain> [--date <YYYY-MM-DD>] [--select <columns>] [--country <cc>] [--limit <n>]',
+          'top-pages': 'top-pages list --target <domain> [--date <YYYY-MM-DD>] [--select <columns>] [--country <cc>] [--limit <n>]',
           'keyword-overview': 'keyword-overview get --keywords <kw1,kw2> [--country <cc>]',
           'keyword-suggestions': 'keyword-suggestions get --keyword <keyword> [--country <cc>] [--limit <n>]',
           'serp': 'serp get --keyword <keyword> [--country <cc>]',
@@ -183,6 +215,7 @@ async function main() {
       }
   }
 
+  if (result?.error && rawArgs.length > 0) process.exitCode = 1
   console.log(JSON.stringify(result, null, 2))
 }
 

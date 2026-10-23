@@ -26,6 +26,17 @@ function parseArgs(args) {
 
 const args = parseArgs(process.argv.slice(2))
 
+
+function requestSignal() {
+  const raw = args['timeout-ms'] ?? '120000'
+  const ms = Number(raw)
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw) || !Number.isSafeInteger(ms) || ms < 1 || ms > 600000) {
+    throw new Error('--timeout-ms must be an integer from 1 to 600000')
+  }
+  return AbortSignal.timeout(ms)
+}
+
+
 async function api(path, opts = {}) {
   const url = path.startsWith('http') ? path : `${BASE_URL}${path}`
   const headers = {
@@ -44,7 +55,7 @@ async function api(path, opts = {}) {
     }
   }
 
-  const res = await fetch(url, { headers })
+  const res = await fetch(url, { signal: requestSignal(), headers })
   const rateLimitRemaining = res.headers.get('x-ratelimit-remaining')
   const rateLimitReset = res.headers.get('x-ratelimit-reset')
 
@@ -52,6 +63,7 @@ async function api(path, opts = {}) {
     const body = await res.text()
     return {
       error: `HTTP ${res.status}`,
+      status: res.status,
       hint: TOKEN
         ? 'Token rejected — check GITHUB_TOKEN scopes (public_repo is enough for public data).'
         : 'Set GITHUB_TOKEN env var to raise rate limit from 60/hr to 5000/hr.',
@@ -63,7 +75,7 @@ async function api(path, opts = {}) {
 
   if (!res.ok) {
     const body = await res.text()
-    return { error: `HTTP ${res.status}`, body }
+    return { error: `HTTP ${res.status}`, status: res.status, body }
   }
 
   const data = await res.json()
@@ -88,7 +100,7 @@ async function paginate(path, { limit, perPage = 100 } = {}) {
     lastRate = result.rate_limit_remaining
     all.push(...result.data)
     if (limit && all.length >= limit) {
-      return { data: all.slice(0, limit), rate_limit_remaining: lastRate, truncated: true }
+      return { data: all.slice(0, limit), rate_limit_remaining: lastRate, truncated: all.length > limit || Boolean(result.next) }
     }
     next = result.next
   }
@@ -116,6 +128,9 @@ async function enrichUsers(users, opts = {}, { concurrency = 5, targetCount } = 
     const batch = users.slice(i, i + concurrency)
     const profiles = await Promise.all(batch.map(u => getUser(u.login)))
     for (const profile of profiles) {
+      if (profile?.error && profile.status !== 404) {
+        throw new Error(`Profile enrichment failed: ${profile.error}`)
+      }
       if (!profile || profile.error) continue
       if (matchesFilter(profile, opts)) matched.push(profile)
     }
@@ -130,7 +145,13 @@ function toCSV(users) {
   const cols = ['login', 'name', 'company', 'email', 'blog', 'location', 'bio', 'twitter_username', 'public_repos', 'followers', 'created_at', 'html_url']
   const escape = (v) => {
     if (v === null || v === undefined) return ''
-    const s = String(v).replace(/\r?\n/g, ' ')
+    // Public profile strings can be spreadsheet formulas. Quoting alone does
+    // not prevent evaluation when the CSV is opened in a spreadsheet.
+    const raw = String(v)
+    const literal = typeof v === 'string' && /^[\s]*[=+@-]/.test(raw)
+      ? "'" + raw
+      : raw
+    const s = literal.replace(/[\r\n]/g, ' ')
     if (s.includes(',') || s.includes('"')) return `"${s.replace(/"/g, '""')}"`
     return s
   }
@@ -248,6 +269,7 @@ async function main() {
       }
   }
 
+  if (result?.error && result.status >= 400) process.exitCode = 1
   console.log(JSON.stringify(result, null, 2))
 }
 

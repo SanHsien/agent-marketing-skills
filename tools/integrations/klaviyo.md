@@ -100,6 +100,8 @@ POST https://a.klaviyo.com/api/lists/{listId}/relationships/profiles/
 
 ### Track event
 
+The monetary event `value` belongs in `data.attributes`, alongside `properties`. Custom event properties do not set the metric's monetary value. See the [Create Event API](https://developers.klaviyo.com/en/v2024-10-15/reference/create_event).
+
 ```bash
 POST https://a.klaviyo.com/api/events/
 
@@ -119,8 +121,8 @@ POST https://a.klaviyo.com/api/events/
           "attributes": { "email": "user@example.com" }
         }
       },
+      "value": 99.99,
       "properties": {
-        "value": 99.99,
         "items": ["Product A"]
       },
       "time": "2025-01-15T10:00:00Z"
@@ -226,3 +228,19 @@ Klaviyo uses the JSON:API specification. All request/response bodies use `{ "dat
 - ecommerce-email
 - lifecycle-marketing
 - customer-segmentation
+
+## Structured event properties
+
+For product arrays and typed event fields, use a JSON object instead of the
+flat `--property key:value,key:value` shorthand:
+
+```bash
+node tools/clis/klaviyo.js events create --metric "Placed Order" --email buyer@example.com \
+  --properties '{"items":[{"SKU":"sku-1","quantity":2}],"VIP":true}' --value 42.50 --dry-run
+```
+
+`--properties` preserves JSON types and nested values; it cannot be combined
+with `--property`. The CLI retains the existing API revision. API acceptance
+and eligibility for segmentation are separate: Klaviyo excludes some values
+(such as zero, null and empty strings) from segmentation. See the official
+[Create Event API](https://developers.klaviyo.com/en/reference/create_event).
