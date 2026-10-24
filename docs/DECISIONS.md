@@ -389,3 +389,15 @@ issue 4 筆全部 open。產品 skill 以上游為準（`AGENTS.md`），未合�
 **PR／issue 軸**：#599–#895 中 219 筆已合併、隨本次同步進來；15 筆 closed 未合併不處理；36 筆 open 等合併（其中 #857 Precleared、#888 LinkJolt、#895 AgentaOS 是第三方整合指南，合併後依廠商導流政策判斷）。issue #601–#856 共 23 筆，19 筆已關閉，4 筆 open 皆為上游產品討論。
 
 水位：commit `5b2c000` → `e85f3cb`，PR `598` → `895`，issue `600` → `856`。
+
+## 2026-10-24：SkillSpector pin 改到 2.12.0（`350e638`），gate 跟上新版契約
+
+**決定**：`requirements-security.txt` 與 `tests/test_docs.py` 改釘 `350e638f316a6fcee8d90f8c3cd296e2d932cda3`（SanHsien/SkillSpector 同步上游 2.12.0）。
+
+**指紋搬移**：對 2.12.0 回報的每個 finding 分別以 2.11.2 與 2.12.0 計算指紋，舊雜湊對上已審條目的原地換新、保留理由（70 筆）；不再產生的 42 筆過期條目刪除。AE1、RP1、LP3 的識別方式在 2.12.0 改變，15 筆以原本的審閱結論重新計算。
+
+**gate 的契約變更**（`tools/run_skillspector.py`，與 book-to-skill 同步）：參照原因碼拆成 `reference_missing`（找不到對應檔）與 `reference_unresolved`（對到多個檔），兩者都接受、未知原因碼仍失敗；排除的二進位檔在 2.12.0 起計為 completed（failed 為 0），兩種計法都接受。新增 3 個測試。
+
+**新增 4 筆已審例外**：2.12.0 的工具濫用分析器在 `ad-creative/references/motion-video-ads.md`、`attribution/references/first-party-tracking.md`、`marketing-plan/references/example-quietude.md`、`site-architecture/SKILL.md` 碰到解析跨度上限。用掃描器自己的判斷函式定位後，觸發點都是英文行文的撇號（we're、don't）或反引號包住的提示詞範本，被當成沒關閉的 shell 引號一路延伸；四個檔案都沒有破壞性指令、遠端腳本或編碼字串。依「不改寫產品 skill」，登記為綁檔案雜湊的 `reviewed_partials`。
+
+**PyPI 冒充套件**：2.12.0 的 SC4 以套件名稱查 OSV 會查到 `MAL-2026-6561`（PyPI 上冒充 NVIDIA/skillspector 的惡意套件，已下架）。本 repo 只掃描 `skills/`，這筆不會出現；安裝一律用 git URL 釘 fork 的精確 commit，不得改成從 PyPI 安裝。

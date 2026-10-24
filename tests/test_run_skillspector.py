@@ -540,3 +540,107 @@ def test_reviewed_partial_rejects_an_empty_analyzer_list(tmp_path):
     entry["analyzers"] = []
     with pytest.raises(ValueError):
         _reviewed_partials(baseline, tmp_path / "demo")
+
+
+def test_exit_code_accepts_accounted_nonfatal_missing_reference():
+    report = _complete_report()
+    report["analysis_completeness"].update(
+        status="partial",
+        is_complete=False,
+        ledger_exceptions=[
+            {
+                "outcome": "partial",
+                "phase": "reference_resolution",
+                "reason_code": "reference_missing",
+                "path": "SKILL.md",
+                "start_line": 12,
+                "end_line": 12,
+                "fatal": False,
+            }
+        ],
+        references=[
+            {
+                "source_path": "SKILL.md",
+                "line": 12,
+                "target_path": None,
+                "status": "missing",
+                "disposition": "partial",
+            },
+            {
+                "source_path": "SKILL.md",
+                "line": 12,
+                "target_path": None,
+                "status": "missing",
+                "disposition": "partial",
+            },
+        ],
+    )
+    assert _exit_code(report) == 0
+
+
+def test_exit_code_rejects_unknown_reference_reason():
+    report = _complete_report()
+    report["analysis_completeness"].update(
+        status="partial",
+        is_complete=False,
+        ledger_exceptions=[
+            {
+                "outcome": "partial",
+                "phase": "reference_resolution",
+                "reason_code": "reference_bogus",
+                "path": "SKILL.md",
+                "start_line": 12,
+                "end_line": 12,
+                "fatal": False,
+            }
+        ],
+        references=[
+            {
+                "source_path": "SKILL.md",
+                "line": 12,
+                "target_path": None,
+                "status": "missing",
+                "disposition": "partial",
+            },
+            {
+                "source_path": "SKILL.md",
+                "line": 12,
+                "target_path": None,
+                "status": "missing",
+                "disposition": "partial",
+            },
+        ],
+    )
+    assert _exit_code(report) == 2
+
+
+def test_exit_code_accepts_explicit_binary_scope_exclusion_counted_as_completed():
+    report = _complete_report()
+    report["analysis_completeness"]["scope_exclusions"] = [
+        {
+            "outcome": "out_of_scope",
+            "reason_code": "binary_content",
+            "path": "assets/example.png",
+            "analyzers": ["static_patterns_tool_misuse"],
+        }
+    ]
+    analyzer = next(
+        item
+        for item in report["analysis_completeness"]["analyzer_statuses"]
+        if item["analyzer_id"] == "static_patterns_tool_misuse"
+    )
+    analyzer.update(planned_work=2, completed=2, failed=0)
+    assert _exit_code(report) == 0
+
+
+# ── Reviewed static parse limits ──────────────────────────────────────────────
+#
+# A bounded static parser can stop inside one oversized expression. The scanner then
+# reports that analyzer as degraded and the file as partially inspected, which this
+# gate treats as incomplete. A maintainer may review that file by hand and record a
+# reviewed partial; the exemption is pinned to the file's SHA-256, so any edit to the
+# file reopens it.
+
+PARTIAL_PATH = "assets/review.html"
+PARTIAL_ANALYZER = "static_patterns_tool_misuse"
+REVIEWED = frozenset({(PARTIAL_PATH, PARTIAL_ANALYZER, "static_parse_limit")})

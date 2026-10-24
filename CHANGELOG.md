@@ -12,6 +12,10 @@
 
 ## 2026-10-24
 
+### 變更（SkillSpector 2.12.0）
+
+- **SkillSpector pin 改到 2.12.0（`350e638`）。** 指紋以新舊版本號對同一 finding 計算後原地換新（70 筆），識別方式改變的 15 筆依原審閱結論重算，刪除 42 筆過期條目；gate 跟上參照原因碼與二進位排除計法的變更；新增 4 筆撇號造成解析上限的已審例外。見 [`docs/DECISIONS.md`](docs/DECISIONS.md)。
+
 ### 同步
 
 - **上游同步到 `e85f3cb`（693 commit；PR #895、issue #856）。** 613 個變更檔：580 個取上游（含 `conversion-tracking`、`link-building` 兩個新 skill）、1 個跟著刪除、21 個本 fork 改過的做三方合併（7 支 CLI 保留輸出遮蔽並納入上游的 exit code 修正）、8 個依政策略過（AIsa、Omnia、Converly、Ploy 的夥伴內容）。產品 skill 本文裡的 ◆ 夥伴提及依「不改寫產品 skill」保留。兩份 README 同步 skill 表與安裝方式。上游新增的三支 workflow 加上 repo 閘門。見 [`docs/DECISIONS.md`](docs/DECISIONS.md)。

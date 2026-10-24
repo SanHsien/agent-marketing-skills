@@ -58,6 +58,13 @@ _DISABLED_WITHOUT_LLM = frozenset(
 )
 
 
+# Non-fatal reference outcomes. SkillSpector 2.12.0 split the old single reason into
+# reference_missing (no bundled artifact matches, e.g. a file the skill writes at run
+# time) and reference_unresolved (several artifacts match); both leave the reference
+# partial without failing the scan.
+_NONFATAL_REFERENCE_REASONS = frozenset({"reference_missing", "reference_unresolved"})
+
+
 def _is_nonnegative_int(value: object) -> bool:
     return isinstance(value, int) and not isinstance(value, bool) and value >= 0
 
@@ -94,7 +101,7 @@ def _reference_exceptions_accounted(
         if (
             item.get("outcome") != "partial"
             or item.get("phase") != "reference_resolution"
-            or item.get("reason_code") != "reference_unresolved"
+            or item.get("reason_code") not in _NONFATAL_REFERENCE_REASONS
             or item.get("fatal") is not False
             or not isinstance(path, str)
             or not path
@@ -262,11 +269,13 @@ def _analyzers_complete(
             # measuring what it claims to measure.
             return False
         elif status == "completed" and analyzer_id not in partial_by_analyzer:
+            # Out-of-scope binaries count as failed work before SkillSpector 2.12.0 and as
+            # completed (failed == 0) from 2.12.0 on; either matches an explicit exclusion.
             allowed_failed = len(binary_exclusions.get(analyzer_id, set()))
             if (
                 planned != completed + failed
                 or any((partial, skipped, unaccounted))
-                or failed != allowed_failed
+                or failed not in {0, allowed_failed}
             ):
                 return False
         elif status == "degraded" and analyzer_id in partial_by_analyzer:
@@ -277,7 +286,7 @@ def _analyzers_complete(
                 planned != completed + partial + failed
                 or partial != partial_by_analyzer[analyzer_id]
                 or any((skipped, unaccounted))
-                or failed != allowed_failed
+                or failed not in {0, allowed_failed}
             ):
                 return False
         else:

@@ -13,6 +13,10 @@ adopt/skip reasoning is recorded in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ## 2026-10-24
 
+### Changed (SkillSpector 2.12.0)
+
+- **SkillSpector pin moves to 2.12.0 (`350e638`).** Fingerprints are carried over by hashing each finding with the old and new version (70), the 15 whose rule identity changed are recomputed under their earlier review, and 42 stale entries are removed; the gate follows the split reference reasons and the new binary-exclusion count; four reviewed partials cover apostrophes that the parser reads as open shell quotes. See [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
 ### Synced
 
 - **Upstream synced through `e85f3cb` (693 commits; PR #895, issue #856).** Of 613 changed files, 580 now match upstream (including the new `conversion-tracking` and `link-building` skills), 1 follows upstream's deletion, the 21 this fork had changed are three-way merged (seven CLIs keep their secret-redacting output and gain upstream's exit-code fix), and 8 paid-partner files (AIsa, Omnia, Converly, Ploy) are skipped by policy. Partner mentions inside product skills stay as upstream wrote them, per the rule against rewriting product skills. Both READMEs pick up the skill table and install options. The three new upstream workflows get the repo guard. See [`docs/DECISIONS.md`](docs/DECISIONS.md).

@@ -71,7 +71,7 @@ def test_fresh_clone_docs_install_the_pinned_security_scanner() -> None:
 def test_security_scanner_pin_supports_configurable_resource_budgets() -> None:
     requirement = (
         "skillspector @ git+https://github.com/SanHsien/SkillSpector.git@"
-        "fe7adc7b94bc9f94161d88be7162ac794d9dadfd"
+        "350e638f316a6fcee8d90f8c3cd296e2d932cda3"
     )
     assert requirement in (ROOT / "requirements-security.txt").read_text(
         encoding="utf-8"
