@@ -45,7 +45,7 @@
 - 提交訊息用 Conventional Commit。Dependabot 或外部 fork 的變更也走 PR，讀 diff 並通過 CI 後再合併。
 - `REVIEW.md` 是風險快照，不是每個一般 bug 的流水帳。
 - 不 force-push `main`，不刪 `upstream` remote。
-- 不要把 `CLAUDE.md` 做成 git symlink。上游用 symlink 指向 `AGENTS.md`；Windows CI 無法建立該連結（`Filename too long`），本 fork 改存一般檔。
+- 只維護 `AGENTS.md`，不新增 `CLAUDE.md`（Claude Code 在專案沒有 `CLAUDE.md` 時直接讀 `AGENTS.md`）。上游的 `CLAUDE.md` 是指向 `AGENTS.md` 的 git symlink；Windows CI 無法建立該連結（`Filename too long`），同步上游時若帶回這個 symlink，刪掉即可，不要保留任何 git symlink。
 
 ## 上游處理
 

@@ -99,7 +99,7 @@ Plus a ◆ marker in [REGISTRY.md](REGISTRY.md) and an entry in [`../partners.js
 - Setup + common operations (with real command/code examples)
 - Links to official docs
 
-**CLIs** (`../clis/*.js`) are zero-dependency Node 18+ scripts: show usage with no args, support `--dry-run`, and never require credentials just to print help. See [AGENTS.md](../CLAUDE.md) build/verify rules.
+**CLIs** (`../clis/*.js`) are zero-dependency Node 18+ scripts: show usage with no args, support `--dry-run`, and never require credentials just to print help. See [AGENTS.md](../AGENTS.md) build/verify rules.
 
 **A partner integration** is all of the above **plus** the disclosure header, the ◆ marker, and the `partners.json` entry.
 

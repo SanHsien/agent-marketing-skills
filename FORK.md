@@ -18,7 +18,7 @@
 | 項目 | 說明 |
 |---|---|
 | `README.md` | 繁中主檔；英文鏡像在 `README.en.md` |
-| `AGENTS.md` / `CLAUDE.md` | 本 fork 的 AI 維護單一真相源 |
+| `AGENTS.md` | 本 fork 的 AI 維護單一真相源 |
 | `NOTICE.md` / `FORK.md` | 來源、授權與同步說明 |
 | `tools/dev_check.ps1` | Windows 本機一鍵 gate |
 | `tools/validate_skills.py` | 產品 skill frontmatter 驗證（Windows 可跑，不依賴 bash） |
