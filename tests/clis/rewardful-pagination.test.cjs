@@ -5,8 +5,8 @@ const path = require('node:path')
 const cli = path.resolve(__dirname, '../../tools/clis/rewardful.js')
 
 function run(args) {
-  const code = `global.fetch = async (url, options) => ({ status: 200, text: async () => JSON.stringify({ url, method: options.method, page: new URL(url).searchParams.get('page') || '1' }) }); process.argv = ['node', ${JSON.stringify(cli)}, ...${JSON.stringify(args)}]; require(${JSON.stringify(cli)});`
-  const result = spawnSync(process.execPath, ['-e', code], { encoding: 'utf8', env: { ...process.env, REWARDFUL_API_KEY: 'fixture-only' } })
+  const code = `global.fetch = async (url, options) => ({ status: 200, text: async () => JSON.stringify({ url, method: options.method, page: new URL(url).searchParams.get('page') || '1' }) }); process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  const result = spawnSync(process.execPath, ['-e', code, '--', cli, ...args], { encoding: 'utf8', env: { ...process.env, REWARDFUL_API_KEY: 'fixture-only' } })
   assert.equal(result.status, 0, result.stderr)
   return JSON.parse(result.stdout)
 }
@@ -33,8 +33,8 @@ test('pagination preview remains credential-redacted without changing default li
 for (const extra of [['--page'], ['--page', 'NaN'], ['--page', '0'], ['--page', '1.5'], ['--page', '9007199254740992'], ['--limit'], ['--limit', '101'], ['--limit', '0'], ['--limit', 'Infinity']]) {
   test(`invalid pagination ${extra.join(' ')} fails before fetching`, () => {
     const args = ['affiliates', 'list', ...extra]
-    const code = `global.fetch=async()=>{throw new Error('unexpected fetch')};process.argv=['node',${JSON.stringify(cli)},...${JSON.stringify(args)}];require(${JSON.stringify(cli)});`
-    const result = spawnSync(process.execPath, ['-e', code], { encoding: 'utf8', env: { ...process.env, REWARDFUL_API_KEY: 'fixture-only' } })
+    const code = `global.fetch=async()=>{throw new Error('unexpected fetch')};process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+    const result = spawnSync(process.execPath, ['-e', code, '--', cli, ...args], { encoding: 'utf8', env: { ...process.env, REWARDFUL_API_KEY: 'fixture-only' } })
     assert.equal(result.status, 1)
     assert.match(JSON.parse(result.stderr).error, /must be an integer/)
   })

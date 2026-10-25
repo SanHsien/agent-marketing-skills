@@ -4,8 +4,8 @@ const { spawnSync } = require('node:child_process')
 const path = require('node:path')
 const cli = path.resolve(__dirname, '../../tools/clis/intercom.js')
 function run(args, oracle = '', expectedStatus = 0) {
-  const code = `global.fetch = async (url, options) => { const assert = require('node:assert/strict'); const parsed = new URL(url); const body = JSON.parse(options.body); ${oracle}; return new Response(JSON.stringify({accepted:true})); }; process.argv = ['node',${JSON.stringify(cli)},...${JSON.stringify(args)}]; require(${JSON.stringify(cli)});`
-  const r = spawnSync(process.execPath,['-e',code],{encoding:'utf8',timeout:10000,env:{...process.env,INTERCOM_API_KEY:'fixture-token'}})
+  const code = `global.fetch = async (url, options) => { const assert = require('node:assert/strict'); const parsed = new URL(url); const body = JSON.parse(options.body); ${oracle}; return new Response(JSON.stringify({accepted:true})); }; process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  const r = spawnSync(process.execPath,['-e', code, '--', cli, ...args],{encoding:'utf8',timeout:10000,env:{...process.env,INTERCOM_API_KEY:'fixture-token'}})
   assert.equal(r.status,expectedStatus,r.stderr);return JSON.parse(r.stdout)
 }
 for (const group of ['contacts','conversations']) {

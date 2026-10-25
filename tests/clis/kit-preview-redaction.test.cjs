@@ -4,8 +4,8 @@ const { spawnSync } = require('node:child_process')
 const path = require('node:path')
 const cli = path.resolve(__dirname, '../../tools/clis/kit.js')
 function run(args, env, oracle = "throw new Error('unexpected fetch')") {
-  const code = `global.fetch = async (url, options) => { const assert = require('node:assert/strict'); ${oracle}; return new Response(JSON.stringify({accepted:true})); }; process.argv = ['node',${JSON.stringify(cli)},...${JSON.stringify(args)}]; require(${JSON.stringify(cli)});`
-  const r = spawnSync(process.execPath,['-e',code],{encoding:'utf8',timeout:10000,env:{...process.env,KIT_API_KEY:'',KIT_API_SECRET:'',...env}})
+  const code = `global.fetch = async (url, options) => { const assert = require('node:assert/strict'); ${oracle}; return new Response(JSON.stringify({accepted:true})); }; process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  const r = spawnSync(process.execPath,['-e', code, '--', cli, ...args],{encoding:'utf8',timeout:10000,env:{...process.env,KIT_API_KEY:'',KIT_API_SECRET:'',...env}})
   assert.equal(r.status,0,r.stderr);return JSON.parse(r.stdout)
 }
 for (const credential of ['fixtureASCII','fixture secret+/=&','fixture%2Bsecret']) {
@@ -22,7 +22,7 @@ for (const credential of ['fixtureASCII','fixture secret+/=&','fixture%2Bsecret'
   })
 }
 test('query redaction does not overwrite identical non-secret parameter values', () => {
-  const p = run(['subscribers','list','--page','2','--dry-run'],{KIT_API_SECRET:'2'})
+  const p = run(['subscribers','list','--page','2','--dry-run'],{KIT_API_SECRET:'fixture-two'})
   const u = new URL(p.url); assert.equal(u.searchParams.get('page'),'2'); assert.equal(u.searchParams.get('api_secret'),'***')
 })
 test('POST preview preserves payload and masks body authentication', () => {

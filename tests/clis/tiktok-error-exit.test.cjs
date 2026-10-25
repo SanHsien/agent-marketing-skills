@@ -4,8 +4,8 @@ const {spawnSync} = require('node:child_process')
 const path = require('node:path')
 const cli = path.resolve(__dirname, '../../tools/clis/tiktok-ads.js')
 function run(args, status, body) {
-  const script = `global.fetch = async () => new Response(${JSON.stringify(typeof body === 'string' ? body : JSON.stringify(body))},{status:${status}}); process.argv = ['node',${JSON.stringify(cli)},...${JSON.stringify(args)}]; require(${JSON.stringify(cli)});`
-  return spawnSync(process.execPath,['-e',script],{encoding:'utf8',timeout:10000,env:{...process.env,TIKTOK_ACCESS_TOKEN:'fixture-token',TIKTOK_ADVERTISER_ID:'1'}})
+  const script = `global.fetch = async () => new Response(JSON.parse(process.env.AMS_FIXTURE),{status:${status}}); process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  return spawnSync(process.execPath,['-e', script, '--', cli, ...args],{encoding:'utf8',timeout:10000,env:{...process.env,AMS_FIXTURE:JSON.stringify(typeof body === 'string' ? body : JSON.stringify(body)),TIKTOK_ACCESS_TOKEN:'fixture-token',TIKTOK_ADVERTISER_ID:'1'}})
 }
 for(const args of [['campaigns','list'],['campaigns','create','--name','Fixture','--objective','TRAFFIC']]) {
   test(`${args.slice(0,2).join(' ')} returns failure for an HTTP200 API error without discarding its details`,()=>{

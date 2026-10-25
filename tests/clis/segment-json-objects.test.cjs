@@ -6,8 +6,8 @@ const cli = path.resolve(__dirname, '../../tools/clis/segment.js')
 function run(command, flag, value, preview = false) {
   const args = [...command, '--user-id', 'fixture-user', flag, value]
   if (preview) args.push('--dry-run')
-  const source = `global.fetch = async (url, opts) => { process.stderr.write('FETCH_CALLED'); return { ok: true, status: 200, text: async () => JSON.stringify({ body: JSON.parse(opts.body) }) }; }; process.argv = ['node', ${JSON.stringify(cli)}, ...${JSON.stringify(args)}]; require(${JSON.stringify(cli)});`
-  return spawnSync(process.execPath, ['-e', source], {encoding: 'utf8', env: { ...process.env, SEGMENT_WRITE_KEY: 'fixture' }, timeout: 5000})
+  const source = `global.fetch = async (url, opts) => { process.stderr.write('FETCH_CALLED'); return { ok: true, status: 200, text: async () => JSON.stringify({ body: JSON.parse(opts.body) }) }; }; process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  return spawnSync(process.execPath, ['-e', source, '--', cli, ...args], {encoding: 'utf8', env: { ...process.env, SEGMENT_WRITE_KEY: 'fixture' }, timeout: 5000})
 }
 const commands = [ [['track', 'event', '--event', 'Purchased'], '--properties'], [['page', 'view'], '--properties'], [['identify', 'user'], '--traits'] ]
 test('event object containers fail before delivery or preview', () => {

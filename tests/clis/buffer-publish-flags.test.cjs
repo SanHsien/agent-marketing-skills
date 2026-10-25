@@ -5,8 +5,8 @@ const path = require('node:path')
 const cli = path.resolve(__dirname, '../../tools/clis/buffer.js')
 function run(flags, dry = false, forbidFetch = dry) {
   const argv = ['updates', 'create', '--profile-ids', 'one,two', '--text', 'Keep this queued', ...flags, ...(dry ? ['--dry-run'] : [])]
-  const source = `global.fetch = async (url, options) => { ${forbidFetch ? "throw new Error('unexpected fetch')" : "return { status: 200, text: async () => JSON.stringify({ url, body: options.body }) }"} }; process.argv = ['node', ${JSON.stringify(cli)}, ...${JSON.stringify(argv)}]; require(${JSON.stringify(cli)});`
-  return spawnSync(process.execPath, ['-e', source], { encoding: 'utf8', timeout: 5000, env: { ...process.env, BUFFER_API_KEY: 'fixture-token-never-sent' } })
+  const source = `global.fetch = async (url, options) => { ${forbidFetch ? "throw new Error('unexpected fetch')" : "return { status: 200, text: async () => JSON.stringify({ url, body: options.body }) }"} }; process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  return spawnSync(process.execPath, ['-e', source, '--', cli, ...argv], { encoding: 'utf8', timeout: 5000, env: { ...process.env, BUFFER_API_KEY: 'fixture-token-never-sent' } })
 }
 function body(result) { assert.equal(result.status, 0, result.stderr); return new URLSearchParams(JSON.parse(result.stdout).body) }
 for (const flag of ['now', 'top', 'shorten']) {

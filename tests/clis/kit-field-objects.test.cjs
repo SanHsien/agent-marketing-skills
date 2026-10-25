@@ -6,8 +6,8 @@ const cli = path.resolve(__dirname, '../../tools/clis/kit.js')
 function run(command, flag, value, preview = false) {
   const args = [...command, flag, value]
   if (preview) args.push('--dry-run')
-  const source = `global.fetch = async (url, opts) => { process.stderr.write('FETCH_CALLED'); return { status: 200, text: async () => JSON.stringify({ body: JSON.parse(opts.body) }) }; }; process.argv = ['node', ${JSON.stringify(cli)}, ...${JSON.stringify(args)}]; require(${JSON.stringify(cli)});`
-  return spawnSync(process.execPath, ['-e', source], {encoding: 'utf8', env: { ...process.env, KIT_API_KEY: 'fixture-key', KIT_API_SECRET: 'fixture-secret' }, timeout: 5000})
+  const source = `global.fetch = async (url, opts) => { process.stderr.write('FETCH_CALLED'); return { status: 200, text: async () => JSON.stringify({ body: JSON.parse(opts.body) }) }; }; process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  return spawnSync(process.execPath, ['-e', source, '--', cli, ...args], {encoding: 'utf8', env: { ...process.env, KIT_API_KEY: 'fixture-key', KIT_API_SECRET: 'fixture-secret' }, timeout: 5000})
 }
 const commands = [ [['subscribers', 'update', '123'], '--fields'], ...['forms', 'sequences', 'tags'].map(cmd => [[cmd, 'subscribe', '123', '--email', 'reader@example.invalid'], '--fields']) ]
 test('custom field containers fail before delivery or preview', () => {

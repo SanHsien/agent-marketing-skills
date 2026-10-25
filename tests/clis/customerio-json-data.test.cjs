@@ -6,8 +6,8 @@ const cli = path.resolve(__dirname, '../../tools/clis/customer-io.js')
 function run(command, flag, value, preview = false) {
   const args = [...command, flag, value]
   if (preview) args.push('--dry-run')
-  const source = `global.fetch = async (url, opts) => { process.stderr.write('FETCH_CALLED'); return { ok: true, status: 200, text: async () => JSON.stringify({ body: JSON.parse(opts.body) }) }; }; process.argv = ['node', ${JSON.stringify(cli)}, ...${JSON.stringify(args)}]; require(${JSON.stringify(cli)});`
-  return spawnSync(process.execPath, ['-e', source], {encoding: 'utf8', env: { ...process.env, CUSTOMERIO_APP_KEY: 'fixture-app', CUSTOMERIO_SITE_ID: 'fixture-site', CUSTOMERIO_API_KEY: 'fixture-track' }, timeout: 5000})
+  const source = `global.fetch = async (url, opts) => { process.stderr.write('FETCH_CALLED'); return { ok: true, status: 200, text: async () => JSON.stringify({ body: JSON.parse(opts.body) }) }; }; process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  return spawnSync(process.execPath, ['-e', source, '--', cli, ...args], {encoding: 'utf8', env: { ...process.env, CUSTOMERIO_APP_KEY: 'fixture-app', CUSTOMERIO_SITE_ID: 'fixture-site', CUSTOMERIO_API_KEY: 'fixture-track' }, timeout: 5000})
 }
 const commands = [ [['customers', 'identify', 'fixture'], '--data', null], [['customers', 'track-event', 'fixture', '--name', 'Purchased'], '--data', 'data'], [['campaigns', 'trigger', 'fixture', '--ids', 'person'], '--data', 'data'], [['send', 'email', '--message-id', 'fixture', '--to', 'reader@example.invalid', '--identifier-id', 'person'], '--data', 'message_data'] ]
 test('event object containers fail before delivery or preview', () => {

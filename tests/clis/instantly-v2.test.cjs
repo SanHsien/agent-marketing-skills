@@ -21,8 +21,8 @@ function result(r, expectedStatus = 0) { assert.equal(r.status,expectedStatus,r.
 const noFetch = "throw new Error('unexpected fetch')"
 
 test('requests go to API v2 with Bearer auth and no key in the URL', () => {
-  const p = result(run(['campaigns','list','--limit','5'], "assert.equal(parsed.pathname, '/api/v2/campaigns'); assert.equal(parsed.searchParams.get('limit'),'5'); assert.equal(parsed.searchParams.has('api_key'), false);"))
-  assert.equal(p.auth,'Bearer test-key')
+  const p = result(run(['campaigns','list','--limit','5'], "assert.equal(parsed.pathname, '/api/v2/campaigns'); assert.equal(parsed.searchParams.get('limit'),'5'); assert.equal(parsed.searchParams.has('api_key'), false); assert.equal(options.headers.Authorization,'Bearer test-key');"))
+  assert.equal(p.auth,'Bearer ***')
 })
 test('campaign activate and pause use the dedicated v2 endpoints', () => {
   assert.equal(result(run(['campaigns','activate','--id','c1'], "assert.equal(parsed.pathname, '/api/v2/campaigns/c1/activate'); assert.equal(options.method,'POST');")).accepted, true)
@@ -58,6 +58,6 @@ test('blocklist add uses bulk create', () => {
 })
 test('dry run masks the key and makes no request', () => {
   const p = result(run(['accounts','warmup-analytics','--emails','a@x.com,b@x.com','--dry-run'], noFetch))
-  assert.equal(p.headers.Authorization,'Bearer ***'); assert.deepEqual(p.body,{emails:['a@x.com','b@x.com']})
+  assert.equal(p.headers.Authorization,'***'); assert.deepEqual(p.body,{emails:['a@x.com','b@x.com']})
   assert.equal(JSON.stringify(p).includes('test-key'), false)
 })

@@ -28,7 +28,17 @@ const read = (p) => readFileSync(resolve(ROOT, p), "utf8");
 const git = (...args) => execFileSync("git", args, { cwd: ROOT, encoding: "utf8" });
 
 const frontmatter = (text) => text.replace(/\r\n/g, "\n").match(/^---\n([\s\S]*?)\n---/)?.[1] ?? "";
-const skillVersion = (text) => frontmatter(text).match(/^metadata:\s*\n(?:[ \t]+.*\n)*?[ \t]+version:\s*["']?([\d.]+)/m)?.[1];
+// Scan line by line: the former nested-quantifier regex backtracked polynomially (CodeQL js/redos).
+const skillVersion = (text) => {
+  const lines = frontmatter(text).split("\n");
+  const start = lines.findIndex((line) => /^metadata:\s*$/.test(line));
+  if (start < 0) return undefined;
+  for (let i = start + 1; i < lines.length && /^[ \t]/.test(lines[i]); i++) {
+    const match = lines[i].match(/^[ \t]+version:\s*["']?([\d.]+)/);
+    if (match) return match[1];
+  }
+  return undefined;
+};
 const repoVersion = (json) => JSON.parse(json).version;
 const marketVersion = (json) => JSON.parse(json).metadata?.version;
 const newer = (a, b) => {

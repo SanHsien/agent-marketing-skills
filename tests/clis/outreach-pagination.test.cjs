@@ -4,8 +4,8 @@ const { spawnSync } = require('node:child_process')
 const path = require('node:path')
 const cli = path.resolve(__dirname, '../../tools/clis/outreach.js')
 function run(args) {
-  const code = `global.fetch = async (url, options) => ({ok:true,status:200,text:async()=>JSON.stringify({url,method:options.method,cursor:new URL(url).searchParams.get('page[after]')})});process.argv=['node',${JSON.stringify(cli)},...${JSON.stringify(args)}];require(${JSON.stringify(cli)});`
-  return spawnSync(process.execPath, ['-e', code], { encoding: 'utf8', env: { ...process.env, OUTREACH_ACCESS_TOKEN: 'fixture-only' } })
+  const code = `global.fetch = async (url, options) => ({ok:true,status:200,text:async()=>JSON.stringify({url,method:options.method,cursor:new URL(url).searchParams.get('page[after]')})});process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  return spawnSync(process.execPath, ['-e', code, '--', cli, ...args], { encoding: 'utf8', env: { ...process.env, OUTREACH_ACCESS_TOKEN: 'fixture-only' } })
 }
 for (const resource of ['prospects', 'sequences', 'mailings', 'accounts', 'tasks']) {
   test(`${resource} list forwards cursor and size instead of repeating the first page`, () => {

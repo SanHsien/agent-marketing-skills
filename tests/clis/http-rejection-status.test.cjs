@@ -66,9 +66,9 @@ function run(command, status, body, preview = false) {
   const args = preview ? [...command.args, '--dry-run'] : command.args
   const setup = preview
     ? "global.fetch = async () => { throw new Error('dry-run reached fetch') }"
-    : `global.fetch = async () => new Response(${JSON.stringify(body)}, { status: ${status} })`
-  const code = `${setup}; process.argv = ['node', ${JSON.stringify(cli)}, ...${JSON.stringify(args)}]; require(${JSON.stringify(cli)});`
-  return spawnSync(process.execPath, ['-e', code], { encoding: 'utf8', timeout: 10000, env: { ...process.env, ...fixtureEnv } })
+    : `global.fetch = async () => new Response(JSON.parse(process.env.AMS_FIXTURE), { status: ${status} })`
+  const code = `${setup}; process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  return spawnSync(process.execPath, ['-e', code, '--', cli, ...args], { encoding: 'utf8', timeout: 10000, env: { ...process.env, ...fixtureEnv, AMS_FIXTURE: JSON.stringify(body) } })
 }
 function output(result) {
   assert.equal(result.signal, null, result.stderr)

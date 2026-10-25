@@ -74,7 +74,7 @@
     while (p.i < s.length) {
       skipWs(s, p); var key = stringEnd(s, p, true); skipWs(s, p);
       if (s.charAt(p.i++) !== ':') throw new Error('metadata colon');
-      if (wanted[key]) { out[key] = readStringValue(s, p); }
+      if (Object.prototype.hasOwnProperty.call(wanted, key)) { out[key] = readStringValue(s, p); }
       else if (key === 'fields') { skipWs(s, p); if (s.charAt(p.i) !== '[') throw new Error('fields shape'); skipValue(s, p, 0); out.fieldsArray = true; }
       else skipValue(s, p, 0);
       skipWs(s, p); var sep = s.charAt(p.i++); if (sep === '}') return; if (sep !== ',') throw new Error('metadata separator');

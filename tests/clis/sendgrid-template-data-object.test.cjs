@@ -6,8 +6,8 @@ const cli = path.resolve(__dirname, '../../tools/clis/sendgrid.js')
 function run(value, preview = false) {
   const args = ['send', '--from', 'sender@example.invalid', '--to', 'reader@example.invalid', '--template-id', 'd-fixture', '--template-data', value]
   if (preview) args.push('--dry-run')
-  const source = `global.fetch = async (url, opts) => { process.stderr.write('FETCH_CALLED'); return { status: 200, text: async () => JSON.stringify({ body: JSON.parse(opts.body) }) }; }; process.argv = ['node', ${JSON.stringify(cli)}, ...${JSON.stringify(args)}]; require(${JSON.stringify(cli)});`
-  return spawnSync(process.execPath, ['-e', source], {encoding: 'utf8', env: { ...process.env, SENDGRID_API_KEY: 'fixture' }, timeout: 5000})
+  const source = `global.fetch = async (url, opts) => { process.stderr.write('FETCH_CALLED'); return { status: 200, text: async () => JSON.stringify({ body: JSON.parse(opts.body) }) }; }; process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  return spawnSync(process.execPath, ['-e', source, '--', cli, ...args], {encoding: 'utf8', env: { ...process.env, SENDGRID_API_KEY: 'fixture' }, timeout: 5000})
 }
 test('invalid template data containers are rejected before delivery or preview', () => {
   for (const value of ['null', '[]', 'true', '42', '"text"']) {

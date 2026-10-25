@@ -16,11 +16,13 @@ function run(args, key, network = false) {
   return JSON.parse(r.stdout)
 }
 
-test('dry run redacts the authentication parameter even if the key also occurs in the domain', () => {
+// 本 fork 的 _safe-output 會遮蔽輸出中所有等於金鑰的字串（含網域裡的片段），寧可多遮也不洩漏。
+test('dry run redacts the authentication parameter and every other occurrence of the key', () => {
   const result = run(['domain', 'search', '--domain', 'test-key.example.com', '--dry-run'], 'test-key')
   const query = new URL(result.url).searchParams
   assert.equal(query.get('api_key'), '***')
-  assert.equal(query.get('domain'), 'test-key.example.com')
+  assert.equal(query.get('domain'), '***.example.com')
+  assert.equal(JSON.stringify(result).includes('test-key'), false)
 })
 
 test('query credentials round trip reserved characters without adding extra parameters', () => {
@@ -42,5 +44,6 @@ test('ordinary live requests retain method, domain and pagination', () => {
   const result = run(['domain', 'search', '--domain', 'example.com', '--limit', '10'], 'test-key', true)
   assert.equal(result.method, 'GET')
   assert.equal(new URL(result.url).searchParams.get('limit'), '10')
-  assert.equal(new URL(result.url).searchParams.get('api_key'), 'test-key')
+  // 輸出會遮蔽回顯的金鑰；金鑰往返請求的行為由上一個測試以複雜金鑰驗證。
+  assert.equal(new URL(result.url).searchParams.get('api_key'), '***')
 })

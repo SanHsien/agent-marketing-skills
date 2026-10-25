@@ -5,8 +5,8 @@ const path = require('node:path')
 
 const cli = path.resolve(__dirname, '../../tools/clis/semrush.js')
 function run(csv, options = {}) {
-  const source = `global.fetch = async () => ({ok: ${options.ok !== false}, status: ${options.status || 200}, text: async () => ${JSON.stringify(csv)}}); process.argv = ['node', ${JSON.stringify(cli)}, 'domain', 'organic', '--domain', 'example.com']; require(${JSON.stringify(cli)});`
-  const result = spawnSync(process.execPath, ['-e', source], {encoding: 'utf8', env: {...process.env, SEMRUSH_API_KEY: 'fixture-key'}})
+  const source = `global.fetch = async () => ({ok: ${options.ok !== false}, status: ${options.status || 200}, text: async () => JSON.parse(process.env.AMS_FIXTURE)}); process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  const result = spawnSync(process.execPath, ['-e', source, '--', cli, 'domain', 'organic', '--domain', 'example.com'], {encoding: 'utf8', env: {...process.env, AMS_FIXTURE: JSON.stringify(csv), SEMRUSH_API_KEY: 'fixture-key'}})
   assert.equal(result.status, options.ok === false ? 1 : 0, result.stderr)
   return JSON.parse(result.stdout)
 }

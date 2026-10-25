@@ -6,11 +6,11 @@ const cli = path.resolve(__dirname, '../../tools/clis/zapier.js')
 function run(args, { key, status = 200, body = '{"accepted":true}', network = true } = {}) {
   const code = `global.fetch = async (url, options) => {
     if (!${network}) throw new Error('Unexpected network request');
-    return { status: ${status}, ok: ${status >= 200 && status < 300}, text: async () => JSON.stringify({ url, ...options, response: ${JSON.stringify(body)} }) };
-  }; process.argv = ['node', ${JSON.stringify(cli)}, ...${JSON.stringify(args)}]; require(${JSON.stringify(cli)});`
-  const env = { ...process.env }; delete env.ZAPIER_API_KEY
+    return { status: ${status}, ok: ${status >= 200 && status < 300}, text: async () => JSON.stringify({ url, ...options, response: JSON.parse(process.env.AMS_FIXTURE) }) };
+  }; process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  const env = { ...process.env, AMS_FIXTURE: JSON.stringify(body) }; delete env.ZAPIER_API_KEY
   if (key !== undefined) env.ZAPIER_API_KEY = key
-  return spawnSync(process.execPath, ['-e', code], { encoding: 'utf8', env })
+  return spawnSync(process.execPath, ['-e', code, '--', cli, ...args], { encoding: 'utf8', env })
 }
 const hook = ['hooks', 'send', '--url', 'https://hooks.zapier.com/hooks/catch/test/example/', '--data', '{"event":"created","value":0}']
 test('catch hook sends JSON without requiring an unrelated management API key', () => {

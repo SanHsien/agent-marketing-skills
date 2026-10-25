@@ -4,8 +4,8 @@ const { spawnSync } = require('node:child_process')
 const path = require('node:path')
 const cli = path.resolve(__dirname, '../../tools/clis/dataforseo.js')
 function run(body, status = 200, args = ['serp', 'locations']) {
-  const source = `global.fetch = async () => new Response(${JSON.stringify(typeof body === 'string' ? body : JSON.stringify(body))}, { status: ${status} }); process.argv = ['node', ${JSON.stringify(cli)}, ...${JSON.stringify(args)}]; require(${JSON.stringify(cli)});`
-  return spawnSync(process.execPath, ['-e', source], { encoding: 'utf8', timeout: 10000, env: { ...process.env, DATAFORSEO_LOGIN: 'fixture-login', DATAFORSEO_PASSWORD: 'fixture-password' } })
+  const source = `global.fetch = async () => new Response(JSON.parse(process.env.AMS_FIXTURE), { status: ${status} }); process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  return spawnSync(process.execPath, ['-e', source, '--', cli, ...args], { encoding: 'utf8', timeout: 10000, env: { ...process.env, AMS_FIXTURE: JSON.stringify(typeof body === 'string' ? body : JSON.stringify(body)), DATAFORSEO_LOGIN: 'fixture-login', DATAFORSEO_PASSWORD: 'fixture-password' } })
 }
 function output(result) {
   assert.equal(result.stderr, '')

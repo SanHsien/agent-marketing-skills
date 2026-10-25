@@ -4,8 +4,8 @@ const { spawnSync } = require('node:child_process')
 const path = require('node:path')
 const cli = path.resolve(__dirname, '../../tools/clis/github-prospects.js')
 function run(args, code) {
-  const script = `global.fetch = async (url, options) => { ${code} }; process.argv = ['node', ${JSON.stringify(cli)}, ...${JSON.stringify(args)}]; require(${JSON.stringify(cli)});`
-  return spawnSync(process.execPath, ['-e', script], { encoding: 'utf8', timeout: 10000, env: { ...process.env, GITHUB_TOKEN: 'fixture-token' } })
+  const script = `global.fetch = async (url, options) => { ${code} }; process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  return spawnSync(process.execPath, ['-e', script, '--', cli, ...args], { encoding: 'utf8', timeout: 10000, env: { ...process.env, GITHUB_TOKEN: 'fixture-token' } })
 }
 for (const [name, args, status] of [
   ['stargazers unauthorized', ['stargazers', 'example/project'], 401],

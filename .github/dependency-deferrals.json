@@ -1,0 +1,8 @@
+{
+  "deferrals": {
+    "ruff": {
+      "deferredLatest": "0.17.2",
+      "reason": "Reviewed against 0.17.2: the CI lint selection (E9,F, py39 target) passes unchanged, and requirements-dev.txt has no upper bound so CI already installs the newest release; the declared floor only needs to rise when a rule or option the repo uses requires it."
+    }
+  }
+}

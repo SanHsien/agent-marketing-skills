@@ -4,8 +4,8 @@ const { spawnSync } = require('node:child_process')
 const path = require('node:path')
 const cli = path.resolve(__dirname, '../../tools/clis/github-prospects.js')
 function exportUsers(users, format) {
-  const source = `global.fetch = async () => ({ ok: true, status: 200, headers: new Headers(), json: async () => ${JSON.stringify(users)} }); process.argv = ['node', ${JSON.stringify(cli)}, 'stargazers', 'example/repo', '--format', ${JSON.stringify(format)}]; require(${JSON.stringify(cli)});`
-  const result = spawnSync(process.execPath, ['-e', source], { encoding: 'utf8' })
+  const source = `global.fetch = async () => ({ ok: true, status: 200, headers: new Headers(), json: async () => JSON.parse(process.env.AMS_FIXTURE) }); process.argv = ['node', ...process.argv.slice(1)]; require(process.argv[1]);`
+  const result = spawnSync(process.execPath, ['-e', source, '--', cli, 'stargazers', 'example/repo', '--format', format], { encoding: 'utf8', env: { ...process.env, AMS_FIXTURE: JSON.stringify(users) } })
   assert.equal(result.status, 0, result.stderr)
   return result.stdout.trimEnd()
 }
