@@ -24,6 +24,11 @@ Windows CI 在 overlay 首推（`ff62783`）因 `CLAUDE.md` 仍是 git symlink �
 | R-03 | P3 | `AGENTS.md` 文件責任清單沒有 `REVIEW.md`。 | 補上「風險快照，不是 bug log」，並把本檔列入文件責任。 |
 | R-04 | P3 | `.github/ISSUE_TEMPLATE/config.yml` 的 Contributing 連結仍指向上游，GitHub 訪客會以為本線收產品 skill。 | 貢獻連結改為本 fork [`CONTRIBUTING.md`](CONTRIBUTING.md)；另留上游產品貢獻連結。skill request 與產品 skill PR 模板標明不要開到這個 fork。`test_issue_contact_links_point_at_this_fork` 鎖行為。 |
 | R-06 | P3 | 上游 `.github/workflows/validate-skill.yml` 使用 `ubuntu-slim`，且沒有本 fork 的 repo 閘門。 | 加上 `github.repository == 'coreyhaines31/marketingskills'`。本線 skill 驗證仍只走 `tools/validate_skills.py`。`test_upstream_workflows_have_repo_guard` 掃全部非 fork 自有 workflow。 |
+| R-08 | P2 | `tests/clis/*.test.cjs` 把 `JSON.stringify` 結果拼進 `node -e` 原始碼，CodeQL `js/bad-code-sanitization` 開了 72 筆。 | CLI 路徑、參數與 fixture 改由 argv／環境變數傳入子行程（`ea9f3e1`，2026-10-26）。 |
+| R-09 | P2 | `scripts/check-versions.mjs` 的 `skillVersion` 正規表示式有巢狀量詞（`js/redos`）。 | 改為逐行掃描 `metadata:` 區塊（`ea9f3e1`，2026-10-26）。 |
+| R-10 | P3 | `tally.js` 的 `readMetadataObject` 用 `wanted[key]` 判斷，會被 `constructor` 等繼承屬性命中（`js/remote-property-injection`）。 | 改用 `hasOwnProperty`（`ea9f3e1`，2026-10-26）。 |
+| R-11 | P2 | 6 個 CLI 契約測試（hunter、instantly、similarweb、kit）在 main 上就失敗：它們來自上游，與本 fork `_safe-output` 的輸出遮蔽契約衝突。且 node 測試套件從未在本 fork 的 CI 跑（上游工作流程只限 `coreyhaines31/marketingskills`）。 | 測試改為斷言遮蔽後的輸出；`ci.yml` 新增 `test-node` job（`ea9f3e1`，2026-10-26）。 |
+| R-12 | P3 | Dependency freshness 紅燈：`ruff>=0.16` 落後 0.17.2。 | 以 `.github/dependency-deferrals.json` 記錄審查（`deferredLatest: 0.17.2`），沒有提高下限（`ea9f3e1`，2026-10-26）。 |
 
 ## 刻意不修
 
@@ -31,6 +36,9 @@ Windows CI 在 overlay 首推（`ff62783`）因 `CLAUDE.md` 仍是 git symlink �
 |---|---|---|---|
 | R-05 | P3 | `.claude-plugin/plugin.json` 的 `homepage`／`repository` 仍是 `coreyhaines31/marketingskills`。 | 產品 plugin 清單。改掛 `SanHsien/agent-marketing-skills` 會把 fork 包裝成第二個官方 marketplace，違反 overlay。 |
 | R-07 | P3 | `.github/FUNDING.yml` 仍是 Corey 的贊助帳號。 | 不把贊助改掛到 fork 維護者。贊助入口留在上游；本線 README 也不轉載贊助 CTA。 |
+| R-13 | P3 | CodeQL `js/file-access-to-http`（`tools/clis/instantly.js`）：`leads bulk-add --file` 把使用者指定的檔案內容送 API。 | 這是該指令的用途，路徑由操作者在命令列給定；已以 won't fix 關閉。 |
+| R-14 | P3 | CodeQL `js/file-system-race`（`.github/scripts/sync-skills.js`）：讀取後寫回 `plugin.json`。 | 腳本只在 CI 對自己的 checkout 單一行程執行，沒有競爭對象；已以 false positive 關閉。本 fork 也不啟用該工作流程。 |
+| R-15 | P3 | CodeQL `js/bad-code-sanitization`（`intercom-*`、`amplitude-*`、`gsc-*`、`pendo-*` 測試的 `oracle`／`response`）。 | 這些字串就是測試作者寫的 mock 程式碼，設計上要被執行，沒有不受信任輸入；已以 used in tests 關閉。 |
 
 ## 本輪實證
 
