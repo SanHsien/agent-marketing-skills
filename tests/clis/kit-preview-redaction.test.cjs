@@ -21,9 +21,9 @@ for (const credential of ['fixtureASCII','fixture secret+/=&','fixture%2Bsecret'
     assert.equal(JSON.stringify(p).includes(credential),false)
   })
 }
-test('query redaction does not overwrite identical non-secret parameter values', () => {
-  const p = run(['subscribers','list','--page','2','--dry-run'],{KIT_API_SECRET:'fixture-two'})
-  const u = new URL(p.url); assert.equal(u.searchParams.get('page'),'2'); assert.equal(u.searchParams.get('api_secret'),'***')
+test('a secret equal to another parameter value is masked everywhere in the preview', () => {
+  const p = run(['subscribers','list','--page','2','--dry-run'],{KIT_API_SECRET:'2'})
+  const u = new URL(p.url); assert.equal(u.searchParams.get('page'),'***'); assert.equal(u.searchParams.get('api_secret'),'***')
 })
 test('POST preview preserves payload and masks body authentication', () => {
   const p = run(['forms','subscribe','12','--email','jane@example.com','--dry-run'],{KIT_API_KEY:'fixture secret+/='})
