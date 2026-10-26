@@ -25,12 +25,20 @@ function redactText(value, secrets) {
   return redacted
 }
 
+// Longest first: when one secret contains another, replacing the shorter one first
+// would leave the rest of the longer one in the output.
+function replacementOrder(secrets) {
+  return [...new Set(secrets.filter(secret => secret && secret !== '***').map(String))]
+    .sort((a, b) => b.length - a.length)
+}
+
 function safeStringify(value, secrets = []) {
+  const ordered = replacementOrder(secrets)
   return JSON.stringify(
     value,
     (key, item) => {
       if (isSensitiveKey(key)) return '***'
-      return typeof item === 'string' ? redactText(item, secrets) : item
+      return typeof item === 'string' ? redactText(item, ordered) : item
     },
     2,
   )
