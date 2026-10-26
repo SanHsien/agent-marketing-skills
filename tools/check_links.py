@@ -125,7 +125,17 @@ def check_document(path: Path) -> list[str]:
     return problems
 
 
+def _reconfigure_stdio() -> None:
+    """Print the Chinese report whatever the console codepage is (see validate_skills)."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError):
+            pass
+
+
 def main() -> int:
+    _reconfigure_stdio()
     documents = iter_documents()
     if not documents:
         print("找不到任何維護用 Markdown 檔")

@@ -7,6 +7,8 @@ link nobody sees.
 
 from __future__ import annotations
 
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -103,3 +105,21 @@ def test_a_broken_html_anchor_href_is_reported(root: Path) -> None:
     problems = problems_for(root, '<a href="gone.md">x</a>\n')
     assert len(problems) == 1 and "gone.md" in problems[0]
     assert problems_for(root, '<a href="target.md">x</a> <a href="#top">y</a>\n') == []
+
+
+def test_summary_survives_a_console_that_cannot_encode_chinese() -> None:
+    """The report is Traditional Chinese; a legacy-codepage console must not crash it.
+
+    Run as a child process with an ASCII stdout, which is what a redirected pipe on a
+    machine without UTF-8 mode looks like. The gate's verdict must come from the links,
+    not from whether the terminal can print the summary line.
+    """
+    env = {**os.environ, "PYTHONUTF8": "0", "PYTHONIOENCODING": "ascii"}
+    result = subprocess.run(
+        [sys.executable, str(Path(check_links.__file__))],
+        capture_output=True,
+        env=env,
+        cwd=check_links.ROOT,
+    )
+    assert result.returncode == 0, result.stderr.decode("utf-8", "replace")
+    assert "維護文件".encode("utf-8") in result.stdout
