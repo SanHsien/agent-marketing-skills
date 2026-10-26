@@ -74,9 +74,35 @@ def _missing_relative(path: Path, target: str) -> str | None:
     return f"{target} → 找不到 {shown}"
 
 
+FENCE_PATTERN = re.compile(r"^[ \t]{0,3}(`{3,}|~{3,})")
+# A code span cannot cross a blank line, so a stray backtick cannot swallow a paragraph.
+CODE_SPAN_PATTERN = re.compile(r"(?<!`)(`+)(?!`)((?:(?!\n[ \t]*\n).)+?)(?<!`)\1(?!`)", re.S)
+
+
+def strip_code(text: str) -> str:
+    """Remove fenced code blocks and inline code spans.
+
+    Markup shown as an example (`[x](path)` in a backtick span or a fenced block) is not
+    a link, so it must not be looked up as one. An unterminated fence runs to the end of
+    the file, as in CommonMark.
+    """
+    kept: list[str] = []
+    fence: str | None = None
+    for line in text.splitlines(keepends=True):
+        marker = FENCE_PATTERN.match(line)
+        if fence is None:
+            if marker:
+                fence = marker.group(1)
+            else:
+                kept.append(line)
+        elif marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence):
+            fence = None
+    return CODE_SPAN_PATTERN.sub("", "".join(kept))
+
+
 def check_document(path: Path) -> list[str]:
     problems: list[str] = []
-    text = path.read_text(encoding="utf-8")
+    text = strip_code(path.read_text(encoding="utf-8"))
     for pattern in (LINK_PATTERN, IMAGE_PATTERN, HTML_SRC_PATTERN):
         for match in pattern.finditer(text):
             missing = _missing_relative(path, match.group(1))

@@ -49,3 +49,30 @@ def test_a_query_string_is_not_part_of_the_path(root: Path) -> None:
 
 def test_a_query_string_does_not_hide_a_missing_target(root: Path) -> None:
     assert len(problems_for(root, "[x](gone.md?plain=1)\n")) == 1
+
+
+def test_links_inside_code_are_examples_not_links(root: Path) -> None:
+    """A doc that shows `[x](gone.md)` as markup is not claiming that file exists."""
+    text = (
+        "Write `[x](gone.md)` like this:\n\n"
+        "```md\n[x](gone.md)\n```\n\n"
+        "~~~\n![i](gone.png)\n~~~\n"
+    )
+    assert problems_for(root, text) == []
+
+
+def test_code_stripping_does_not_swallow_real_links_around_it(root: Path) -> None:
+    text = "```\n[x](inside.md)\n```\n\n[ok](target.md) and [bad](gone.md) and `code`\n"
+    problems = problems_for(root, text)
+    assert len(problems) == 1 and "gone.md" in problems[0]
+
+
+def test_a_code_span_inside_link_text_still_checks_the_target(root: Path) -> None:
+    assert len(problems_for(root, "[`name`](gone.md)\n")) == 1
+    assert problems_for(root, "[`name`](target.md)\n") == []
+
+
+def test_a_stray_backtick_does_not_hide_links_in_other_paragraphs(root: Path) -> None:
+    text = "a stray ` backtick here\n\n[bad](gone.md)\n\nand another ` one\n"
+    problems = problems_for(root, text)
+    assert len(problems) == 1 and "gone.md" in problems[0]
