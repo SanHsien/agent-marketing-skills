@@ -114,3 +114,32 @@ def test_report_names_both_exits_so_the_next_person_does_not_invent_a_third() ->
     assert "freshness-hold:" in report
     assert "dependency-deferrals.json" in report
     assert "mute button" in report
+
+
+def test_a_deferral_whose_reviewed_release_cannot_be_parsed_is_ignored(tmp_path: Path) -> None:
+    """`deferredLatest: "latest"` must not become a deferral that can never expire."""
+    path = tmp_path / "dependency-deferrals.json"
+    path.write_text(
+        json.dumps(
+            {
+                "deferrals": {
+                    "typo": {"deferredLatest": "latest", "reason": "reviewed, not now"},
+                    "kept": {"deferredLatest": "9.1", "reason": "reviewed, not now"},
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert checker.load_deferrals(path) == {"kept": ("9.1", "reviewed, not now")}
+
+
+def test_an_unparsable_reviewed_release_never_covers_a_row(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(checker, "fetch_pypi_version", lambda name: "99.0.0")
+    packages = checker.parse_requirements("pytest>=8.3\n", "requirements-dev.txt")
+
+    rows = checker.collect_status(packages, deferrals={"pytest": ("latest", "typo")})
+
+    assert checker.needs_review(rows[0]) is True

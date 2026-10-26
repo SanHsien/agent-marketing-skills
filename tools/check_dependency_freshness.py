@@ -90,7 +90,9 @@ def load_deferrals(path: Path = DEFERRALS_PATH) -> dict[str, tuple[str, str]]:
             continue
         latest = str(entry.get("deferredLatest", "")).strip()
         reason = str(entry.get("reason", "")).strip()
-        if latest and reason:
+        # A release this check cannot parse can never be "passed", so such a deferral would
+        # silence the row forever -- the mute button the field exists to prevent.
+        if latest and reason and release_key(latest) is not None:
             deferrals[name.lower()] = (latest, reason)
     return deferrals
 
@@ -168,7 +170,12 @@ def collect_status(
         minimum = package["minimum"]
         latest = fetch_pypi_version(package["name"])
         reviewed, reason = deferrals.get(package["name"].lower(), ("", ""))
-        deferred = bool(reviewed and latest and not is_newer_version(latest, reviewed))
+        deferred = bool(
+            reviewed
+            and latest
+            and release_key(reviewed) is not None
+            and not is_newer_version(latest, reviewed)
+        )
         rows.append(
             {
                 **package,
