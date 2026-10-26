@@ -173,3 +173,23 @@ def test_report_with_unencodable_titles_still_prints_on_a_legacy_console(monkeyp
     legacy.flush()
     assert "🚀".encode("utf-8") in legacy.buffer.getvalue()
     assert "🚀" in report_path.read_text(encoding="utf-8")
+
+
+def test_a_full_page_of_unreviewed_tickets_is_reported_as_unchecked(monkeypatch):
+    """`gh --limit 1000` returns exactly 1000 when there are more; the rest were never seen.
+
+    If every returned item is still above the watermark, older unreviewed items may have
+    been cut off, and the list must not be presented as complete.
+    """
+    items = [{"number": number, "title": f"t{number}"} for number in range(2000, 1000, -1)]
+    assert len(items) == checker.TICKET_LIMIT
+    monkeypatch.setattr(checker.subprocess, "run", fake_gh(items))
+    assert checker.collect_new_tickets({**BASELINE, "reviewed_pr_through": 10}, "pr") is None
+
+
+def test_a_full_page_that_reaches_the_watermark_is_complete(monkeypatch):
+    items = [{"number": number, "title": f"t{number}"} for number in range(1999, 999, -1)]
+    assert len(items) == checker.TICKET_LIMIT
+    monkeypatch.setattr(checker.subprocess, "run", fake_gh(items))
+    tickets = checker.collect_new_tickets({**BASELINE, "reviewed_pr_through": 1500}, "pr")
+    assert tickets is not None and len(tickets) == 499
