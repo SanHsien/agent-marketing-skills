@@ -113,3 +113,36 @@ def test_upstream_slug(url, expected):
 def test_shipped_baseline_matches_the_documented_upstream():
     baseline = checker.load_baseline()
     assert checker.upstream_slug(baseline["repo"]) is not None
+
+
+def _missing_executable(args, **kwargs):
+    raise FileNotFoundError(2, "No such file or directory", args[0])
+
+
+def test_gh_not_installed_reports_unchecked_rather_than_crashing(monkeypatch):
+    """No `gh` on PATH is "cannot answer", the same as a non-zero exit.
+
+    `subprocess.run` raises instead of returning when the executable is missing, so the
+    "return None, never []" contract was only kept for gh that exists and fails.
+    """
+    monkeypatch.setattr(checker.subprocess, "run", _missing_executable)
+    assert checker.collect_new_tickets(BASELINE, "pr") is None
+
+
+def test_git_not_installed_is_a_reported_check_failure(monkeypatch):
+    monkeypatch.setattr(checker.subprocess, "run", _missing_executable)
+    with pytest.raises(checker.UpstreamCheckError, match="git"):
+        checker.run_git(["status"], REPO_ROOT)
+
+
+def test_main_without_gh_writes_the_report_and_fails_closed(monkeypatch, tmp_path, capsys):
+    report_path = tmp_path / "report.md"
+    monkeypatch.setattr(checker, "load_baseline", lambda: dict(BASELINE))
+    monkeypatch.setattr(checker, "fetch_upstream", lambda baseline, repo_dir: "refs/x")
+    monkeypatch.setattr(checker, "collect_new_commits", lambda *args: [])
+    monkeypatch.setattr(checker.subprocess, "run", _missing_executable)
+    monkeypatch.setattr(sys, "argv", ["check_upstream_updates.py", "--output", str(report_path)])
+
+    assert checker.main() == 2
+    assert "Not checked" in report_path.read_text(encoding="utf-8")
+    assert "ERROR: gh could not enumerate" in capsys.readouterr().out
