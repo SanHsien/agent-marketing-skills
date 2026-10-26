@@ -6,6 +6,7 @@ to stop watching upstream.
 
 from __future__ import annotations
 
+import io
 import json
 import subprocess
 import sys
@@ -146,3 +147,29 @@ def test_main_without_gh_writes_the_report_and_fails_closed(monkeypatch, tmp_pat
     assert checker.main() == 2
     assert "Not checked" in report_path.read_text(encoding="utf-8")
     assert "ERROR: gh could not enumerate" in capsys.readouterr().out
+
+
+def test_report_with_unencodable_titles_still_prints_on_a_legacy_console(monkeypatch, tmp_path):
+    """Upstream titles are written by strangers; one emoji must not end the run.
+
+    `print(report)` ran after the report file was written but before the exit code was
+    decided, so on a console whose codepage cannot encode the title the run died with a
+    traceback instead of reporting the tickets it had read.
+    """
+    legacy = io.TextIOWrapper(io.BytesIO(), encoding="ascii", errors="strict")
+    monkeypatch.setattr(sys, "stdout", legacy)
+    report_path = tmp_path / "report.md"
+    monkeypatch.setattr(checker, "load_baseline", lambda: dict(BASELINE))
+    monkeypatch.setattr(checker, "fetch_upstream", lambda baseline, repo_dir: "refs/x")
+    monkeypatch.setattr(checker, "collect_new_commits", lambda *args: [])
+    monkeypatch.setattr(
+        checker,
+        "collect_new_tickets",
+        lambda baseline, kind: [{"number": 7, "title": "Add 🚀 support — 中文"}],
+    )
+    monkeypatch.setattr(sys, "argv", ["check_upstream_updates.py", "--output", str(report_path)])
+
+    assert checker.main() == 0
+    legacy.flush()
+    assert "🚀".encode("utf-8") in legacy.buffer.getvalue()
+    assert "🚀" in report_path.read_text(encoding="utf-8")

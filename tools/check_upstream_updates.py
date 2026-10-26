@@ -16,6 +16,7 @@ import argparse
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -283,7 +284,22 @@ def render_markdown(
     return with_tickets(lines)
 
 
+def _reconfigure_stdio() -> None:
+    """Print the report as UTF-8 whatever the console codepage is.
+
+    The report carries titles written by strangers; on a console that cannot encode one
+    (cp950 and an emoji, an ASCII pipe) `print` raised after the file was written and the
+    run ended in a traceback instead of an exit code.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError):
+            pass
+
+
 def main() -> int:
+    _reconfigure_stdio()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default="upstream-review-report.md")
     parser.add_argument("--repo-dir", type=Path, default=REPO_ROOT)
