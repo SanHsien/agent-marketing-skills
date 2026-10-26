@@ -27,13 +27,19 @@ def _reconfigure_stdio() -> None:
             pass
 
 
+# The opening and closing delimiters are lines that are exactly `---`. Splitting on the
+# first `---` anywhere would end the block in the middle of a value such as
+# `description: Use when ... --- ...` and silently skip every field after it.
+FRONTMATTER_RE = re.compile(
+    r"\A---[ \t]*\r?\n(?:(?P<body>.*?)\r?\n)?---[ \t]*(?:\r?\n|\Z)", re.S
+)
+
+
 def extract_frontmatter(text: str) -> str | None:
-    if not text.startswith("---"):
+    match = FRONTMATTER_RE.match(text)
+    if not match:
         return None
-    parts = text.split("---", 2)
-    if len(parts) < 3:
-        return None
-    return parts[1]
+    return match.group("body") or ""
 
 
 def field_value(frontmatter: str, name: str) -> str:
