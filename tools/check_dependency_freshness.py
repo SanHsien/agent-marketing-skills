@@ -81,8 +81,11 @@ def load_deferrals(path: Path = DEFERRALS_PATH) -> dict[str, tuple[str, str]]:
     without it is ignored for exactly that reason.
     """
     try:
-        entries = json.loads(path.read_text(encoding="utf-8")).get("deferrals", {})
+        document = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
+        return {}
+    entries = document.get("deferrals", {}) if isinstance(document, dict) else {}
+    if not isinstance(entries, dict):
         return {}
     deferrals: dict[str, tuple[str, str]] = {}
     for name, entry in (entries or {}).items():

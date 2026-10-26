@@ -143,3 +143,12 @@ def test_an_unparsable_reviewed_release_never_covers_a_row(
     rows = checker.collect_status(packages, deferrals={"pytest": ("latest", "typo")})
 
     assert checker.needs_review(rows[0]) is True
+
+
+@pytest.mark.parametrize("content", ["[]", "null", '"text"', '{"deferrals": []}', '{"deferrals": "x"}'])
+def test_a_deferrals_file_of_the_wrong_shape_defers_nothing(tmp_path: Path, content: str) -> None:
+    """Hand-edited JSON of the wrong shape must read as "no deferrals", not crash the report."""
+    path = tmp_path / "dependency-deferrals.json"
+    path.write_text(content, encoding="utf-8")
+
+    assert checker.load_deferrals(path) == {}
