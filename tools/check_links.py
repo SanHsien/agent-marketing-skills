@@ -41,8 +41,21 @@ def iter_documents() -> list[Path]:
     )
 
 
+def _destination(target: str) -> str:
+    """The URL part of a link destination, without an optional `"title"`.
+
+    CommonMark allows `[x](path "title")` and `[x](<path with spaces> 'title')`; the
+    title is separated from the path by whitespace, so it is never part of the file name.
+    """
+    target = target.strip()
+    if target.startswith("<"):
+        end = target.find(">")
+        return target[1:end] if end > 0 else target[1:]
+    return target.split(None, 1)[0] if target else ""
+
+
 def _missing_relative(path: Path, target: str) -> str | None:
-    target = target.strip().strip("<>")
+    target = _destination(target)
     if not target or target.startswith(SKIP_PREFIXES):
         return None
     file_part = unquote(target.split("#", 1)[0])
