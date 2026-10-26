@@ -85,3 +85,21 @@ def test_a_missing_image_is_reported_once(root: Path) -> None:
 
 def test_two_separate_links_to_one_missing_file_are_both_reported(root: Path) -> None:
     assert len(problems_for(root, "[a](gone.md)\n\n[b](gone.md)\n")) == 2
+
+
+def test_a_broken_reference_style_definition_is_reported(root: Path) -> None:
+    """`[ref]: gone.md` is a link too; only inline links were being looked up."""
+    problems = problems_for(root, "See [the guide][ref].\n\n[ref]: gone.md\n")
+    assert len(problems) == 1 and "gone.md" in problems[0]
+    assert problems_for(root, "See [the guide][ref].\n\n[ref]: target.md \"Title\"\n") == []
+    assert problems_for(root, "[ref]: https://example.com/x\n") == []
+
+
+def test_a_footnote_definition_is_not_a_link(root: Path) -> None:
+    assert problems_for(root, "Text[^1].\n\n[^1]: Some explanation, not a path.\n") == []
+
+
+def test_a_broken_html_anchor_href_is_reported(root: Path) -> None:
+    problems = problems_for(root, '<a href="gone.md">x</a>\n')
+    assert len(problems) == 1 and "gone.md" in problems[0]
+    assert problems_for(root, '<a href="target.md">x</a> <a href="#top">y</a>\n') == []

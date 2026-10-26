@@ -19,6 +19,9 @@ ROOT = Path(__file__).resolve().parent.parent
 LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 IMAGE_PATTERN = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 HTML_SRC_PATTERN = re.compile(r"""(?is)<img[^>]+src=["']([^"']+)["']""")
+HTML_HREF_PATTERN = re.compile(r"""(?is)<a\b[^>]*?\bhref=["']([^"']+)["']""")
+# `[label]: destination "title"`, but not a footnote definition (`[^1]: text`).
+REFERENCE_PATTERN = re.compile(r"(?m)^[ \t]{0,3}\[(?!\^)[^\]]+\]:[ \t]*(<[^>\n]*>|\S+)")
 SKIP_PREFIXES = ("http://", "https://", "mailto:", "tel:", "#")
 
 SKIP_NAMES = {
@@ -104,7 +107,13 @@ def check_document(path: Path) -> list[str]:
     problems: list[str] = []
     text = strip_code(path.read_text(encoding="utf-8"))
     seen: set[tuple[int, int]] = set()
-    for pattern in (LINK_PATTERN, IMAGE_PATTERN, HTML_SRC_PATTERN):
+    for pattern in (
+        LINK_PATTERN,
+        IMAGE_PATTERN,
+        HTML_SRC_PATTERN,
+        HTML_HREF_PATTERN,
+        REFERENCE_PATTERN,
+    ):
         for match in pattern.finditer(text):
             # `![alt](path)` also matches the plain-link pattern: one destination, one check.
             if match.span(1) in seen:
