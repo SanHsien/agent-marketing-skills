@@ -39,3 +39,13 @@ def test_a_link_title_is_not_part_of_the_path(root: Path) -> None:
 
 def test_a_title_does_not_hide_a_missing_target(root: Path) -> None:
     assert len(problems_for(root, '[x](gone.md "A title")\n')) == 1
+
+
+def test_a_query_string_is_not_part_of_the_path(root: Path) -> None:
+    """GitHub serves `target.md?plain=1`; the query selects a view, not a file."""
+    assert problems_for(root, "[x](target.md?plain=1)\n") == []
+    assert problems_for(root, "[x](target.md?plain=1#top)\n") == []
+
+
+def test_a_query_string_does_not_hide_a_missing_target(root: Path) -> None:
+    assert len(problems_for(root, "[x](gone.md?plain=1)\n")) == 1

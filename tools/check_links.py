@@ -58,7 +58,8 @@ def _missing_relative(path: Path, target: str) -> str | None:
     target = _destination(target)
     if not target or target.startswith(SKIP_PREFIXES):
         return None
-    file_part = unquote(target.split("#", 1)[0])
+    # Neither the fragment nor a query string (`file.md?plain=1`) names a file.
+    file_part = unquote(target.split("#", 1)[0].split("?", 1)[0])
     if not file_part:
         return None
     resolved = (path.parent / file_part).resolve()
