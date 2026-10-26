@@ -103,8 +103,13 @@ def strip_code(text: str) -> str:
 def check_document(path: Path) -> list[str]:
     problems: list[str] = []
     text = strip_code(path.read_text(encoding="utf-8"))
+    seen: set[tuple[int, int]] = set()
     for pattern in (LINK_PATTERN, IMAGE_PATTERN, HTML_SRC_PATTERN):
         for match in pattern.finditer(text):
+            # `![alt](path)` also matches the plain-link pattern: one destination, one check.
+            if match.span(1) in seen:
+                continue
+            seen.add(match.span(1))
             missing = _missing_relative(path, match.group(1))
             if missing:
                 problems.append(missing)

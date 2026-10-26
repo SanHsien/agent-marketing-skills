@@ -76,3 +76,12 @@ def test_a_stray_backtick_does_not_hide_links_in_other_paragraphs(root: Path) ->
     text = "a stray ` backtick here\n\n[bad](gone.md)\n\nand another ` one\n"
     problems = problems_for(root, text)
     assert len(problems) == 1 and "gone.md" in problems[0]
+
+
+def test_a_missing_image_is_reported_once(root: Path) -> None:
+    """`![i](gone.png)` also looks like a plain link; it is one problem, not two."""
+    assert len(problems_for(root, "![alt](gone.png)\n")) == 1
+
+
+def test_two_separate_links_to_one_missing_file_are_both_reported(root: Path) -> None:
+    assert len(problems_for(root, "[a](gone.md)\n\n[b](gone.md)\n")) == 2
