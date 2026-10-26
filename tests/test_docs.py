@@ -261,3 +261,14 @@ def test_every_maintained_python_tool_is_compiled_and_linted_by_ci_and_dev_check
         if dev_check.count("tools" + BACKSLASH + tool.name) < 2:
             missing.append(f"dev_check.ps1 needs {tool.name} in both the compile and ruff steps")
     assert missing == []
+
+
+def test_development_doc_does_not_hard_code_the_skill_count() -> None:
+    """The gate scans every skill directory; a number in the prose goes stale on each sync.
+
+    DEVELOPMENT.md said "50 個產品 skill" while `skills/` held 52, and the scan loop
+    (`Get-ChildItem ... -Directory`) has no such limit.
+    """
+    development = (ROOT / "docs" / "DEVELOPMENT.md").read_text(encoding="utf-8")
+    stale = re.findall(r"\d+\s*個產品\s*skill", development)
+    assert stale == []

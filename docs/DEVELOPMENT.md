@@ -57,7 +57,7 @@ pwsh -NoProfile -File tools\dev_check.ps1
 5. `node --check`（`tools/clis/*.js`）
 6. `node --test`（`tests/clis/*.test.cjs`、`tests/assets/*.test.cjs`；與 CI 的 `test-node` job 同一組）
 7. `python tools/check_links.py`
-8. 以 `requirements-security.txt` 釘定的 SkillSpector 完整掃描 50 個產品 skill
+8. 以 `requirements-security.txt` 釘定的 SkillSpector 完整掃描 `skills/` 底下的每個產品 skill
 
 掃描預設每個靜態分析 300 秒、每個 skill workflow 900 秒；這是大型 reference
 skill 在 Windows runner 上完成 bytecode/supply-chain accounting 所需的可重現預算，
