@@ -42,15 +42,41 @@ def extract_frontmatter(text: str) -> str | None:
     return match.group("body") or ""
 
 
+_QUOTED_RE = re.compile(r"\"([^\"]*)\"|'([^']*)'")
+_BLOCK_HEADER_RE = re.compile(r"([>|])[+-]?[1-9]?")
+
+
 def field_value(frontmatter: str, name: str) -> str:
-    pattern = re.compile(
-        rf"^{re.escape(name)}:\s*(?:\"([^\"]*)\"|'([^']*)'|(.*))\s*$",
-        re.M,
-    )
-    match = pattern.search(frontmatter)
-    if not match:
-        return ""
-    return next(group for group in match.groups() if group is not None).strip()
+    """Return a top-level scalar, following its indented continuation lines.
+
+    A block scalar (`description: >` / `|`) and a plain scalar wrapped onto indented
+    lines are read as the text they spell out, not as the one-character indicator or the
+    first physical line -- otherwise a long folded description passes the length limit.
+    """
+    key = re.compile(rf"^{re.escape(name)}:[ \t]*(.*?)\s*$")
+    lines = frontmatter.splitlines()
+    for index, line in enumerate(lines):
+        match = key.match(line)
+        if not match:
+            continue
+        continuation: list[str] = []
+        for follow in lines[index + 1 :]:
+            if follow.strip() and not follow[:1].isspace():
+                break
+            continuation.append(follow.strip())
+        while continuation and not continuation[-1]:
+            continuation.pop()
+        first = match.group(1)
+        header = _BLOCK_HEADER_RE.fullmatch(first)
+        if header:
+            separator = " " if header.group(1) == ">" else "\n"
+            return separator.join(continuation).strip()
+        value = " ".join(part for part in [first, *continuation] if part)
+        quoted = _QUOTED_RE.fullmatch(value)
+        if quoted:
+            return next(group for group in quoted.groups() if group is not None).strip()
+        return value.strip()
+    return ""
 
 
 def audit_skill(skill_dir: Path) -> tuple[list[str], list[str]]:

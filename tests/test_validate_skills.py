@@ -69,3 +69,47 @@ def test_frontmatter_requires_the_closing_delimiter_on_its_own_line() -> None:
     assert crlf is not None and crlf.strip() == "name: a"
     dashed = extract("---\nname: a\ndescription: x --- y\n---\nbody\n")
     assert dashed is not None and dashed.strip().endswith("x --- y")
+
+
+def test_folded_block_description_is_measured_by_its_text_not_by_the_indicator(
+    tmp_path: Path,
+) -> None:
+    """`description: >` followed by indented text is a real description.
+
+    The validator read the one character `>` as the whole value, so a 1100-character
+    folded description passed the 1024 limit and a trigger phrase inside it was missed.
+    """
+    long_text = "\n".join(["  When the user wants " + "x" * 60] * 18)
+    skill_dir = _write_skill(
+        tmp_path, "cro", f"---\nname: cro\ndescription: >\n{long_text}\n---\n\n# CRO\n"
+    )
+    errors, _warnings = validate_skills.audit_skill(skill_dir)
+    assert any("Description length invalid" in item for item in errors)
+
+
+def test_short_folded_description_counts_its_trigger_phrase(tmp_path: Path) -> None:
+    skill_dir = _write_skill(
+        tmp_path,
+        "cro",
+        "---\nname: cro\ndescription: >\n  When the user wants to improve\n"
+        "  conversion on a page.\nmetadata:\n  version: 1.0.0\n---\n\n# CRO\n",
+    )
+    errors, warnings = validate_skills.audit_skill(skill_dir)
+    assert errors == []
+    assert warnings == []
+
+
+def test_block_description_indicator_with_no_text_is_a_missing_description(
+    tmp_path: Path,
+) -> None:
+    skill_dir = _write_skill(
+        tmp_path, "cro", "---\nname: cro\ndescription: |\nmetadata:\n  version: 1.0.0\n---\n\n# CRO\n"
+    )
+    errors, _warnings = validate_skills.audit_skill(skill_dir)
+    assert any("Missing 'description'" in item for item in errors)
+
+
+def test_field_value_joins_continuation_lines_of_a_plain_scalar() -> None:
+    frontmatter = "name: cro\ndescription: When the user\n  wants CRO.\nmetadata:\n  version: 1\n"
+    assert validate_skills.field_value(frontmatter, "description") == "When the user wants CRO."
+    assert validate_skills.field_value(frontmatter, "name") == "cro"
