@@ -123,3 +123,18 @@ def test_summary_survives_a_console_that_cannot_encode_chinese() -> None:
     )
     assert result.returncode == 0, result.stderr.decode("utf-8", "replace")
     assert "維護文件".encode("utf-8") in result.stdout
+
+
+@pytest.mark.parametrize(
+    "target",
+    [
+        "ftp://example.com/file.txt",
+        "data:text/plain;base64,aGk=",
+        "javascript:void(0)",
+        "//cdn.example.com/logo.png",
+        "HTTPS://example.com/Upper",
+    ],
+)
+def test_urls_with_any_scheme_are_not_repository_paths(root: Path, target: str) -> None:
+    """Only http(s), mailto and tel were skipped; every other URL was looked up as a file."""
+    assert problems_for(root, f"[x]({target})\n") == []

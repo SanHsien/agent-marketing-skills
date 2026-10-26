@@ -22,7 +22,10 @@ HTML_SRC_PATTERN = re.compile(r"""(?is)<img[^>]+src=["']([^"']+)["']""")
 HTML_HREF_PATTERN = re.compile(r"""(?is)<a\b[^>]*?\bhref=["']([^"']+)["']""")
 # `[label]: destination "title"`, but not a footnote definition (`[^1]: text`).
 REFERENCE_PATTERN = re.compile(r"(?m)^[ \t]{0,3}\[(?!\^)[^\]]+\]:[ \t]*(<[^>\n]*>|\S+)")
-SKIP_PREFIXES = ("http://", "https://", "mailto:", "tel:", "#")
+# Anything that is not a path inside this repository: a URL with any scheme (the scheme
+# needs two or more characters, so a Windows drive letter is not mistaken for one), a
+# protocol-relative `//host/...` URL, or a same-page `#fragment`.
+EXTERNAL_PATTERN = re.compile(r"^(?:[A-Za-z][A-Za-z0-9+.\-]+:|//|#)")
 
 SKIP_NAMES = {
     "upstream-review-report.md",
@@ -59,7 +62,7 @@ def _destination(target: str) -> str:
 
 def _missing_relative(path: Path, target: str) -> str | None:
     target = _destination(target)
-    if not target or target.startswith(SKIP_PREFIXES):
+    if not target or EXTERNAL_PATTERN.match(target):
         return None
     # Neither the fragment nor a query string (`file.md?plain=1`) names a file.
     file_part = unquote(target.split("#", 1)[0].split("?", 1)[0])
