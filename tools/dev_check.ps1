@@ -87,6 +87,22 @@ foreach ($cli in $cliFiles) {
     }
 }
 
+# The same files ci.yml's `test-node` job runs (`node --test tests/clis/*.test.cjs
+# tests/assets/*.test.cjs`); without this step a CLI contract could fail in CI while this
+# canonical gate stayed green. The test files mock every network call and launch nothing.
+$nodeTestFiles = @(
+    Get-ChildItem -LiteralPath (Join-Path $repoRoot "tests\clis") -Filter "*.test.cjs" -File
+    Get-ChildItem -LiteralPath (Join-Path $repoRoot "tests\assets") -Filter "*.test.cjs" -File
+)
+if (-not $nodeTestFiles) {
+    throw "No Node CLI contract tests found under tests\clis or tests\assets"
+}
+Write-Host "==> Node CLI contract tests ($($nodeTestFiles.Count) files)"
+& $nodeExe --test @($nodeTestFiles | ForEach-Object { $_.FullName })
+if ($LASTEXITCODE -ne 0) {
+    throw "node --test failed with exit code $LASTEXITCODE"
+}
+
 Invoke-PythonStep -Label "Check Markdown links" -Arguments @(
     "tools\check_links.py"
 )

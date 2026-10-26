@@ -222,3 +222,24 @@ def test_check_links_rejects_path_outside_repo(tmp_path: Path) -> None:
     doc.write_text("[here](.)\n", encoding="utf-8")
     problems = check_links.check_document(doc)
     assert any("逃出" in item for item in problems)
+
+
+def test_canonical_gate_runs_the_node_cli_contract_tests_ci_runs() -> None:
+    """The Windows gate was green while the `test (node CLI contracts)` job was red.
+
+    Six contract tests failed on main for exactly that reason: `dev_check.ps1` only ran
+    `node --check`, so nothing a maintainer ran locally executed them.
+    """
+    ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    dev_check = (ROOT / "tools" / "dev_check.ps1").read_text(encoding="utf-8")
+    assert "node --test" in ci
+    assert "--test" in dev_check
+    assert "tests\\clis" in dev_check and "tests\\assets" in dev_check
+    assert "*.test.cjs" in dev_check
+
+
+def test_docs_say_the_node_cli_contract_tests_run() -> None:
+    agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    development = (ROOT / "docs" / "DEVELOPMENT.md").read_text(encoding="utf-8")
+    assert "只做語法檢查" not in agents
+    assert "node --test" in development

@@ -25,7 +25,7 @@
 ## 技術與資料流
 
 - 產品本體是 Markdown Agent Skills：`skills/<name>/SKILL.md`（可選 `references/`、`evals/`、`assets/`）。執行時由宿主 Agent 讀檔，沒有獨立行銷引擎。
-- `tools/clis/*.js`：上游零依賴 Node.js CLI（Node 18+）。本 fork 只做語法檢查，不拿真實 API 當 CI。
+- `tools/clis/*.js`：上游零依賴 Node.js CLI（Node 18+）。本 fork 對它們做語法檢查（`node --check`），並以 `node --test tests/clis/*.test.cjs` 跑 mock 過網路的契約測試；不拿真實 API 當 CI。
 - `tools/integrations/`、`tools/REGISTRY.md`、`tools/PARTNERS.md`、`partners.json`：工具登錄與合作夥伴規則，以上游為準。
 - `.claude-plugin/`：Claude Code plugin marketplace 清單。
 - `scripts/sync-partners.mjs`、`.github/scripts/sync-skills.js`：上游同步腳本。本 fork 不跑它們來改繁中 README。
