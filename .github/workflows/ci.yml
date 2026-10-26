@@ -52,6 +52,7 @@ jobs:
           tools/check_dependency_freshness.py
           tools/check_links.py
           tools/run_skillspector.py
+          tools/stage_scan_input.py
           tools/validate_skills.py
 
       - name: Ruff (E9 + F)
@@ -62,6 +63,7 @@ jobs:
           tools/check_dependency_freshness.py
           tools/check_links.py
           tools/run_skillspector.py
+          tools/stage_scan_input.py
           tools/validate_skills.py
 
       - name: Pytest

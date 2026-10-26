@@ -11,6 +11,7 @@ import check_links  # noqa: E402
 import validate_skills  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
+BACKSLASH = chr(92)
 
 
 def test_every_skill_directory_has_valid_frontmatter() -> None:
@@ -243,3 +244,20 @@ def test_docs_say_the_node_cli_contract_tests_run() -> None:
     development = (ROOT / "docs" / "DEVELOPMENT.md").read_text(encoding="utf-8")
     assert "只做語法檢查" not in agents
     assert "node --test" in development
+
+
+def test_every_maintained_python_tool_is_compiled_and_linted_by_ci_and_dev_check() -> None:
+    """A new `tools/*.py` must join both gate lists, or one of them silently skips it.
+
+    `stage_scan_input.py` was in `dev_check.ps1`'s compile and ruff steps but not in
+    `ci.yml`'s, so the Python 3.9-3.14 matrix never linted it.
+    """
+    ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    dev_check = (ROOT / "tools" / "dev_check.ps1").read_text(encoding="utf-8")
+    missing = []
+    for tool in sorted((ROOT / "tools").glob("*.py")):
+        if ci.count(f"tools/{tool.name}") < 2:
+            missing.append(f"ci.yml needs {tool.name} in both the compile and ruff steps")
+        if dev_check.count("tools" + BACKSLASH + tool.name) < 2:
+            missing.append(f"dev_check.ps1 needs {tool.name} in both the compile and ruff steps")
+    assert missing == []
