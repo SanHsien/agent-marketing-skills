@@ -401,3 +401,19 @@ issue 4 筆全部 open。產品 skill 以上游為準（`AGENTS.md`），未合�
 **新增 4 筆已審例外**：2.12.0 的工具濫用分析器在 `ad-creative/references/motion-video-ads.md`、`attribution/references/first-party-tracking.md`、`marketing-plan/references/example-quietude.md`、`site-architecture/SKILL.md` 碰到解析跨度上限。用掃描器自己的判斷函式定位後，觸發點都是英文行文的撇號（we're、don't）或反引號包住的提示詞範本，被當成沒關閉的 shell 引號一路延伸；四個檔案都沒有破壞性指令、遠端腳本或編碼字串。依「不改寫產品 skill」，登記為綁檔案雜湊的 `reviewed_partials`。
 
 **PyPI 冒充套件**：2.12.0 的 SC4 以套件名稱查 OSV 會查到 `MAL-2026-6561`（PyPI 上冒充 NVIDIA/skillspector 的惡意套件，已下架）。本 repo 只掃描 `skills/`，這筆不會出現；安裝一律用 git URL 釘 fork 的精確 commit，不得改成從 PyPI 安裝。
+
+## 2026-10-26：PR #897–#898、issue #899 判讀，commit 軸無新增
+
+commit 軸實查無新提交（`e85f3cb` 仍是上游 `main` 頭）。`#896` 在上游查不到（issue 與 PR 皆回「could not resolve」），不是漏審。以下三筆全部 open、無採用項目。
+
+| 項目 | 判定 | 理由與證據 |
+| --- | --- | --- |
+| PR #897（HeyReagent 整合指南，head `55cbc920`，`tools/integrations/heyreagent.md` +123、`tools/REGISTRY.md` +4/-1） | 政策性不引用 | 第三方廠商在上游掛自己的導流入口：一份 123 行廠商說明、`REGISTRY` 加一列分類表、一列詳述表、一條清單項，並改寫決策表第 6 步的推薦連結。與 #586 Glasser、#598 Converly 同一類（見 2026-09-15、2026-09-30 條目）。本 fork 與該廠商無商業關係，`tools/integrations/` 與 `tools/REGISTRY.md` 以上游為準，且本線不轉載廠商整合卡片 |
+| PR #898（Adlicio 整合指南，head `93813972`，`tools/integrations/adlicio.md` +127、`tools/REGISTRY.md` +2） | 政策性不引用 | 同上：廠商整合卡片加 `REGISTRY` 兩列，內文含 `npm install -g commentscraper` 與對廠商 API 的 `curl` 範例，是導流用的使用說明，不是對本 fork 工具缺陷的修正 |
+| issue #899（第三方網站通知「AI 輔助報告已刊出」） | 不適用 | 對方是報告彙整站的外聯通知，內容只是給上游維護者的評分摘要；不指出任何缺陷，也與本 fork 的 skill、工具、gate 無關。本 fork 有測試與掃描 gate，通知中「沒有測試與安全機制」的評語對本線也不成立（`python -m pytest tests`、SkillSpector gate） |
+
+**隱藏內容掃描（PLAYBOOK 判準八）**：兩筆 PR 都以 `gh api pulls/<n>/files` 取**當下** head 的 patch（`headRefOid` 與檢查器列出的相同，各只有 1 個 commit，沒有 force-push 的前後差異可比）。對新增的整合指南與 `REGISTRY.md` 的 patch 掃描：行內「非空白 + 40 個以上空白 + 非空白」、超過 400 字元的行、`eval(`／`new Function`／`globalThis`／`atob`／`base64`、80 字元以上的 hex 字串、零寬與方向控制字元。結果：僅命中 #897 的一行 414 字元的 ToS 警語（純英文散文，無夾帶），其餘零命中。即使判定不引用，這個掃描結果也留下紀錄，因為這兩份文件之後可能經由 commit 軸抵達。
+
+**觸發條件**：政策性不引用，不是等待中的暫緩；除非維護者決定本線要開始轉載廠商整合內容。若 #897／#898 合併進上游 `main`，經由 commit 軸抵達時，依 2026-10-24 條目的做法（整合指南與 `REGISTRY` 夥伴列依政策略過）處理，並重新取 PR 合併時的內容再掃一次。
+
+水位：commit 不變（`e85f3cb`），PR `895` → `898`，issue `856` → `899`。日期 2026-10-26。
