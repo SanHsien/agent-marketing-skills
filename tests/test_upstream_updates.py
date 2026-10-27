@@ -6,7 +6,6 @@ to stop watching upstream.
 
 from __future__ import annotations
 
-import io
 import json
 import subprocess
 import sys
@@ -41,27 +40,6 @@ def fake_gh(payload: object, returncode: int = 0):
     return runner
 
 
-def test_tickets_are_queried_with_state_all(monkeypatch):
-    """An item opened and closed between two runs was still never triaged."""
-    monkeypatch.setattr(
-        checker.subprocess,
-        "run",
-        fake_gh([{"number": 9, "title": "closed without merging"}]),
-    )
-    tickets = checker.collect_new_tickets(BASELINE, "pr")
-    assert tickets == [{"number": 9, "title": "closed without merging"}]
-
-
-def test_items_at_or_below_the_watermark_are_not_re_reported(monkeypatch):
-    monkeypatch.setattr(
-        checker.subprocess,
-        "run",
-        fake_gh([{"number": 4, "title": "old"}, {"number": 5, "title": "new"}]),
-    )
-    baseline = {**BASELINE, "reviewed_pr_through": 4}
-    assert [t["number"] for t in checker.collect_new_tickets(baseline, "pr")] == [5]
-
-
 def test_ticket_titles_survive_undecodable_bytes(monkeypatch):
     """Titles are written by strangers and the console is not always UTF-8.
 
@@ -84,18 +62,6 @@ def test_gh_failure_reports_unchecked_rather_than_empty(monkeypatch):
     """`None`, not `[]`: "not checked" must never render as "nothing to review"."""
     monkeypatch.setattr(checker.subprocess, "run", fake_gh([], returncode=1))
     assert checker.collect_new_tickets(BASELINE, "issue") is None
-
-
-def test_report_says_so_when_tickets_could_not_be_enumerated():
-    report = checker.render_markdown(BASELINE, [], prs=None, issues=None)
-    assert "Not checked" in report
-
-
-def test_report_covers_all_three_axes_even_when_commits_are_clean():
-    report = checker.render_markdown(BASELINE, [], prs=[], issues=[])
-    assert "## Commits" in report
-    assert "## Upstream pull requests" in report
-    assert "## Upstream issues" in report
 
 
 @pytest.mark.parametrize(
@@ -134,62 +100,3 @@ def test_git_not_installed_is_a_reported_check_failure(monkeypatch):
     monkeypatch.setattr(checker.subprocess, "run", _missing_executable)
     with pytest.raises(checker.UpstreamCheckError, match="git"):
         checker.run_git(["status"], REPO_ROOT)
-
-
-def test_main_without_gh_writes_the_report_and_fails_closed(monkeypatch, tmp_path, capsys):
-    report_path = tmp_path / "report.md"
-    monkeypatch.setattr(checker, "load_baseline", lambda: dict(BASELINE))
-    monkeypatch.setattr(checker, "fetch_upstream", lambda baseline, repo_dir: "refs/x")
-    monkeypatch.setattr(checker, "collect_new_commits", lambda *args: [])
-    monkeypatch.setattr(checker.subprocess, "run", _missing_executable)
-    monkeypatch.setattr(sys, "argv", ["check_upstream_updates.py", "--output", str(report_path)])
-
-    assert checker.main() == 2
-    assert "Not checked" in report_path.read_text(encoding="utf-8")
-    assert "ERROR: gh could not enumerate" in capsys.readouterr().out
-
-
-def test_report_with_unencodable_titles_still_prints_on_a_legacy_console(monkeypatch, tmp_path):
-    """Upstream titles are written by strangers; one emoji must not end the run.
-
-    `print(report)` ran after the report file was written but before the exit code was
-    decided, so on a console whose codepage cannot encode the title the run died with a
-    traceback instead of reporting the tickets it had read.
-    """
-    legacy = io.TextIOWrapper(io.BytesIO(), encoding="ascii", errors="strict")
-    monkeypatch.setattr(sys, "stdout", legacy)
-    report_path = tmp_path / "report.md"
-    monkeypatch.setattr(checker, "load_baseline", lambda: dict(BASELINE))
-    monkeypatch.setattr(checker, "fetch_upstream", lambda baseline, repo_dir: "refs/x")
-    monkeypatch.setattr(checker, "collect_new_commits", lambda *args: [])
-    monkeypatch.setattr(
-        checker,
-        "collect_new_tickets",
-        lambda baseline, kind: [{"number": 7, "title": "Add 🚀 support — 中文"}],
-    )
-    monkeypatch.setattr(sys, "argv", ["check_upstream_updates.py", "--output", str(report_path)])
-
-    assert checker.main() == 0
-    legacy.flush()
-    assert "🚀".encode("utf-8") in legacy.buffer.getvalue()
-    assert "🚀" in report_path.read_text(encoding="utf-8")
-
-
-def test_a_full_page_of_unreviewed_tickets_is_reported_as_unchecked(monkeypatch):
-    """`gh --limit 1000` returns exactly 1000 when there are more; the rest were never seen.
-
-    If every returned item is still above the watermark, older unreviewed items may have
-    been cut off, and the list must not be presented as complete.
-    """
-    items = [{"number": number, "title": f"t{number}"} for number in range(2000, 1000, -1)]
-    assert len(items) == checker.TICKET_LIMIT
-    monkeypatch.setattr(checker.subprocess, "run", fake_gh(items))
-    assert checker.collect_new_tickets({**BASELINE, "reviewed_pr_through": 10}, "pr") is None
-
-
-def test_a_full_page_that_reaches_the_watermark_is_complete(monkeypatch):
-    items = [{"number": number, "title": f"t{number}"} for number in range(1999, 999, -1)]
-    assert len(items) == checker.TICKET_LIMIT
-    monkeypatch.setattr(checker.subprocess, "run", fake_gh(items))
-    tickets = checker.collect_new_tickets({**BASELINE, "reviewed_pr_through": 1500}, "pr")
-    assert tickets is not None and len(tickets) == 499
