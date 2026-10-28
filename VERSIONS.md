@@ -4,50 +4,50 @@ Current versions of all skills. Agents can compare against local versions to che
 
 | Skill | Version | Last Updated |
 |-------|---------|--------------|
-| ab-testing | 2.0.2 | 2026-10-12 |
-| ad-creative | 2.12.1 | 2026-10-15 |
-| ai-seo | 2.10.1 | 2026-10-19 |
-| analytics | 2.2.1 | 2026-10-19 |
-| aso | 2.0.2 | 2026-10-08 |
+| ab-testing | 2.0.3 | 2026-10-27 |
+| ad-creative | 2.12.2 | 2026-10-26 |
+| ai-seo | 2.11.0 | 2026-10-26 |
+| analytics | 2.2.2 | 2026-10-27 |
+| aso | 2.0.3 | 2026-10-27 |
 | attribution | 1.1.6 | 2026-10-19 |
 | churn-prevention | 2.0.3 | 2026-10-12 |
 | co-marketing | 2.0.3 | 2026-10-12 |
-| cold-email | 2.2.0 | 2026-10-07 |
-| community-marketing | 2.0.1 | 2026-08-23 |
+| cold-email | 2.2.1 | 2026-10-27 |
+| community-marketing | 2.0.2 | 2026-10-27 |
 | competitor-profiling | 2.1.4 | 2026-10-15 |
 | competitors | 2.3.0 | 2026-10-01 |
-| content-strategy | 2.1.4 | 2026-10-15 |
-| conversion-tracking | 1.0.0 | 2026-10-19 |
-| copy-editing | 2.2.0 | 2026-10-15 |
-| copywriting | 2.3.1 | 2026-10-15 |
+| content-strategy | 2.1.5 | 2026-10-27 |
+| conversion-tracking | 1.0.1 | 2026-10-19 |
+| copy-editing | 2.2.1 | 2026-10-27 |
+| copywriting | 2.3.2 | 2026-10-27 |
 | cro | 2.0.3 | 2026-10-08 |
-| customer-research | 2.0.4 | 2026-10-02 |
-| directory-submissions | 2.1.2 | 2026-10-15 |
+| customer-research | 2.0.5 | 2026-10-27 |
+| directory-submissions | 2.1.4 | 2026-10-27 |
 | emails | 2.1.4 | 2026-10-15 |
 | events | 1.0.0 | 2026-08-23 |
 | free-tools | 2.0.3 | 2026-10-15 |
-| image | 2.0.2 | 2026-10-02 |
+| image | 2.0.3 | 2026-10-27 |
 | influencer-marketing | 1.4.0 | 2026-10-15 |
 | launch | 2.2.0 | 2026-10-07 |
-| lead-magnets | 2.1.0 | 2026-10-08 |
+| lead-magnets | 2.1.1 | 2026-10-27 |
 | link-building | 1.0.1 | 2026-10-19 |
 | marketing-council | 1.0.0 | 2026-07-06 |
 | marketing-ideas | 2.0.1 | 2026-08-23 |
-| marketing-loops | 1.6.1 | 2026-10-15 |
+| marketing-loops | 1.6.2 | 2026-10-27 |
 | marketing-plan | 1.2.2 | 2026-10-12 |
 | marketing-psychology | 2.0.0 | 2026-05-05 |
-| offers | 1.0.2 | 2026-10-12 |
+| offers | 1.0.3 | 2026-10-27 |
 | onboarding | 2.0.2 | 2026-10-12 |
-| ads | 2.6.2 | 2026-10-19 |
-| paywalls | 2.0.0 | 2026-05-05 |
-| popups | 2.0.0 | 2026-05-05 |
+| ads | 2.7.0 | 2026-10-26 |
+| paywalls | 2.1.1 | 2026-10-27 |
+| popups | 2.0.1 | 2026-10-27 |
 | pricing | 2.1.4 | 2026-10-12 |
 | product-marketing | 2.2.0 | 2026-10-15 |
-| programmatic-seo | 2.1.0 | 2026-10-06 |
-| prospecting | 1.3.0 | 2026-10-08 |
+| programmatic-seo | 2.1.1 | 2026-10-27 |
+| prospecting | 1.5.0 | 2026-10-27 |
 | public-relations | 1.2.1 | 2026-10-15 |
 | referrals | 2.2.1 | 2026-10-12 |
-| revops | 2.2.1 | 2026-10-12 |
+| revops | 2.2.2 | 2026-10-27 |
 | sales-enablement | 2.4.0 | 2026-10-07 |
 | schema | 2.0.2 | 2026-10-08 |
 | seo-audit | 2.2.2 | 2026-10-15 |
@@ -55,9 +55,66 @@ Current versions of all skills. Agents can compare against local versions to che
 | site-architecture | 2.1.0 | 2026-10-06 |
 | sms | 1.1.0 | 2026-10-02 |
 | social | 2.4.0 | 2026-10-14 |
-| video | 2.2.1 | 2026-10-02 |
+| video | 2.3.0 | 2026-10-26 |
 
 ## Recent Changes
+
+### 2.13.9 (2026-10-27)
+
+- **prospecting** (1.4.0 → 1.5.0): signal plays adds **gap plays**: a spend or growth signal paired with a gap you can verify from outside that your offer fixes (ads with no visible tracking, paid traffic sent to the homepage, long-running ad creative, thin location or integration pages, lead magnets with no follow-up, expansion without localization, hiring for repetitive work). Each row says how to check the gap. Rules: evidence required for every gap, limits of outside checks (server-side tracking, brand-search homepages, winning ads that run long), re-check within 7 days of sending, and open with the observation and a question. The signal-tools table adds X search and the public ad libraries. Prompted by Mitch Davey's post on signal plays.
+- **marketing-loops** (1.6.1 → 1.6.2): the signal-sweep loop verifies and saves evidence for gap plays before staging a touch.
+
+### 2.13.8 (2026-10-27)
+
+- **Perplexity Computer ZIPs**: each release now includes `<name>-perplexity.zip` for every skill, with `SKILL.md` at the archive root as Perplexity requires (the source and Claude web ZIPs nest the skill in a folder, so Perplexity rejected them). The packager's new `perplexity` target keeps the original skill files and fails the build if a skill exceeds Perplexity's documented limits: 100 files, 20 MB unzipped, a 1,024-character description. Install steps are in the README (Option 9). No skill content changed.
+
+### 2.13.7 (2026-10-27)
+
+Fixes contradictions and stale facts found while rewriting marketing-skills.com's skill pages:
+
+- **ab-testing** (2.0.2 → 2.0.3): sample-size tables recomputed. The reference ran about 2.3× high (31,000 per variant for 3% → 3.6%) and SKILL.md about 10–20% low (12k); both now come from the two-proportion formula at α 0.05 two-sided, 80% power (14k), with the assumptions stated.
+- **cold-email** (2.2.0 → 2.2.1): follow-up reply share aligned with the sourced Instantly 2026 benchmark (~58% of replies from email 1, ~42% from follow-ups) instead of an unsourced 55%.
+- **revops** (2.2.1 → 2.2.2): MQL thresholds tied to their own example point tables (the two references used different weights), and SLA recipes reassign leads only under an agreed reassignment rule, matching inbound-routing.
+- **paywalls** (2.1.0 → 2.1.1) and **offers** (1.0.2 → 1.0.3): paywall discount experiments now reward commitment and real deadlines (offers rules out acquisition discounts and fake scarcity); fake countdowns join the dark-patterns list; annual-prepay pricing is distinguished from acquisition discounts.
+- **image** (2.0.2 → 2.0.3): current Black Forest Labs names (FLUX 3 Image; FLUX.2 [pro]/[flex]/[dev]/[klein]; FLUX.1 Kontext as previous generation), Midjourney V7 throughout, and an unsourced "#1 page speed killer" line removed. OpenAI's gpt-image-2.5 names checked against its deprecations page.
+- **directory-submissions** (2.1.3 → 2.1.4): G2's deal for Capterra, GetApp, and Software Advice dated to its Jan 2026 announcement, with Software Advice no longer called a Gartner property; "AI engines penalize duplicate content" (unsourced) replaced, eval updated; a dated G2 price removed.
+- **aso** (2.0.2 → 2.0.3): the screenshot rubric weights the first three screens instead of rewarding 8–10 (benchmarks say returns diminish past 6); the +2.5pp CPP figure is labelled as the organic-referral lift, distinct from the +5.9% average.
+- **analytics** (2.2.1 → 2.2.2): gtag samples send GA4's recommended `sign_up` event, mapped from the internal `signup_completed`.
+- **programmatic-seo** (2.1.0 → 2.1.1): subfolder advice rests on internal links, not a claim that subdomains split authority (its platforms reference says Google ranks neither higher); "Stats" removed from the playbook table.
+- **content-strategy** (2.1.4 → 2.1.5): the scoring example totals 7.9, not 8.0. **community-marketing** (2.0.1 → 2.0.2): "5 community models" described four. **copywriting** (2.3.1 → 2.3.2): clarity figures credited to Founding Marketing, Ch. 3. **customer-research** (2.0.4 → 2.0.5): one persona minimum. **copy-editing** (2.2.0 → 2.2.1): its approved example dropped an em dash its own check bans. **popups** (2.0.0 → 2.0.1) and **lead-magnets** (2.1.0 → 2.1.1): duplicate related-skill entries merged.
+
+### 2.13.6 (2026-10-27)
+
+- **Tools registry**: 22 tools now document official MCP servers that the registry and their integration guides listed as unavailable: Mixpanel, Amplitude, PostHog, Semrush, Ahrefs, Similarweb, Salesforce, Kit, Klaviyo, Brevo, ActiveCampaign, beehiiv, Optimizely, Customer.io, Typeform, Buffer, Livestorm, PartnerStack, Tolt, Twilio (beta), Attentive (beta), and Webflow. Each guide links the vendor's MCP docs with a checked date. Category-table notes that ranked tools ("Best for links", "Most popular", "Stripe is the default") now state facts instead. The MCP-enabled list in AGENTS.md is updated to match. No skill content changed.
+
+### 2.13.5 (2026-10-26)
+
+- **paywalls** (2.0.0 → 2.1.0): new `references/mobile-subscription-paywalls.md` for consumer iOS/Android subscription apps: the paywall after onboarding's first personalized result, hard paywall vs. freemium (RevenueCat 2026 data), yearly-first plan presentation, trials with reminders and trial length as a test, one abandon offer, dated store fees (Apple Small Business Program; Google Play's June 2026 10% + 5% split, with the 10% applying to web links; the US link-out commission still in court), the web-to-app funnel, revenue per download, and an App Store review checklist. New description triggers for mobile and subscription-app paywalls. Adapted from Blake Anderson's ai-app-playbook (MIT); his "best and cheapest" stack verdicts were left out.
+
+### 2.13.4 (2026-10-26)
+
+Learnings from a batch of October 2026 posts, verified before inclusion:
+
+- **ads** (2.6.2 → 2.7.0): the Meta playbook adds **ad sequencing**: why order matters to Meta's ranking model, the narrow auction setup (Awareness or Engagement objective, target frequency, lifetime budget of 7+ days, 2+ ads), sizing a sequence to the flight, and the cost trade-off. The creative-research reference adds a **persistent competitor ad tracker** (weekly pulls from the Meta, Google and LinkedIn ad libraries, vision tagging, diffs, gap questions), with a caveat that ad longevity is a proxy, not proof. The Google Search playbook covers **AI Max** under the same gate as broad match. Sources: Cody Schneider, Jon Loomer, Meta Engineering.
+- **ai-seo** (2.10.2 → 2.11.0): the prompt-portfolio reference adds scoring by **buying topic** and a fix-before-create sequence (Jam's AI search audit). Platform notes add Bing Webmaster Tools' **AI Performance report and grounding queries**, and Brave's submit-url page with its limits. Agent readiness adds Fern's Agent Score for developer docs.
+- **prospecting** (1.3.0 → 1.4.0): signal plays adds **warm paths**: mining your own network (LinkedIn export, calendar, inbox), matching it to target accounts, paid connectors per vertical, and double opt-in intros (Cody Schneider's podcast with Super Connector).
+- **video** (2.2.2 → 2.3.0): adds a **personalized video per account** workflow (component library, motion primitives, demo-flow menu, render engine, automated QA, tracker), adapted from Harvey's write-up. Drops the "recommended" label on HeyGen.
+- **directory-submissions** (2.1.2 → 2.1.3): the Notion entry now reflects the Notion Marketplace's requirements (public connection with the "Any workspace" scope, which can't be changed later, plus a review that includes security).
+
+Not incorporated: duplicating Shopping products to test images and landing pages (third-party sources call it a Shopping policy violation), agency spend anecdotes, and an unverified 50-site launch list.
+
+### 2.13.3 (2026-10-26)
+
+- **video** (2.2.1 → 2.2.2) and the **Hyperframes integration guide**: the Hyperframes vs Remotion comparison now sticks to facts that don't drift (HTML vs React authoring, and how each times animation) and points to each project's docs for rendering, licensing, and features. Removed the unsupported "more powerful than Hyperframes" line (flagged by a HyperFrames maintainer), the "recommended for agents" label, and the stale cloud-rendering, license-tier, and ecosystem rows.
+- **ad-creative** (2.12.1 → 2.12.2): code-based video ads no longer call Remotion "the best option". The section, decision tree, cost table, and workflows now name code-based video (Remotion or Hyperframes), point to the `video` skill for choosing between them, and drop the stale license-tier pricing line. The video, image, and voice decision trees now list tools as "options include" by need instead of single picks or "best quality" rankings, and the cost table is marked as rough estimates to verify.
+
+### 2.13.2 (2026-10-26)
+
+- **ai-seo** (2.10.1 → 2.10.2): agent-readiness reference adds the AgentReady open standard (agentready.org, led by Ora): find → read → act ordering, MUST/SHOULD/MAY practice IDs to cite in audits, and Ora's study figures (3.7× more fact-free answers when agents can't read the site, 1.9× recommendation rate, 60% vs 37% pricing accuracy) labeled as vendor research. Adds WAF-as-separate-gate, 429 + Retry-After over challenge pages, linking discovery files, the AI Catalog, visible-text facts over JSON-LD-only, and the act tier (MCP server or CLI, finishable auth, OpenAPI). Markdown mirrors downgraded to MAY since format didn't change task success. robots.txt guidance (reference and SKILL.md) now defaults to a wildcard allow with named groups only for deliberate exceptions.
+
+### 2.13.1 (2026-10-19)
+
+- **conversion-tracking** (1.0.0 → 1.0.1): an ad-platform setup now reaches the delivery decision when the user mentions ad blockers, iOS or ATT signal loss, or conversions the platform is missing or under-reporting, and walks through the options in `references/server-side.md`, free and native paths first. A narrower version of the "every ad-platform setup reaches the delivery decision" change dropped from 2.13.0. Names no vendor.
 
 ### 2.13.0 (2026-10-19)
 

@@ -417,3 +417,39 @@ commit 軸實查無新提交（`e85f3cb` 仍是上游 `main` 頭）。`#896` 在
 **觸發條件**：政策性不引用，不是等待中的暫緩；除非維護者決定本線要開始轉載廠商整合內容。若 #897／#898 合併進上游 `main`，經由 commit 軸抵達時，依 2026-10-24 條目的做法（整合指南與 `REGISTRY` 夥伴列依政策略過）處理，並重新取 PR 合併時的內容再掃一次。
 
 水位：commit 不變（`e85f3cb`），PR `895` → `898`，issue `856` → `899`。日期 2026-10-26。
+
+## 2026-10-28：上游同步到 `0cd9b3a`（69 commit；PR #909、issue #899）
+
+**範圍與方法**：本 fork 與上游沒有共同祖先，以上一個水位 `e85f3cb` 為 base 對 `e85f3cb..0cd9b3a` 做三方套用（`git apply -3`）。上游動到 94 個檔案（+798／−325），91 檔乾淨套用，3 檔衝突。合併前對新增行掃過隱藏內容（`\S\s{40,}\S`、`eval`／`new Function`／`globalThis`、base64／hex 長字串、零寬與雙向控制字元）：只有 44 行超過 400 字元，全是 `VERSIONS.md`、`README.md`、`AGENTS.md` 的 Markdown 說明文字。
+
+**採用（整批取用）**：上游合併的 PR #891、#900–#903、#906–#909 與直接推到 main 的提交，內容是產品 skill 的事實修正與新內容（ads 的 Meta 排序與 AI Max、ai-seo 的 AgentReady 與主題缺口評分、prospecting 的 gap plays 與暖路徑、paywalls 的行動訂閱 App 參考、17 個 skill 的矛盾與過時事實、ab-testing 樣本數表、video／ad-creative 不再把 Remotion 當唯一或「開源」選項）、對應 evals、版本號與 `VERSIONS.md`、`scripts/package_skills.py` 的 Perplexity 目標與測試、22 個既有工具指南與 `tools/REGISTRY.md` 的官方 MCP 標示（只改既有列的 MCP 欄，沒有新增夥伴列）。
+
+**衝突與取捨**：
+
+| 檔案 | 解法 |
+|---|---|
+| `AGENTS.md` | 保留本 fork 版。本 fork 的 `AGENTS.md` 是繁中維護指引，沒有上游那行 MCP-enabled tools 清單（上游只改了那一行的日期與工具名單）；工具清單以 `tools/REGISTRY.md` 為準，已隨本次同步 |
+| `README.md`（繁中） | 保留本 fork 版。上游只新增「Option 9：Perplexity Computer Skill ZIPs」，ZIP 來自上游自己的 release；本 fork 的 `release.yml` 有 repo 閘門、不發 ZIP，理由同 2026-10-24 不寫 Claude Web ZIP |
+| `skills/aso/references/scoring-criteria.md` | 取上游。產品 skill 不改寫（`AGENTS.md` 硬性邊界）；本 fork 的差異只是 clean-repo 初始化時帶進來的表格排版，上游這次改了截圖評分標準（前三張截圖要先講核心價值） |
+
+**workflow 閘門**：上游改了 `release.yml`、`skill-packaging.yml`（加 Perplexity ZIP 打包），兩支的 `github.repository == 'coreyhaines31/marketingskills'` 閘門都在，`tests/test_docs.py::test_upstream_workflows_have_repo_guard` 守著。
+
+**自我掃描（SkillSpector 2.12.0，pin 不變）**：
+
+- `reviewed_partials` 的 `marketing-loops/SKILL.md`：上游只把 `metadata.version` 從 1.6.1 改成 1.6.2，觸發點仍是 description 那句 `'ranking drop alert,'`。重審後把綁定的 SHA-256 換成新內容（`0257b2d…` → `fd1ba02…`），理由後面補一句重審紀錄。
+- 10 個 skill 共 23 筆 finding 因元件內容或行號改變而換了指紋：ad-creative 5（E1 的 Gemini／ElevenLabs curl 範例、AE1 指向已審 partial 的兩個引用）、ai-seo 3（EA2 常見錯誤清單、RP1 的 `npx is-agentic`／`npx afdocs`）、analytics 1（TM3 `?debug_mode=true`）、conversion-tracking 2（AR2「never judge the last three days」、LP3）、directory-submissions 2（AR2「nofollow without warning」、E1 Slack App Directory 網址）、marketing-loops 2（AR2 停損條款、EA2「Never send … without approval」）、paywalls 1（P6「Re-show rules」）、prospecting 2（AE1 指向已審 partial、AS2 eval 期望答案提到 Truelist MCP）、revops 1（EA2 折扣矩陣「Auto-approved」）、video 4（RP1 的 `npx hyperframes`／`npx create-video`）。逐筆讀過命中原文，全是同一批自我指涉誤判，與 2026-10-24 審過的舊條目一一對應；新增 23 筆精確 fingerprint（以 `skillspector baseline --no-llm` 對 LF 正規化的暫存副本產生，與 gate 的掃描輸入相同），各附理由。ad-creative／ai-seo 的 RP1、marketing-loops 的 EA4、revops 的 RA2 已由既有 `scoped_rules` 壓掉，不另加。
+- 對全部 52 個 skill 重產目前的指紋後，baseline 有 24 筆對不上任何現行 finding（就是上述 finding 的舊版本），刪除；剩下 84 筆全部對得上。
+
+**PR 軸**：
+
+| 項目 | 判定 | 理由與證據 |
+| --- | --- | --- |
+| #900–#903、#906–#909 | 已合併，隨本次同步進來 | 合併 commit 分別是 `1e6062e`、`468e60f`、`f90b9d3`、`17772c7`、`7378ebd`、`e6c962c`、`c90f24b`、`0cd9b3a` |
+| #904（Coupler.io MCP 設定，head `e5812307`，只動 `tools/integrations/coupler.md` +40／−1） | 等上游合併 | Coupler 已是 REGISTRY 既有工具（本 fork `tools/REGISTRY.md` 第 59 行），這是廠商人員更新既有指南的 MCP 與 agent skill 段落，不是新增夥伴；open 未合併，合併後隨 commit 軸進來 |
+| #905（deed.page 整合指南，head `d28ab408`，`tools/integrations/deed-page.md` +101、`tools/REGISTRY.md` +3） | 政策性不引用 | 第三方靜態託管服務新增自己的整合卡片與 REGISTRY 列，屬廠商導流入口，理由同 2026-10-26 的 #897、#898 |
+
+兩筆 open PR 以 `gh pr diff` 對目前 head 掃過隱藏內容，無命中（#905 有 5 處 `npx`／`curl` 是安裝說明本文）。issue 軸沒有 #899 之後的新項目。
+
+**觸發條件**：#904 合併 → 下次 commit 軸同步自動帶入；#905 合併進上游 `main` → 經由 commit 軸抵達時，依 2026-10-24 條目的做法略過整合指南與 REGISTRY 列。上游 README 若新增本 fork 會發佈的安裝方式（非上游 release 資產）才翻進繁中 README。
+
+水位：commit `e85f3cb` → `0cd9b3a`，PR `898` → `909`，issue 維持 `899`。

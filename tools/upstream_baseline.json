@@ -1,9 +1,9 @@
 {
   "repo": "https://github.com/coreyhaines31/marketingskills.git",
   "branch": "main",
-  "reviewed_through": "e85f3cbc2e4a79bf33b2a12e9bdd9087d414735b",
-  "reviewed_date": "2026-10-26",
+  "reviewed_through": "0cd9b3a0ef4c411a1d690419ce843f2a1da32cce",
+  "reviewed_date": "2026-10-28",
   "notes": "Fork overlay established at upstream merge of PR #569 (partner program rules). No product commits adopted beyond the fork point. Subsequent upstream commits, PRs, and issues require review. 2026-08-30：commit 水位推進到 e55de88、PR 569 → 571。#571（Converly 因未付款下架）採用——本 fork 的 REGISTRY 原本替一個連上游都下架的廠商掛 Verified Partner 背書，而本線與該廠商毫無商業關係；#570（往 repo 塞加密貨幣交易 app）與本 repo 主題無關且上游未合併，不引用。理由見 docs/DECISIONS.md 同日條目。2026-09-11：commit 水位推進到 5b2c000、PR 571 → 583、issue 維持 569（實查為空）。d4ff28a（Converly 二次上架）與 4fbe11f/88de9fd/5cd4a7e（Ploy 上架三部曲）略過——付款清償的是上游與廠商的贊助關係，不是本 fork 的，維持既有的贊助商 CTA 略過政策。5b2c000（ai-seo 2.5.0）cherry-pick 採用——純產品內容與版本號更新，無 README/REGISTRY/gate 衝突。PR #572/#573/#575/#580/#581/#582/#583 全部 OPEN 未合併，暫緩；#580/#581 的連結修正經查證不落在 tools/check_links.py 的掃描範圍（該工具明確排除 skills/ 與 tools/integrations/），不構成『本 fork 工具能證明的缺陷』。理由見 docs/DECISIONS.md 同日條目。 2026-09-15：commit 與 issue 軸實查無新項目；PR 583 → 588。#586（Glasser 整合指南）與 #587（AIPM registry 徽章）不引用——第三方廠商導流，與 Converly／Ploy 同一類政策。#588（tools/clis/README.md 補完 CLI 目錄）暫緩至合併，純文件對齊且非本 fork 工具能證明的缺陷。理由見 docs/DECISIONS.md 同日條目。 2026-09-30：PR 588 → 598、issue 569 → 600；commit 軸無新增。無採用項目，皆為上游未合併或產品內容，等 commit 軸抵達。理由見 docs/DECISIONS.md 同日條目。 2026-10-24：commit 5b2c000 → e85f3cb（693 commit／613 檔）、PR 598 → 895、issue 600 → 856。逐檔分類：取上游 580（含 conversion-tracking、link-building）、刪除 1、三方合併 21（7 支 CLI 保留輸出遮蔽）、依夥伴政策略過 8（AIsa、Omnia、Converly、Ploy）。產品 skill 內的 ◆ 夥伴提及依「不改寫產品 skill」保留。新增三支上游 workflow 的 repo 閘門；gate 新增綁檔案雜湊的 reviewed_partials；73 筆新 finding 逐筆審閱收錄；SkillSpector pin 改 fe7adc7。理由見 docs/DECISIONS.md 同日條目。 2026-10-26：commit 維持 e85f3cb（實查無新提交）、PR 895 → 898、issue 856 → 899。無採用項目。#897（HeyReagent 整合指南，head 55cbc92，2 檔 +127/-1）與 #898（Adlicio 整合指南，head 9381397，2 檔 +129）皆為第三方廠商導流，與 Glasser／Converly／Ploy 同一類，政策性不引用；兩筆依判準八取當下 head 掃描，無行內超長空白夾帶、eval、base64 或不可見字元。#899 是第三方網站的『AI 輔助報告已刊出』通知，與本 fork 的產品、工具、gate 無關，不適用。#896 在上游不存在（issue 與 PR 皆查無）。理由見 docs/DECISIONS.md 同日條目。",
-  "reviewed_pr_through": 898,
+  "reviewed_pr_through": 909,
   "reviewed_issue_through": 899
 }

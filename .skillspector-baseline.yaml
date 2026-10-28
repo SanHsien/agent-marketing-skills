@@ -33,8 +33,8 @@ reviewed_partials:
   - static_patterns_system_prompt_leakage
   - static_patterns_tool_misuse
   reason_code: obfuscated_instruction_text
-  sha256: 0257b2d5e0ce8664af9fb2d4abc9e3265744931b1d6818610437bb4812ad9fd2
-  reason: 2026-10-24 人工審閱：觸發點是 frontmatter description 第 3 行的觸發詞清單，一長串以單引號包住的使用者說法，其中一則是 'ranking drop alert,'。掃描器把「drop + 引號內容」解讀成「刪掉這些字元」的指令並嘗試重建，結果判為無法確定，所以保守標成混淆。全文沒有零寬或格式字元、沒有 base64 或跳脫編碼，引號內都是一般英文片語；其餘新增內容只是兩個 operator 參考檔的指引段落與數字更新（43 → 58 個 loop）。
+  sha256: fd1ba02a07a6d255f17b81c1c047603b03be5093e5a164a0c14386e7ab6fd3b2
+  reason: 2026-10-24 人工審閱：觸發點是 frontmatter description 第 3 行的觸發詞清單，一長串以單引號包住的使用者說法，其中一則是 'ranking drop alert,'。掃描器把「drop + 引號內容」解讀成「刪掉這些字元」的指令並嘗試重建，結果判為無法確定，所以保守標成混淆。全文沒有零寬或格式字元、沒有 base64 或跳脫編碼，引號內都是一般英文片語；其餘新增內容只是兩個 operator 參考檔的指引段落與數字更新（43 → 58 個 loop）。 2026-10-28 重審上游 0cd9b3a 版本：與上一版只差 metadata.version 1.6.1 → 1.6.2，觸發點仍是同一句 description，判定不變。
 - skill: prospecting
   path: references/compliance.md
   analyzers:
@@ -156,10 +156,6 @@ fingerprints:
   rule_id: AE4
   file: references/team-and-agency-model.md
   reason: 自我指涉誤判：marketing-plan 系列文件開頭出現的字元組合被誤判為可疑 Unicode／混合腳本，實際內容為一般繁體/英文商業文件排版符號，非惡意編碼。
-- hash: sha256:82d259354684f32bd41c9324d18531be1bb676f072a83c34285ae8fd8f2a32b3
-  rule_id: P6
-  file: references/experiments.md
-  reason: 自我指涉誤判：付費牆實驗文件中『re-show rules』『escalating urgency』等段落是產品訊息顯示邏輯的 A/B 測試設計說明，非外洩系統提示或內部規則。
 - hash: sha256:4425a41b8a0994f8947bc7f4dde48cb7c6375e40217954a6c86ff51a6bc43f57
   rule_id: EA2
   file: references/demo-scripts.md
@@ -172,18 +168,6 @@ fingerprints:
   rule_id: P5
   file: assets/creative-review-template.html
   reason: "2026-10-24 上游同步後審閱：範例廣告在講第三方實驗室檢測蛋白粉的砷、鎘、鉛並列出合格結果，是示範證據式產品文案，不含取得或使用有害物質的指示。"
-- hash: sha256:4a74bb2f5a051bad2ddb594204afe4b21cdab320dbc98005b1521fb85be34bb5
-  rule_id: E1
-  file: references/generative-tools.md
-  reason: "2026-10-24 上游同步後審閱：Gemini 影像與 ElevenLabs 語音 API 的 curl 範例，是使用者自己帶金鑰呼叫官方端點的文件說明，skill 不會自行送出資料。"
-- hash: sha256:8710336469cc412ecff6fa0dc7d87220b86ca1542ed2f69587079af07933451d
-  rule_id: E1
-  file: references/generative-tools.md
-  reason: "2026-10-24 上游同步後審閱：Gemini 影像與 ElevenLabs 語音 API 的 curl 範例，是使用者自己帶金鑰呼叫官方端點的文件說明，skill 不會自行送出資料。"
-- hash: sha256:d0dd67ed37fbc109904418d6eab5f3937f04c5b7c9ff6a689cd5472c7d6eba0e
-  rule_id: E1
-  file: references/generative-tools.md
-  reason: "2026-10-24 上游同步後審閱：Gemini 影像與 ElevenLabs 語音 API 的 curl 範例，是使用者自己帶金鑰呼叫官方端點的文件說明，skill 不會自行送出資料。"
 - hash: sha256:9a39fe174dfadf87e685188919a09b27954437df99cc82960f606a25214751ce
   rule_id: P1
   file: references/audit-guardrails.md
@@ -192,14 +176,6 @@ fingerprints:
   rule_id: AR2
   file: references/reading-google-ads-data.md
   reason: "2026-10-24 上游同步後審閱：「學習期的出價策略不要判讀績效」是廣告數據判讀原則，不是要 agent 忽略拒絕條件。"
-- hash: sha256:43a59a48d611a2906dd81f5864d66f308430ea7fd3480f555a5c2aa22d870292
-  rule_id: EA2
-  file: SKILL.md
-  reason: "2026-10-24 上游同步後審閱：命中常見錯誤清單：封鎖搜尋爬蟲前要先確認用途。語意是提醒先查證，不是授予自主權。"
-- hash: sha256:59dc8d8484831bda2b4023ae129f59a7fafcdb06c71e5386d1bf2c293f740752
-  rule_id: TM3
-  file: references/ga4-implementation.md
-  reason: "2026-10-24 上游同步後審閱：`?debug_mode=true` 是 GA4 官方 DebugView 的啟用方式說明，不是不安全的預設值。"
 - hash: sha256:c8af8144b96aeb2f927ff42cab76315c8b1086add4e49e8b1b7de34192ca44d1
   rule_id: PE3
   file: references/measurement-paradigms.md
@@ -220,10 +196,6 @@ fingerprints:
   rule_id: PE3
   file: references/headless-cms.md
   reason: "2026-10-24 上游同步後審閱：說明 Contentful Preview API 使用另一組 access token，是平台設定文件，沒有讀取憑證。"
-- hash: sha256:add08b4ff6842f0e5d07cba9481d75e41c084f22b6722111577b6e6df96b0bf7
-  rule_id: AR2
-  file: SKILL.md
-  reason: "2026-10-24 上游同步後審閱：「別判讀最近三天的數據」是轉換回填延遲的判讀原則。"
 - hash: sha256:581661210b16308789e30f1e922b6e1ac4df9103896a0b7f399391a4717c153d
   rule_id: P1
   file: references/browser-side.md
@@ -260,14 +232,6 @@ fingerprints:
   rule_id: EA2
   file: references/form.md
   reason: "2026-10-24 上游同步後審閱：表單設計清單項目「單一欄位、免確認」，與 agent 自主權無關。"
-- hash: sha256:1534f61c188df9a77d0ff34f4574425535446c9054357dfa205eaa142ea8c07d
-  rule_id: AR2
-  file: references/directory-list.md
-  reason: "2026-10-24 上游同步後審閱：「每季重新確認外連是否被改成 nofollow」是 SEO 維運提醒。"
-- hash: sha256:41a1a04f2d595bfdf2454915a4f1c5e11a88bd3d112a895bdf648e0c64102a67
-  rule_id: E1
-  file: references/submission-tracker-template.csv
-  reason: "2026-10-24 上游同步後審閱：目錄投遞追蹤表的一列（Slack App Directory 網址），只是資料不是請求。"
 - hash: sha256:7d93a36adc723f9e2014a0bc9ea5f5a5dc8b984b296de972470f51b78864c72c
   rule_id: P1
   file: evals/evals.json
@@ -284,10 +248,6 @@ fingerprints:
   rule_id: EA2
   file: references/content-to-skill-release.md
   reason: "2026-10-24 上游同步後審閱：時效性事實的處理規則：保留原日期、未查證不得宣稱至今仍為真。"
-- hash: sha256:9bc48a7b473246292f4d03b95532380d375d12112617129b15b0d58d8e2d343f
-  rule_id: AR2
-  file: references/loop-catalog.md
-  reason: "2026-10-24 上游同步後審閱：loop 的停止條件「樣本太少不判讀、不以開信率判斷」，是分析原則。"
 - hash: sha256:e2f83f76bfb293e4685bee9b06bb88f5fc89cf7e1c1fdb4c6705a723db6a0dca
   rule_id: EA2
   file: evals/evals.json
@@ -312,10 +272,6 @@ fingerprints:
   rule_id: EA2
   file: SKILL.md
   reason: "2026-10-24 上游同步後審閱：列的是 agent 未經核准「不得」做的事（改預算、上下架、改追蹤、發廣告），語意是限制自主。"
-- hash: sha256:a5b8b2ca8d792f941af76b62511d772818823c4f1fec40ed416dee7d6b218fe9
-  rule_id: AS2
-  file: evals/evals.json
-  reason: "2026-10-24 上游同步後審閱：eval 期望輸出提到 Truelist 有 MCP server，是工具介紹不是讀取 MCP 設定。"
 - hash: sha256:3c28cfa7bde416891137b55b2abc98f5216deb2cdca3a7e876be5114fbf83c97
   rule_id: EA2
   file: references/compliance.md
@@ -332,10 +288,6 @@ fingerprints:
   rule_id: AR2
   file: references/newsjacking.md
   reason: "2026-10-24 上游同步後審閱：「搶快沒判斷比晚到更糟」是公關判斷原則。"
-- hash: sha256:a802f0e725c889d4b8e199763a737a2932edb2c1632a0d63bab57f805029e463
-  rule_id: EA2
-  file: SKILL.md
-  reason: "2026-10-24 上游同步後審閱：折扣核准矩陣的一列（標準價自動核准），是 CRM 流程設計範例。"
 - hash: sha256:9ae2ca2a7d6daf066ecb39b845ab42ab974474aa1bac5e227773b8a7b35d1662
   rule_id: OH1
   file: references/schema-examples.md
@@ -384,10 +336,6 @@ fingerprints:
   rule_id: PE3
   file: references/server-side.md
   reason: "2026-10-24 上游同步後審閱：用「有沒有 access token／dataset ID」辨別真假伺服器端整合，是判讀指引。"
-- hash: sha256:d62086cb059679ca1b8efdc57ba54c0a9aaec92071cb95de85a501071f983a79
-  rule_id: EA2
-  file: references/loop-catalog.md
-  reason: "2026-10-24 上游同步後審閱：停止條件明定未經核准不得送出回覆草稿，語意是限制自主。"
 - hash: sha256:4a6d9354909542ab5ee1ae4336c8245021410c9f7076aee2fded54f0cc970d0e
   rule_id: EA2
   file: SKILL.md
@@ -400,26 +348,6 @@ fingerprints:
   rule_id: EA2
   file: references/compliance.md
   reason: "2026-10-24 上游同步後審閱：合規文件（GDPR、PECR、CASL、DNC）在說明哪些情況需要或不需要同意，語意是法遵限制。"
-- hash: sha256:1471c0af470f72a747dae62fa9dd7adcce0310c40cd5d903bb5d2b5be496b729
-  rule_id: AE1
-  file: SKILL.md
-  reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：SKILL.md 引用的審稿頁與 motion-video-ads.md 因解析上限未被完整檢查而連帶產生；兩者都已登記在 reviewed_partials 並人工審閱。"
-- hash: sha256:127a68fb1c11238f7babac3d6ee515bc3b423440db2105a30241f46b379be258
-  rule_id: AE1
-  file: SKILL.md
-  reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：SKILL.md 引用的審稿頁與 motion-video-ads.md 因解析上限未被完整檢查而連帶產生；兩者都已登記在 reviewed_partials 並人工審閱。"
-- hash: sha256:6bc328a1fed034b0dd376b9e1782895b622bcb045bf105ae473e8a7144253f92
-  rule_id: RP1
-  file: SKILL.md
-  reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：表格列出第三方檢測工具，`npx is-agentic` 是給使用者自己執行的範例，skill 不綁定執行。2.12.0 換雜湊。"
-- hash: sha256:b97dcc1ae317a3fb85fd7240615f4a4d39c43e484bc7e21f942f22286cfb27e1
-  rule_id: RP1
-  file: evals/evals.json
-  reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：表格列出第三方檢測工具，`npx is-agentic` 是給使用者自己執行的範例，skill 不綁定執行。2.12.0 換雜湊。"
-- hash: sha256:c74810a6ad36ed726bad0f115e706b55ca58ee843168b6c0286c6e688f8e99d3
-  rule_id: RP1
-  file: references/agent-readiness.md
-  reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：表格列出第三方檢測工具，`npx is-agentic` 是給使用者自己執行的範例，skill 不綁定執行。2.12.0 換雜湊。"
 - hash: sha256:19df3bbecf041bea8a5b50ad4b16d6ba0ad25451600d22e7415c1df60fa72b0d
   rule_id: AE1
   file: SKILL.md
@@ -432,31 +360,99 @@ fingerprints:
   rule_id: AE1
   file: SKILL.md
   reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：SKILL.md 引用的 first-party-tracking.md 因解析上限未被完整檢查而連帶產生；該檔已登記在 reviewed_partials 並人工審閱。"
-- hash: sha256:7c4862670da8e7b70c0fdebf3d4b2a92a20ade430d2bf9f692c46c5c04f1251b
-  rule_id: LP3
-  file: SKILL.md
-  reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：上游產品 frontmatter 沒有 allowed-tools；依 AGENTS.md 不改寫產品 skill。2.12.0 換雜湊。"
-- hash: sha256:8a6e17845c6dea24b242630990defaf019acd4351708bb07f91613d48e11ef42
-  rule_id: AE1
-  file: SKILL.md
-  reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：SKILL.md 引用的 compliance.md 因觸發詞誤判未被完整檢查而連帶產生；該檔已在 reviewed_partials 人工審閱。2.12.0 換雜湊。"
-- hash: sha256:52ac349a0d2c8efc6ecaf9ececb36558baaff5c7d54d01240973ea6c9dfe5eb2
-  rule_id: RP1
-  file: SKILL.md
-  reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：hyperframes、create-video 與 playwright 的 `npx` 範例是給使用者自己執行的入門與環境準備指令，skill 不綁定執行。2.12.0 換雜湊。"
-- hash: sha256:5576e6c58f298f96e36a604fa1b99ac1eb8c381945ef4328af00f85ef95106f7
-  rule_id: RP1
-  file: SKILL.md
-  reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：hyperframes、create-video 與 playwright 的 `npx` 範例是給使用者自己執行的入門與環境準備指令，skill 不綁定執行。2.12.0 換雜湊。"
-- hash: sha256:0ead05edb2f81b0ab74a97de0bf8b6ec1d2d063ee92b3d2e5805dcd59face626
-  rule_id: RP1
-  file: SKILL.md
-  reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：hyperframes、create-video 與 playwright 的 `npx` 範例是給使用者自己執行的入門與環境準備指令，skill 不綁定執行。2.12.0 換雜湊。"
-- hash: sha256:51b4b7dad53ca6897057d5bf73d033bdac2160e2a92fe422de01fedc606f45bd
-  rule_id: RP1
-  file: SKILL.md
-  reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：hyperframes、create-video 與 playwright 的 `npx` 範例是給使用者自己執行的入門與環境準備指令，skill 不綁定執行。2.12.0 換雜湊。"
 - hash: sha256:1ec27af796292d8572319b73b4baf0a3a2450fbbbbe3767511bc4a0621b72be6
   rule_id: RP1
   file: references/product-demo-recording.md
   reason: "2026-10-24 隨 SkillSpector 2.12.0 審閱：hyperframes、create-video 與 playwright 的 `npx` 範例是給使用者自己執行的入門與環境準備指令，skill 不綁定執行。2.12.0 換雜湊。"
+- hash: sha256:d06c8d1115f41fae2fc249493d5a68fa1adacd55b4b8a7b21284214e9eeb27c1
+  rule_id: E1
+  file: references/generative-tools.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 0cd9b3a）：Gemini 與 ElevenLabs 的 curl 範例是給使用者自己呼叫供應商 API 的文件，金鑰取自使用者的環境變數、送往該供應商的官方端點；skill 不會自動執行，也不把 agent 資料外傳。
+- hash: sha256:eccce729fe00fa5fb3b07b2a04e543921e5cb0b660e86a7a8069c4bbdd2b0013
+  rule_id: E1
+  file: references/generative-tools.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 0cd9b3a）：Gemini 與 ElevenLabs 的 curl 範例是給使用者自己呼叫供應商 API 的文件，金鑰取自使用者的環境變數、送往該供應商的官方端點；skill 不會自動執行，也不把 agent 資料外傳。
+- hash: sha256:2dd1bce8f89d60c32c2a14a44ceb5c8ebbe6b91aac9d1f9814d36cc528d80eaf
+  rule_id: E1
+  file: references/generative-tools.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 0cd9b3a）：Gemini 與 ElevenLabs 的 curl 範例是給使用者自己呼叫供應商 API 的文件，金鑰取自使用者的環境變數、送往該供應商的官方端點；skill 不會自動執行，也不把 agent 資料外傳。
+- hash: sha256:b9c0a6d4dec71cae5adb6adba9d89207ae150cc7ca9fe1d3cadb879144fbba7d
+  rule_id: AE1
+  file: SKILL.md
+  reason: 自我指涉誤判（2026-10-28 重審）：SKILL.md 指向 references/motion-video-ads.md 與 assets/creative-review-template.html，這兩個檔的解析上限已在 reviewed_partials 以內容 SHA-256 人工審過且本次未改；只因 SKILL.md 行號變動而產生新指紋。
+- hash: sha256:6053c5217824e1e1a22b432e25f09a325d88db8763d93736508ff5ae67b523e0
+  rule_id: AE1
+  file: SKILL.md
+  reason: 自我指涉誤判（2026-10-28 重審）：SKILL.md 指向 references/motion-video-ads.md 與 assets/creative-review-template.html，這兩個檔的解析上限已在 reviewed_partials 以內容 SHA-256 人工審過且本次未改；只因 SKILL.md 行號變動而產生新指紋。
+- hash: sha256:0922aa7a51b72c3f338ba5978f86a66bd2d6aab8d9b87cc439a8f973ebaa0942
+  rule_id: EA2
+  file: SKILL.md
+  reason: 自我指涉誤判（2026-10-28 重審）：『Blocking discovery crawlers without checking their purpose』是 AI SEO 的常見錯誤清單，提醒網站主不要盲目封鎖搜尋爬蟲，不是要求 agent 不經確認就行動。
+- hash: sha256:54416aee554c653af86e2a87000f563fdd5ac9305f38de3b2ac7c3687393051a
+  rule_id: RP1
+  file: references/agent-readiness.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 8364e8b）：`npx is-agentic`、`npx afdocs check` 是 agent-readiness 評測工具的使用者操作說明，skill 不自動執行，也不是未鎖版的 MCP 或 CLI 設定。
+- hash: sha256:a1a419922738796bc3f1295b04d59ac5a2c0ee696a7fb47d17f04cdb846e6aaa
+  rule_id: RP1
+  file: references/agent-readiness.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 8364e8b）：`npx is-agentic`、`npx afdocs check` 是 agent-readiness 評測工具的使用者操作說明，skill 不自動執行，也不是未鎖版的 MCP 或 CLI 設定。
+- hash: sha256:b0c9bb5074d010dd21c7b74496f9c08f4cc88884c893172e01a2dce81181a398
+  rule_id: TM3
+  file: references/ga4-implementation.md
+  reason: 自我指涉誤判（2026-10-28 重審）：`?debug_mode=true` 是 GA4 DebugView 的官方啟用方式，屬分析設定說明，不是要 agent 開啟除錯或繞過工具限制。
+- hash: sha256:fa1d313f3ff7291ce8f42c992ae4e95cf780adbe6dce8c014fda0380ef89a98c
+  rule_id: AR2
+  file: SKILL.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 f43cdf1）：『never judge the last three days of anything』是說轉換資料有最多 72 小時延遲，別用最近三天下結論，屬分析方法，不是叫 agent 不要拒絕要求。
+- hash: sha256:a8ec500c750c0a8f0f1e25452c13c653e984d0f6a815bdf7bf41fd6a0024bac8
+  rule_id: LP3
+  file: SKILL.md
+  reason: 自我指涉誤判（2026-10-28 重審）：此 skill 是追蹤設定的文字指引，偵測到的檔案讀寫與網路能力來自文件中的設定範例；與 2026-10-24 已審的同一筆相同，只因 SKILL.md 內容更新而換指紋。
+- hash: sha256:28af3ef6d0ed278e71274f89e469b13a782165860f7da00f7d222edd39af295d
+  rule_id: AR2
+  file: references/directory-list.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 ffbf38c／85b482e）：『change all outbound links to nofollow without warning』描述目錄站可能悄悄改連結屬性、提醒定期複查，不是要 agent 無預警行動。
+- hash: sha256:81039c07046c6fbd60a1a43fa9b4f8f203951ecd046b34cb8d4d7332d22d2609
+  rule_id: E1
+  file: references/submission-tracker-template.csv
+  reason: 自我指涉誤判（2026-10-28 重審）：`https://api.slack.com/apps` 是追蹤表裡 Slack App Directory 的提交網址欄位，只是一筆目錄資料，沒有資料送出。
+- hash: sha256:b6719742427fa1ce67deb6f1df1ddb373326dbe69697eeeef967b98fd84847af
+  rule_id: AR2
+  file: references/loop-catalog.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 3c849a2）：『Never judge』出現在外撥迴圈的停損條款（樣本太少不下結論），屬分析紀律，不是反拒絕指令。
+- hash: sha256:69968333ab1bf96b36d1e0c64202439585607d8f7308a64141d747d79c050ad9
+  rule_id: EA2
+  file: references/loop-catalog.md
+  reason: 自我指涉誤判（2026-10-28 重審）：原文是『Never send a drafted response … without approval』，是禁止未經人工核准就送出回覆的防護條款，與過度授權相反。
+- hash: sha256:5056789c898d8039c354dfb6d1ead5447cac19c2c37bc8bd9ef23eda7813e9b2
+  rule_id: P6
+  file: references/experiments.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 448ab68）：『Re-show rules after major engagement』是付費牆何時再次顯示的實驗變數，與系統提示詞外洩無關。
+- hash: sha256:9e8ce91573c84177866d4970ade96b89a04661d65ad6d68ed0d5841d2b5a9c04
+  rule_id: AE1
+  file: SKILL.md
+  reason: 自我指涉誤判（2026-10-28 重審）：SKILL.md 指向 references/compliance.md，該檔的混淆文字判定已在 reviewed_partials 以內容 SHA-256 人工審過且本次未改；只因 SKILL.md 內容更新而產生新指紋。
+- hash: sha256:4c1338f5322ffa5261748dab338fe8e7f8883a4ddcea01c938202865aeb168a8
+  rule_id: AS2
+  file: evals/evals.json
+  reason: 自我指涉誤判（2026-10-28 重審上游 ec6d913）：eval 期望答案『Mentions Truelist MCP server for agent workflows』是在檢查回答有沒有提到工具，不是要 agent 列舉或窺探 MCP 伺服器。
+- hash: sha256:da57f424a1b505295ef90cc7f9e536c89cbd4bd652f9b5d315cefefb8ad051be
+  rule_id: EA2
+  file: SKILL.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 c1f91d8）：表格的『Auto-approved』是標準定價不需折扣核准的銷售流程規則，不是授權 agent 自動核准任何事。
+- hash: sha256:031b068fb594ba9766bf7f74d1a2a1bf5e0c76a8e2e613b2aca5b30a406b3391
+  rule_id: RP1
+  file: SKILL.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 9cc40d0／3bc63dc）：`npx hyperframes`、`npx create-video@latest` 是兩個影片框架的入門指令，給使用者自己在專案裡執行；skill 不自動執行，也不是 MCP 設定。
+- hash: sha256:d712f250b1f4d8734a7b17493f760197d0f6874d0f5e4ee21fa4992439a0b02d
+  rule_id: RP1
+  file: SKILL.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 9cc40d0／3bc63dc）：`npx hyperframes`、`npx create-video@latest` 是兩個影片框架的入門指令，給使用者自己在專案裡執行；skill 不自動執行，也不是 MCP 設定。
+- hash: sha256:48102e7e78b615ede35769e43d305c5a83b88777774fb0f10920ddcb349c899d
+  rule_id: RP1
+  file: SKILL.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 9cc40d0／3bc63dc）：`npx hyperframes`、`npx create-video@latest` 是兩個影片框架的入門指令，給使用者自己在專案裡執行；skill 不自動執行，也不是 MCP 設定。
+- hash: sha256:93737fe01f618285eb1475e0f9284bcb8b044b7907be6cb8c0cd5f9f54767a71
+  rule_id: RP1
+  file: SKILL.md
+  reason: 自我指涉誤判（2026-10-28 重審上游 9cc40d0／3bc63dc）：`npx hyperframes`、`npx create-video@latest` 是兩個影片框架的入門指令，給使用者自己在專案裡執行；skill 不自動執行，也不是 MCP 設定。
