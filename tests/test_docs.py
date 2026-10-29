@@ -272,3 +272,14 @@ def test_development_doc_does_not_hard_code_the_skill_count() -> None:
     development = (ROOT / "docs" / "DEVELOPMENT.md").read_text(encoding="utf-8")
     stale = re.findall(r"\d+\s*個產品\s*skill", development)
     assert stale == []
+
+
+def test_readme_docs_do_not_hard_code_the_skill_count() -> None:
+    """README entries should describe skills via the list rather than hard-coded counts.
+
+    Hard-coded numbers in the prose easily go stale when upstream adds or removes skills.
+    """
+    zh = (ROOT / "README.md").read_text(encoding="utf-8")
+    en = (ROOT / "README.en.md").read_text(encoding="utf-8")
+    assert re.findall(r"\d+\s*個產品\s*skill", zh) == []
+    assert re.findall(r"\b\d+\s+product skills\b", en) == []

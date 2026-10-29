@@ -20,7 +20,7 @@ See each skill's **Related Skills** section for the full dependency map.
 
 ## Available skills
 
-This repository currently ships **50** product skills. The descriptions below are upstream trigger phrases used for discovery.
+This repository ships the product skills listed below. The descriptions below are upstream trigger phrases used for discovery.
 
 <!-- SKILLS:START -->
 | Skill | Description |

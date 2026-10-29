@@ -9,7 +9,7 @@
 
 ## 結論
 
-這個 fork 適合作為 Windows 本機安裝、並追蹤上游行銷 Agent Skills 的維護線。產品是 50 個英文 skill 與 64 支零依賴 Node CLI；沒有獨立行銷引擎。
+這個 fork 適合作為 Windows 本機安裝、並追蹤上游行銷 Agent Skills 的維護線。產品是 52 個英文 skill 與 66 支零依賴 Node CLI；沒有獨立行銷引擎。
 
 2026-08-27 覆核列出的 R-01～R-07，**fork 能修的都修了**（R-01～R-04、R-06）。**沒有**改寫產品 skill、**沒有**改 `.claude-plugin/plugin.json`、**沒有**把 `FUNDING.yml` 改掛到維護者、**沒有**回貢。
 
@@ -71,7 +71,7 @@ pwsh -NoProfile -File tools\dev_check.ps1
 
 ## 已檢查、不列為 finding
 
-- 產品現況：50 個 `skills/*/` 目錄、64 支 `tools/clis/*.js`；frontmatter 驗證通過。
+- 產品現況：52 個 `skills/*/` 目錄、66 支 `tools/clis/*.js` CLI（另有輔助檔 `_safe-output.js`）；frontmatter 驗證通過。
 - Fork overlay Python（`tools/check_*.py`、`tools/validate_skills.py`）無 `os.system`、`shell=True`、`eval(`、`exec(`、`pickle`。`check_upstream_updates.py` 以 argv 列表呼叫 `git`。
 - CLI 憑證只讀 `process.env.*`，倉庫沒有提交 `.env`（`git ls-files` 為 0）。
 - `sync-skills.yml`、`release.yml` 與 `validate-skill.yml` 仍有 `github.repository == 'coreyhaines31/marketingskills'`。
@@ -83,7 +83,7 @@ pwsh -NoProfile -File tools\dev_check.ps1
 ## 尚未宣稱範圍
 
 - **沒有**用真實客戶落地頁、廣告帳號或 API key 跑任何產品 CLI。
-- **沒有**在 Claude Code / Codex / Cursor 實際安裝並觸發全部 50 個 skill。
+- **沒有**在 Claude Code / Codex / Cursor 實際安裝並觸發全部 52 個 skill。
 - **沒有**對 `tools/integrations/` 做 HTTP 探活。
 - `dev_check.ps1` **不含** Bandit；CodeQL 是獨立 workflow。
 - **不宣稱**本 fork 有自己的 GitHub Release；產品版本仍跟隨上游 `.claude-plugin/plugin.json`（目前 `2.11.0`）。

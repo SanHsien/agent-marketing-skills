@@ -5,13 +5,12 @@
 
 ## 現況
 
-本 repo 是行銷 Agent Skills 與零依賴 Node.js CLI 的 Windows 維護線，CLI 契約測試模擬網路，不以真實 API 作 CI（`AGENTS.md`〈專案定位〉、〈技術與資料流〉）。2026-10-29 快照 open PR、安全告警均為 0，CI、CodeQL、Dependency freshness、Upstream check 最近結果為 success；Regression Tests、Release、Sync Skills 與 Validate Agent Skill 因上游 repo 閘門 skipped，issue 因停用而未查到（2026-10-29 `gh` 查詢，`67905a4dc762`）。最新同步報告驗證產品技能清單已有 52 個，但中英入口仍寫 50，實際宿主觸發與真實 API 使用亦不在既有驗收範圍（深掃上游審查報告，2026-10-28；`README.md:46`、`README.en.md:23`；`REVIEW.md:83-90`）。
+本 repo 是行銷 Agent Skills 與零依賴 Node.js CLI 的 Windows 維護線，CLI 契約測試模擬網路，不以真實 API 作 CI（`AGENTS.md`〈專案定位〉、〈技術與資料流〉）。2026-10-29 快照 open PR、安全告警均為 0，CI、CodeQL、Dependency freshness、Upstream check 最近結果為 success；Regression Tests、Release、Sync Skills 與 Validate Agent Skill 因上游 repo 閘門 skipped，issue 因停用而未查到（2026-10-29 `gh` 查詢，`67905a4dc762`）。產品技能清單目前收錄 52 個，中英入口改以清單導向呈現，實際宿主觸發與真實 API 使用不在既有驗收範圍（深掃上游審查報告，2026-10-28；`README.md`、`README.en.md`；`REVIEW.md:83-90`）。
 
 ## 近期：可以直接動手
 
 | 項目 | 為什麼 | 驗收方式 | 建議執行者 | 證據 |
 | --- | --- | --- | --- | --- |
-| 移除中英入口過期的技能數，校正現況描述 | 手寫總數與目前清單不同，容易讓接手者誤判同步漏項 | 對照 `skills/*/SKILL.md` 與兩份 README 表格；改用清單導向說明或可驗證產生方式；同步校正 REVIEW 的現況敘述，保留有日期的歷史驗證原文；連結與文件契約檢查通過 | Claude Haiku | `README.md:46`、`README.en.md:23`、`REVIEW.md:12,74`；`docs/DECISIONS.md:377`；`84857e2` |
 | 補一個宿主的最小技能使用驗收 | 靜態驗證與 CLI mock 測試不能證明技能安裝後真的被觸發 | 維護者選定一個宿主，用一份去識別產品背景走 `product-marketing` 與一個相關 skill；記錄實際讀取、輸出與 SHA，不觸發廣告、郵件或付費 API | 維護者 | `REVIEW.md:83-90`；`README.md`〈Skills 怎麼一起運作〉；`AGENTS.md` 的資料邊界 |
 
 ## 中期：等條件成立再做
