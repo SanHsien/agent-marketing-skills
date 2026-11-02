@@ -91,6 +91,7 @@
 | [prospecting](skills/prospecting/) | When the user wants to find, qualify, and build a list of prospects to reach out to, across B2B SaaS, general B2B, or... |
 | [public-relations](skills/public-relations/) | When the user wants help with public relations, earned media, press coverage, journalist outreach, or media strategy... |
 | [referrals](skills/referrals/) | When the user wants to create, optimize, or analyze a referral program, affiliate program, or word-of-mouth strategy.... |
+| [reverse-engineer-marketing](skills/reverse-engineer-marketing/) | When the user wants to reverse engineer how another company grew and copy what worked. Also use when the user mentions... |
 | [revops](skills/revops/) | When the user wants help with revenue operations, lead lifecycle management, or marketing-to-sales handoff processes.... |
 | [sales-enablement](skills/sales-enablement/) | When the user wants to create sales collateral, pitch decks, one-pagers, objection handling docs, or demo scripts. Also... |
 | [schema](skills/schema/) | When the user wants to add, fix, or optimize schema markup and structured data on their site. Also use when the user... |
@@ -198,7 +199,7 @@ pwsh -NoProfile -File tools\dev_check.ps1
 - **留存**：`churn-prevention`
 - **增長工程**：`co-marketing`、`free-tools`、`referrals`、`lead-magnets`、`community-marketing`
 - **策略與變現**：`marketing-ideas`、`marketing-psychology`、`launch`、`pricing`、`offers`、`marketing-plan`、`marketing-loops`、`marketing-council`
-- **業務與 RevOps**：`revops`、`sales-enablement`、`prospecting`、`directory-submissions`、`public-relations`、`competitor-profiling`、`influencer-marketing`
+- **業務與 RevOps**：`revops`、`sales-enablement`、`prospecting`、`directory-submissions`、`public-relations`、`competitor-profiling`、`reverse-engineer-marketing`、`influencer-marketing`
 
 工具登錄見 [`tools/REGISTRY.md`](tools/REGISTRY.md)；合作夥伴規則見 [`tools/PARTNERS.md`](tools/PARTNERS.md)。那些是上游產品檔，本 fork 不代為背書任何廠商。
 

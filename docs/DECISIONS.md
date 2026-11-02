@@ -453,3 +453,40 @@ commit 軸實查無新提交（`e85f3cb` 仍是上游 `main` 頭）。`#896` 在
 **觸發條件**：#904 合併 → 下次 commit 軸同步自動帶入；#905 合併進上游 `main` → 經由 commit 軸抵達時，依 2026-10-24 條目的做法略過整合指南與 REGISTRY 列。上游 README 若新增本 fork 會發佈的安裝方式（非上游 release 資產）才翻進繁中 README。
 
 水位：commit `e85f3cb` → `0cd9b3a`，PR `898` → `909`，issue 維持 `899`。
+
+## 2026-11-02：上游同步到 `88c79f6`（45 commit；PR #929、issue #924）
+
+**範圍與方法**：以上一個水位 `0cd9b3a` 為 base 對 `0cd9b3a..88c79f6` 做三方套用（`git apply -3`，與 2026-10-28 同法）。上游動到 66 個檔案（+5,979／−89），64 檔乾淨套用，2 檔衝突（`AGENTS.md`、`README.md`）。合併前對全部新增行掃隱藏內容（`\S\s{40,}\S`、`eval`／`new Function`／`globalThis`／`atob`／`child_process`／`execSync`／`spawn`、100 字元以上 base64／hex、零寬與雙向控制字元、控制碼）：只有超過 400 字元的 Markdown／JSON 說明文字（`VERSIONS.md`、各 SKILL.md、`evals.json`、industry packs），零寬與控制字元 0 命中。新增的可執行碼 `skills/reverse-engineer-marketing/scripts/teardown.mjs`（1,227 行）逐行掃：只用 `node:zlib`、`node:fs`、`node:url`，沒有 `child_process`／`eval`；對外請求限於公開資料來源（Wayback、crt.sh、SEC EDGAR、CFPB、FDIC、廣告資料庫網址與 `api.scrapecreators.com`，後者只在使用者自設 `SCRAPECREATORS_API_KEY` 時呼叫）；唯一寫檔是使用者以 `--out` 指定的 CSV。
+
+**採用（整批取用）**：上游已合併的 PR #918（SavvyCal MCP 與 v1 API 指南；`tools/clis/savvycal.js`、`tools/integrations/savvycal.md`、`tools/REGISTRY.md` 既有列的 MCP 欄）、#919（ai-seo 的 agent checkout 面、`video` 的 code-rendered product films 參考、ab-testing 警語；2.13.10）、#920（SavvyCal CLI 列表篩選與 `--duration` 錯誤訊息）、#922（`reverse-engineer-marketing` 新技能 2.14.0：SKILL.md、14 個 evals、31 個 industry packs、`scripts/teardown.mjs` 加 `tests/clis/reverse-engineer-teardown.test.cjs`，以及 competitor-profiling／marketing-ideas／social／marketing-loops 的路由）及其版本號、`VERSIONS.md`、`.claude-plugin/*`、`.codex-plugin/plugin.json`、`scripts/claude-web-descriptions.json`。合併 commit 分別是 `20195e6`、`d82c604`、`820ad2c`、`5ffe077`；末端 `88c79f6` 只是 README 同步。
+
+**scrapecreators 整合指南（`tools/integrations/scrapecreators.md`，+86）與 REGISTRY 一列**：採用。與 #897、#905 這類「廠商自己投稿導流」不同：它是上游維護者自己的 commit（`53918f8`），本 fork 的 `tools/REGISTRY.md` 早就列了這個 provider（第 645 行），`skills/ads/references/creative-research-automation.md:95` 已引用，而新技能的 `sc-ads` 指令依賴它。`partners.json` 沒有新增項目、沒有贊助或 affiliate 欄位，不屬 Verified Partner。
+
+**衝突與取捨**：
+
+| 檔案 | 解法 |
+|---|---|
+| `AGENTS.md` | 保留本 fork 版。上游只改了 MCP-enabled tools 清單那一行（日期與 scrapecreators、savvycal 名單）；本 fork 沒有那行，工具清單以 `tools/REGISTRY.md` 為準，已隨本次同步 |
+| `README.md`（繁中） | 保留本 fork 版，再手動補上技能目錄表一列與分類清單（`README.md`、`README.en.md` 各加 `reverse-engineer-marketing`，這是 AGENTS.md 允許同步的技能目錄表）。上游同次的 ASCII 圖改動不帶 |
+
+**PR 軸**：
+
+| 項目 | 狀態／head | 判定 | 理由與證據 |
+|---|---|---|---|
+| #918、#919、#920、#922 | merged | 隨本次同步進來 | 見上 |
+| #910（DiscoverLaunches 加進獨立發佈站清單，`directory-list.md` +1、`submission-tracker-template.csv` +1） | open `0d64f982` | 等上游合併 | 資料列新增，隨 commit 軸抵達；不替上游決定哪個站該收 |
+| #911（cold-email 範例改用證據欄位，2.13.10）、#923（seo-audit 把 Firecrawl 列為 JS 渲染選項，2.2.3）、#928（Italy 加入 prior-consent 規則，2.14.2）、#929（directory-submissions 處理文件化 API 路由與待審，`SKILL.md` +20／−8） | open `9e180d92`／`ea22c336`／`9449a1fe`／`849f8d1b` | 等上游合併 | 產品 skill 的事實修正；每筆都帶版本號與 `VERSIONS.md` 變更，與已合併的 2.13.10／2.14.0 版本線會互相衝突，合併後隨 commit 軸進來比現在挑著取乾淨 |
+| #914（conversion-tracking：cancelled submit 與 thank-you refresh，+223／−16 共 12 檔，對應 issue #912、#913）、#927（Formidable 失敗 AJAX 提交，2.14.1，對應 issue #924） | open `fe4c3b76`／`99713ddf` | 等上游合併 | 缺陷在 issue 內有重現步驟；修的是 `skills/conversion-tracking/assets/snippets/` 的追蹤腳本（#914：`generic-ajax-form.js`、`thank-you-page.js`；#927：`formidable-forms.js`）加對應 GTM recipe 與 `tests/assets/` 測試。兩筆各帶自己的版本號（2.13.10／2.14.1）與 `VERSIONS.md`、plugin 版本改動，與本次已進來的 2.14.0 版本線互相依序；等上游合併後取，避免本 fork 自己挑出一條不存在於上游的版本序 |
+| #915（video 產品照片構圖與每個長寬比一種版型）、#925（reverse-engineer-marketing 橫向模式等，+922／−23，15 檔）、#926（短影音格式研究，14 檔） | open `792d554b`／`5afe1ca4`／`5ad934b3` | 等上游合併 | 新功能或產品內容擴充，且 #925、#926 又動 2.14.0 剛合併的新技能與版本號；#925 的超長空白行是 `teardown.mjs` 內 CLI help 文字的欄位對齊，不是夾帶 |
+| #916（LazyMind CLI 與整合指南，+352，第三方作者） | open `f5d70c5b` | 政策性不引用 | 外部團隊新增自己的 CLI（`tools/clis/lazymind.js`）與 REGISTRY 列，屬廠商導流入口，理由同 #897／#898／#905；本 fork 與該廠商無商業關係 |
+| #917（社群資料與監聽：中國平台參考、REGISTRY 分類、SocialToAI 指南，+436／−8，9 檔） | open `4be9c74f` | 政策性不引用 | 作者在 PR 內自述來自 SocialToAI 團隊，其中一項是替自家產品新增整合指南；同類。其餘兩項（無廠商名的中國平台參考、REGISTRY 社群資料分類）若上游合併，隨 commit 軸抵達時再判斷是否只取中立部分 |
+
+十二筆 open PR 都以 `gh pr diff` 對**目前** head 掃過隱藏內容（零寬、雙向控制、控制碼 0 命中；`eval`／`new Function`／`globalThis`／`atob`／base64 0 命中，唯一的空白夾內容命中是 #925 的 help 文字對齊）。
+
+**issue 軸**：#912、#913 由 #914 修，#924 由 #927 修（三筆 issue 都 open，不是已修）；隨 PR 合併抵達。無需動作。
+
+**觸發條件**：上表「等上游合併」的 PR 合併後，下次 commit 軸同步自動帶入；#916、#917 若合併進上游 `main`，經由 commit 軸抵達時依 2026-10-24 條目的做法略過廠商整合指南與 REGISTRY 列。
+
+**SkillSpector 自我掃描審閱**：此次同步新增的發現逐筆讀過原文，全部判為誤判，沒有任何一筆需要從同步中剔除，因此沒有丟棄上游檔案。ai-seo 3 筆（`without checking` 是「別盲目封鎖爬蟲」的錯誤清單；兩個 `npx` 評測工具是給使用者的操作說明）、competitor-profiling 1 筆（`proceed without asking` 是唯讀研究的效率指引）、video 4 筆（`npx hyperframes`／`npx create-video` 入門指令）、marketing-loops 的兩個指紋，都是原文不變、只因行號移動而換指紋，就地更換並在理由後註記。reverse-engineer-marketing 25 筆：12 筆 AE1 是 `scripts/teardown.mjs` 解析不完整的連帶發現；2 筆 E1 是對 SEC EDGAR 與 FDIC 公開 API 的 GET 查詢；7 筆 EA2 全是「未經核准／同意不得……」的防護條款；P6 兩筆是 FTC／MLS 的 display rules 合規說明；RP1 一筆是 Docker pull counts 指標；LP3 一筆是未宣告 allowed-tools。`teardown.mjs` 1227 行已全文通讀（無 child_process／eval；網路僅限 GET 公開來源，唯一帶憑證的請求是 `SCRAPECREATORS_API_KEY` 只送往 api.scrapecreators.com），登記於 `.skillspector-baseline.yaml` 的 `reviewed_partials`，內容雜湊變動即重審。
+
+水位：commit `0cd9b3a` → `88c79f6`，PR `909` → `929`，issue `899` → `924`。

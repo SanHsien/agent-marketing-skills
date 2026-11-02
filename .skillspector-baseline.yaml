@@ -33,8 +33,14 @@ reviewed_partials:
   - static_patterns_system_prompt_leakage
   - static_patterns_tool_misuse
   reason_code: obfuscated_instruction_text
-  sha256: fd1ba02a07a6d255f17b81c1c047603b03be5093e5a164a0c14386e7ab6fd3b2
-  reason: 2026-10-24 人工審閱：觸發點是 frontmatter description 第 3 行的觸發詞清單，一長串以單引號包住的使用者說法，其中一則是 'ranking drop alert,'。掃描器把「drop + 引號內容」解讀成「刪掉這些字元」的指令並嘗試重建，結果判為無法確定，所以保守標成混淆。全文沒有零寬或格式字元、沒有 base64 或跳脫編碼，引號內都是一般英文片語；其餘新增內容只是兩個 operator 參考檔的指引段落與數字更新（43 → 58 個 loop）。 2026-10-28 重審上游 0cd9b3a 版本：與上一版只差 metadata.version 1.6.1 → 1.6.2，觸發點仍是同一句 description，判定不變。
+  sha256: eea7f18ee8c5c98e3fa1437a07835466bb9c9d9132a0927523913b3af4c6a642
+  reason: 2026-10-24 人工審閱：觸發點是 frontmatter description 第 3 行的觸發詞清單，一長串以單引號包住的使用者說法，其中一則是 'ranking drop alert,'。掃描器把「drop + 引號內容」解讀成「刪掉這些字元」的指令並嘗試重建，結果判為無法確定，所以保守標成混淆。全文沒有零寬或格式字元、沒有 base64 或跳脫編碼，引號內都是一般英文片語；其餘新增內容只是兩個 operator 參考檔的指引段落與數字更新（43 → 58 個 loop）。 2026-10-28 重審上游 0cd9b3a 版本：與上一版只差 metadata.version 1.6.1 → 1.6.2，觸發點仍是同一句 description，判定不變。 2026-11-02 重審上游 88c79f6 版本：與上一版只差 metadata.version 1.6.2 → 1.7.0、loop 數 58 → 59 與一則指向 reverse-engineer-marketing 的路由條目，description 的觸發詞清單與那句 'ranking drop alert,' 未動，判定不變。
+- skill: reverse-engineer-marketing
+  path: scripts/teardown.mjs
+  analyzer: static_patterns_tool_misuse
+  reason_code: static_parse_limit
+  sha256: 2adfce56fb18af364c5dd0c3f49949b084a5018823746c49718065ef027b433a
+  reason: "2026-11-02 人工審閱上游 88c79f6 版本：已完整通讀 scripts/teardown.mjs 全部 1227 行。無 child_process、eval、new Function、動態 import 以外的程式碼載入（唯一的動態 import 是 node:dns）。網路只有 GET 查詢：使用者指定的目標網域、web.archive.org／archive.org、crt.sh、sec.gov／data.sec.gov／efts.sec.gov、consumerfinance.gov、api.fdic.gov、cdn.optimizely.com，以及 growthbook 的 apiHost（取自被研究頁面、限 https、只 GET、不帶憑證）；唯一帶憑證的請求是 sc-ads 把環境變數 SCRAPECREATORS_API_KEY 只送往 api.scrapecreators.com。檔案存取只有 readFileSync／writeFileSync，路徑全來自 --moves／--traffic／--old／--new／--out 參數，輸出的 CSV 有公式前綴跳脫。解析器跨度上限是被 1227 行裡的大型正規式清單與模板字串觸發，不是工具濫用。"
 - skill: prospecting
   path: references/compliance.md
   analyzers:
@@ -188,10 +194,10 @@ fingerprints:
   rule_id: EA2
   file: references/multichannel-cadence.md
   reason: "2026-10-24 上游同步後審閱：合規規則：電話要比對 Do Not Call 名單、未經同意不得對美國手機用 AI 語音。語意是禁止。"
-- hash: sha256:137d66a88118123c7713df33a65c066674e16f2742af77f59b275c8b386631f1
+- hash: sha256:8c215879ae3ed73f527b5e1a614c54f0aef7329dd8dbe280960146eadaa98c12
   rule_id: EA2
   file: SKILL.md
-  reason: "2026-10-24 上游同步後審閱：「使用者已給 URL 與脈絡時直接開始研究，不必再問」是唯讀研究流程的效率指引，不涉及對外動作。"
+  reason: "2026-10-24 上游同步後審閱：「使用者已給 URL 與脈絡時直接開始研究，不必再問」是唯讀研究流程的效率指引，不涉及對外動作。 2026-11-02 重審上游 88c79f6：原文不變，只因行號或周邊內容移動而換了指紋。"
 - hash: sha256:90cc46beaf54dd2d5b9e68c7acfed172ae222d1568a0d23065959a7345687934
   rule_id: PE3
   file: references/headless-cms.md
@@ -384,18 +390,18 @@ fingerprints:
   rule_id: AE1
   file: SKILL.md
   reason: 自我指涉誤判（2026-10-28 重審）：SKILL.md 指向 references/motion-video-ads.md 與 assets/creative-review-template.html，這兩個檔的解析上限已在 reviewed_partials 以內容 SHA-256 人工審過且本次未改；只因 SKILL.md 行號變動而產生新指紋。
-- hash: sha256:0922aa7a51b72c3f338ba5978f86a66bd2d6aab8d9b87cc439a8f973ebaa0942
+- hash: sha256:a907d958842f2ff9334fc7a711c53c9b470dea119a66d358d6c4e055f8041918
   rule_id: EA2
   file: SKILL.md
-  reason: 自我指涉誤判（2026-10-28 重審）：『Blocking discovery crawlers without checking their purpose』是 AI SEO 的常見錯誤清單，提醒網站主不要盲目封鎖搜尋爬蟲，不是要求 agent 不經確認就行動。
-- hash: sha256:54416aee554c653af86e2a87000f563fdd5ac9305f38de3b2ac7c3687393051a
+  reason: 自我指涉誤判（2026-10-28 重審）：『Blocking discovery crawlers without checking their purpose』是 AI SEO 的常見錯誤清單，提醒網站主不要盲目封鎖搜尋爬蟲，不是要求 agent 不經確認就行動。 2026-11-02 重審上游 88c79f6：原文不變，只因行號或周邊內容移動而換了指紋。
+- hash: sha256:7679b23452f353c181f135ee9a3a416b94c0dea82bb4624bad37d92fddedf821
   rule_id: RP1
   file: references/agent-readiness.md
-  reason: 自我指涉誤判（2026-10-28 重審上游 8364e8b）：`npx is-agentic`、`npx afdocs check` 是 agent-readiness 評測工具的使用者操作說明，skill 不自動執行，也不是未鎖版的 MCP 或 CLI 設定。
-- hash: sha256:a1a419922738796bc3f1295b04d59ac5a2c0ee696a7fb47d17f04cdb846e6aaa
+  reason: 自我指涉誤判（2026-10-28 重審上游 8364e8b）：`npx is-agentic`、`npx afdocs check` 是 agent-readiness 評測工具的使用者操作說明，skill 不自動執行，也不是未鎖版的 MCP 或 CLI 設定。 2026-11-02 重審上游 88c79f6：原文不變，只因行號或周邊內容移動而換了指紋。
+- hash: sha256:7302236c0b0b271710e77a26b1a4f51b032eed6a58442ac7ff9802069191be03
   rule_id: RP1
   file: references/agent-readiness.md
-  reason: 自我指涉誤判（2026-10-28 重審上游 8364e8b）：`npx is-agentic`、`npx afdocs check` 是 agent-readiness 評測工具的使用者操作說明，skill 不自動執行，也不是未鎖版的 MCP 或 CLI 設定。
+  reason: 自我指涉誤判（2026-10-28 重審上游 8364e8b）：`npx is-agentic`、`npx afdocs check` 是 agent-readiness 評測工具的使用者操作說明，skill 不自動執行，也不是未鎖版的 MCP 或 CLI 設定。 2026-11-02 重審上游 88c79f6：原文不變，只因行號或周邊內容移動而換了指紋。
 - hash: sha256:b0c9bb5074d010dd21c7b74496f9c08f4cc88884c893172e01a2dce81181a398
   rule_id: TM3
   file: references/ga4-implementation.md
@@ -416,14 +422,14 @@ fingerprints:
   rule_id: E1
   file: references/submission-tracker-template.csv
   reason: 自我指涉誤判（2026-10-28 重審）：`https://api.slack.com/apps` 是追蹤表裡 Slack App Directory 的提交網址欄位，只是一筆目錄資料，沒有資料送出。
-- hash: sha256:b6719742427fa1ce67deb6f1df1ddb373326dbe69697eeeef967b98fd84847af
+- hash: sha256:4266f17df75449bdefb9657240f7925ce6cfb0f86d285cae2acde194c9790ad3
   rule_id: AR2
   file: references/loop-catalog.md
-  reason: 自我指涉誤判（2026-10-28 重審上游 3c849a2）：『Never judge』出現在外撥迴圈的停損條款（樣本太少不下結論），屬分析紀律，不是反拒絕指令。
-- hash: sha256:69968333ab1bf96b36d1e0c64202439585607d8f7308a64141d747d79c050ad9
+  reason: 自我指涉誤判（2026-10-28 重審上游 3c849a2）：『Never judge』出現在外撥迴圈的停損條款（樣本太少不下結論），屬分析紀律，不是反拒絕指令。 2026-11-02：上游 88c79f6 在 loop-catalog.md 新增 growth-move watch loop，原文與判定不變，只是行號移動而換了指紋。
+- hash: sha256:b30df6f54aa8625651d51293b64fc440f78ba57b29662b4453096e71b1bc2c2e
   rule_id: EA2
   file: references/loop-catalog.md
-  reason: 自我指涉誤判（2026-10-28 重審）：原文是『Never send a drafted response … without approval』，是禁止未經人工核准就送出回覆的防護條款，與過度授權相反。
+  reason: 自我指涉誤判（2026-10-28 重審）：原文是『Never send a drafted response … without approval』，是禁止未經人工核准就送出回覆的防護條款，與過度授權相反。 2026-11-02：上游 88c79f6 在 loop-catalog.md 新增 growth-move watch loop，原文與判定不變，只是行號移動而換了指紋。
 - hash: sha256:5056789c898d8039c354dfb6d1ead5447cac19c2c37bc8bd9ef23eda7813e9b2
   rule_id: P6
   file: references/experiments.md
@@ -440,19 +446,119 @@ fingerprints:
   rule_id: EA2
   file: SKILL.md
   reason: 自我指涉誤判（2026-10-28 重審上游 c1f91d8）：表格的『Auto-approved』是標準定價不需折扣核准的銷售流程規則，不是授權 agent 自動核准任何事。
-- hash: sha256:031b068fb594ba9766bf7f74d1a2a1bf5e0c76a8e2e613b2aca5b30a406b3391
+- hash: sha256:ba556e8f92b99b8b738884c3634949fda5d48c54d48efe6a57edfc6303bfdd4d
   rule_id: RP1
   file: SKILL.md
-  reason: 自我指涉誤判（2026-10-28 重審上游 9cc40d0／3bc63dc）：`npx hyperframes`、`npx create-video@latest` 是兩個影片框架的入門指令，給使用者自己在專案裡執行；skill 不自動執行，也不是 MCP 設定。
-- hash: sha256:d712f250b1f4d8734a7b17493f760197d0f6874d0f5e4ee21fa4992439a0b02d
+  reason: 自我指涉誤判（2026-10-28 重審上游 9cc40d0／3bc63dc）：`npx hyperframes`、`npx create-video@latest` 是兩個影片框架的入門指令，給使用者自己在專案裡執行；skill 不自動執行，也不是 MCP 設定。 2026-11-02 重審上游 88c79f6：原文不變，只因行號或周邊內容移動而換了指紋。
+- hash: sha256:10f28645d0bbcce2b4312f90bbdcec6a4a023e48b7dece17f2295cbcd344a61b
   rule_id: RP1
   file: SKILL.md
-  reason: 自我指涉誤判（2026-10-28 重審上游 9cc40d0／3bc63dc）：`npx hyperframes`、`npx create-video@latest` 是兩個影片框架的入門指令，給使用者自己在專案裡執行；skill 不自動執行，也不是 MCP 設定。
-- hash: sha256:48102e7e78b615ede35769e43d305c5a83b88777774fb0f10920ddcb349c899d
+  reason: 自我指涉誤判（2026-10-28 重審上游 9cc40d0／3bc63dc）：`npx hyperframes`、`npx create-video@latest` 是兩個影片框架的入門指令，給使用者自己在專案裡執行；skill 不自動執行，也不是 MCP 設定。 2026-11-02 重審上游 88c79f6：原文不變，只因行號或周邊內容移動而換了指紋。
+- hash: sha256:3baa369d4ea70cca477e43e17f4fcc88a508e2722f394b4ce6fd013a787f45f9
   rule_id: RP1
   file: SKILL.md
-  reason: 自我指涉誤判（2026-10-28 重審上游 9cc40d0／3bc63dc）：`npx hyperframes`、`npx create-video@latest` 是兩個影片框架的入門指令，給使用者自己在專案裡執行；skill 不自動執行，也不是 MCP 設定。
-- hash: sha256:93737fe01f618285eb1475e0f9284bcb8b044b7907be6cb8c0cd5f9f54767a71
+  reason: 自我指涉誤判（2026-10-28 重審上游 9cc40d0／3bc63dc）：`npx hyperframes`、`npx create-video@latest` 是兩個影片框架的入門指令，給使用者自己在專案裡執行；skill 不自動執行，也不是 MCP 設定。 2026-11-02 重審上游 88c79f6：原文不變，只因行號或周邊內容移動而換了指紋。
+- hash: sha256:b65690978011fd905e2183d1981d14e49fab9891f433f66b257e9ede58b89374
   rule_id: RP1
   file: SKILL.md
-  reason: 自我指涉誤判（2026-10-28 重審上游 9cc40d0／3bc63dc）：`npx hyperframes`、`npx create-video@latest` 是兩個影片框架的入門指令，給使用者自己在專案裡執行；skill 不自動執行，也不是 MCP 設定。
+  reason: 自我指涉誤判（2026-10-28 重審上游 9cc40d0／3bc63dc）：`npx hyperframes`、`npx create-video@latest` 是兩個影片框架的入門指令，給使用者自己在專案裡執行；skill 不自動執行，也不是 MCP 設定。 2026-11-02 重審上游 88c79f6：原文不變，只因行號或周邊內容移動而換了指紋。
+- hash: sha256:25b8fc8eba20e6faa0e9ae4b017731174917fe3fafd7fe12492665d261a2e94e
+  rule_id: LP3
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：此 skill 附帶 scripts/teardown.mjs 而未宣告 allowed-tools；腳本已通讀，只對公開來源發 GET 並讀寫使用者以參數指定的 CSV／JSON，沒有 child_process、eval 或對未知主機的傳輸。"
+- hash: sha256:a8d7c0e487d854b88ac0d394395ed25e6a5a45cad9dfbd58d3c916a0a3c8cc1a
+  rule_id: RP1
+  file: references/industries/saas.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：『Docker pull counts』是開發者工具採用度指標（映像下載數），不是引用某個 Docker 映像。"
+- hash: sha256:1a350b8da7bc939d204760da7a610d1321d4c03914aef16dcd4b230f667ca660
+  rule_id: E1
+  file: scripts/teardown.mjs
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：filings 與 fdic 指令對 SEC EDGAR（data.sec.gov）與 FDIC（api.fdic.gov）公開 API 發 GET 查詢公司名，不帶金鑰或本機資料，是使用者主動執行的唯讀研究查詢。"
+- hash: sha256:2da67df7f28e74bb651ec55edef602a78da6f1601bf9114d900deee950452b1c
+  rule_id: E1
+  file: scripts/teardown.mjs
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：filings 與 fdic 指令對 SEC EDGAR（data.sec.gov）與 FDIC（api.fdic.gov）公開 API 發 GET 查詢公司名，不帶金鑰或本機資料，是使用者主動執行的唯讀研究查詢。"
+- hash: sha256:1fed2628ed3415c9e9ef118433d048809a957245752326a0cb5512384ed7401f
+  rule_id: EA2
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：『no approval』出自『註冊、預約示範、與對方聊天機器人互動須先經使用者逐項核准』的條款，是要求人工核准的防護，與過度授權相反。"
+- hash: sha256:0210f21f4c5a5cbac2bb17446d2d7240bc10c72e65b9f406051f9736778cdfae
+  rule_id: EA2
+  file: evals/evals.json
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：『Does not record a call without consent』是評測的負向斷言（不得未經同意錄音），是防護，不是授權。"
+- hash: sha256:534b08d7dc09e2fcb8af03f01d4b9165c79bbc59b200d7cb939c4c465c9c1ece
+  rule_id: EA2
+  file: references/industries/cpg-food-beverage.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：『Don't copy a claim without checking the current rules』是提醒複製食品宣稱前先查現行法規，是防護。"
+- hash: sha256:cb33c79702755fff19115c390dd3944515b0fb123eb701f80d9dd1e33ace1b3f
+  rule_id: EA2
+  file: references/industries/games-pc-console.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：『Don't buy the full game without approval』是未經使用者核准不得購買的限制，是防護。"
+- hash: sha256:7e3bfefbbd2d2740c9a58bf61adc058fa85d29af7560b425382ac9fdb982401f
+  rule_id: EA2
+  file: references/industries/local-services.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：『Never record a call without consent where the law requires it』是禁止未經同意錄音的守則，是防護。"
+- hash: sha256:08992eb487a04eee1c062e82694483235f3496219e1141b6f54e5a41cbe578fb
+  rule_id: EA2
+  file: references/industries/media-creators.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：『imported contacts without consent』描述電子報平台禁止未經同意匯入聯絡人的平台規則，用來提醒使用者避免，不是指示 agent 執行。"
+- hash: sha256:d3019a4bc2bf1bc0a17d8c38bf0c25ca325c70ca57b1f50cbb00efb0c0113078
+  rule_id: EA2
+  file: references/industries/mobile-apps-games.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：『Don't start a paid trial without approval』是未經使用者核准不得開付費試用的限制，是防護。"
+- hash: sha256:ff21949b9fae256126a978be17a91179538c0c1e911d7daf02e1cabeb406da2d
+  rule_id: P6
+  file: references/industries/hospitality-travel.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：『display rules』指 FTC 對飯店總價顯示的規範，是產業合規說明，與提取系統提示無關。"
+- hash: sha256:e9c7a28c03127d76ac64a0c2d7cc4f0530eee0ca34b15e13879be9525b106110
+  rule_id: P6
+  file: references/industries/real-estate.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：『display rules』指 MLS 對房源資料顯示的規則，是產業合規說明，與提取系統提示無關。"
+- hash: sha256:512098906419731c427d4dad5d2978652d97887105d27b32be709952a7f71c47
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：SKILL.md 呼叫 scripts/teardown.mjs，該檔因解析上限未被完整檢查而連帶產生；腳本已逐行通讀並登記在 reviewed_partials。"
+- hash: sha256:188efcd253b0eba2008a567ce566c947698ede87c9dbabfde7c2ed8d361ace09
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：SKILL.md 呼叫 scripts/teardown.mjs，該檔因解析上限未被完整檢查而連帶產生；腳本已逐行通讀並登記在 reviewed_partials。"
+- hash: sha256:bac5660ab43dd8ccfd00ee4b56bc51cc94284cdd7735d029e3a73445e4ae3f3e
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：SKILL.md 呼叫 scripts/teardown.mjs，該檔因解析上限未被完整檢查而連帶產生；腳本已逐行通讀並登記在 reviewed_partials。"
+- hash: sha256:a3242f5f4fd93580391836e6d9587598edd600163a2f5b3f164a7e55b97927f5
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：SKILL.md 呼叫 scripts/teardown.mjs，該檔因解析上限未被完整檢查而連帶產生；腳本已逐行通讀並登記在 reviewed_partials。"
+- hash: sha256:54c7a1cbc53e6dd6ea9ed434f052e54a9afdf820df0a9778dce5648b2d713d4f
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：SKILL.md 呼叫 scripts/teardown.mjs，該檔因解析上限未被完整檢查而連帶產生；腳本已逐行通讀並登記在 reviewed_partials。"
+- hash: sha256:de702cc32e27b5add185c4e4b6a8732c8d8e0c0871f212b4202806834e5b4ec5
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：SKILL.md 呼叫 scripts/teardown.mjs，該檔因解析上限未被完整檢查而連帶產生；腳本已逐行通讀並登記在 reviewed_partials。"
+- hash: sha256:89c31129c543d7c1c6642d9072c36d244df44a4f59ac5f6cb5ad7f1007ff70c9
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：SKILL.md 呼叫 scripts/teardown.mjs，該檔因解析上限未被完整檢查而連帶產生；腳本已逐行通讀並登記在 reviewed_partials。"
+- hash: sha256:e1a033c7a08d213c3cc86463b1df0b9b1fc65c7c46777037f2076141ff838338
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：SKILL.md 呼叫 scripts/teardown.mjs，該檔因解析上限未被完整檢查而連帶產生；腳本已逐行通讀並登記在 reviewed_partials。"
+- hash: sha256:126e1f8b7144ff006ffb42a8a9d148c2f28e7de7411a1fab5b7653e1d8a111b7
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：SKILL.md 呼叫 scripts/teardown.mjs，該檔因解析上限未被完整檢查而連帶產生；腳本已逐行通讀並登記在 reviewed_partials。"
+- hash: sha256:061ec0f991a471cda3040b04b8de83df9aa82f5d9e72bb173cb7c70fe3ea1297
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：SKILL.md 呼叫 scripts/teardown.mjs，該檔因解析上限未被完整檢查而連帶產生；腳本已逐行通讀並登記在 reviewed_partials。"
+- hash: sha256:8b3a3702a4697f812722ad20546d13381b70c7201b3f72003e7b35a80b28962b
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：SKILL.md 呼叫 scripts/teardown.mjs，該檔因解析上限未被完整檢查而連帶產生；腳本已逐行通讀並登記在 reviewed_partials。"
+- hash: sha256:6b2028bd403c14fb735f53adcd805c29f26a746c067430e48cd665a833ad8c3a
+  rule_id: AE1
+  file: SKILL.md
+  reason: "2026-11-02 審閱新增 skill reverse-engineer-marketing（上游 88c79f6）：SKILL.md 呼叫 scripts/teardown.mjs，該檔因解析上限未被完整檢查而連帶產生；腳本已逐行通讀並登記在 reviewed_partials。"

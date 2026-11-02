@@ -68,6 +68,7 @@ This repository ships the product skills listed below. The descriptions below ar
 | [prospecting](skills/prospecting/) | When the user wants to find, qualify, and build a list of prospects to reach out to, across B2B SaaS, general B2B, or... |
 | [public-relations](skills/public-relations/) | When the user wants help with public relations, earned media, press coverage, journalist outreach, or media strategy... |
 | [referrals](skills/referrals/) | When the user wants to create, optimize, or analyze a referral program, affiliate program, or word-of-mouth strategy.... |
+| [reverse-engineer-marketing](skills/reverse-engineer-marketing/) | When the user wants to reverse engineer how another company grew and copy what worked. Also use when the user mentions... |
 | [revops](skills/revops/) | When the user wants help with revenue operations, lead lifecycle management, or marketing-to-sales handoff processes.... |
 | [sales-enablement](skills/sales-enablement/) | When the user wants to create sales collateral, pitch decks, one-pagers, objection handling docs, or demo scripts. Also... |
 | [schema](skills/schema/) | When the user wants to add, fix, or optimize schema markup and structured data on their site. Also use when the user... |
@@ -155,7 +156,7 @@ You can also invoke skills directly: `/cro`, `/emails`, `/seo-audit`.
 - **Retention**: `churn-prevention`
 - **Growth**: `co-marketing`, `free-tools`, `referrals`, `lead-magnets`, `community-marketing`
 - **Strategy**: `marketing-ideas`, `marketing-psychology`, `launch`, `pricing`, `offers`, `marketing-plan`, `marketing-loops`, `marketing-council`
-- **Sales & RevOps**: `revops`, `sales-enablement`, `prospecting`, `directory-submissions`, `public-relations`, `competitor-profiling`, `influencer-marketing`
+- **Sales & RevOps**: `revops`, `sales-enablement`, `prospecting`, `directory-submissions`, `public-relations`, `competitor-profiling`, `reverse-engineer-marketing`, `influencer-marketing`
 
 The tool registry is [`tools/REGISTRY.md`](tools/REGISTRY.md). Partner rules live in [`tools/PARTNERS.md`](tools/PARTNERS.md). Those are upstream product files; this fork does not endorse vendors.
 
