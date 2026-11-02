@@ -490,3 +490,12 @@ commit 軸實查無新提交（`e85f3cb` 仍是上游 `main` 頭）。`#896` 在
 **SkillSpector 自我掃描審閱**：此次同步新增的發現逐筆讀過原文，全部判為誤判，沒有任何一筆需要從同步中剔除，因此沒有丟棄上游檔案。ai-seo 3 筆（`without checking` 是「別盲目封鎖爬蟲」的錯誤清單；兩個 `npx` 評測工具是給使用者的操作說明）、competitor-profiling 1 筆（`proceed without asking` 是唯讀研究的效率指引）、video 4 筆（`npx hyperframes`／`npx create-video` 入門指令）、marketing-loops 的兩個指紋，都是原文不變、只因行號移動而換指紋，就地更換並在理由後註記。reverse-engineer-marketing 25 筆：12 筆 AE1 是 `scripts/teardown.mjs` 解析不完整的連帶發現；2 筆 E1 是對 SEC EDGAR 與 FDIC 公開 API 的 GET 查詢；7 筆 EA2 全是「未經核准／同意不得……」的防護條款；P6 兩筆是 FTC／MLS 的 display rules 合規說明；RP1 一筆是 Docker pull counts 指標；LP3 一筆是未宣告 allowed-tools。`teardown.mjs` 1227 行已全文通讀（無 child_process／eval；網路僅限 GET 公開來源，唯一帶憑證的請求是 `SCRAPECREATORS_API_KEY` 只送往 api.scrapecreators.com），登記於 `.skillspector-baseline.yaml` 的 `reviewed_partials`，內容雜湊變動即重審。
 
 水位：commit `0cd9b3a` → `88c79f6`，PR `909` → `929`，issue `899` → `924`。
+
+**維護者決定（2026-11-02）**：收入 `reverse-engineer-marketing`。另有 Antigravity 唯讀覆核（relay `20261102T145859965Z-31d06a`）看上述豁免理由；它若找出真問題，以後續 commit 修正，不影響收入的決定。
+
+**`reverse-engineer-marketing` 的已知風險**（收入時整理，讓使用者依自己的用途判斷；技能本體維持上游原文，不另加限制）：
+
+1. **對第三方的行為**：這個技能會研究競爭對手的網站、廣告與公開資料，可能涉及註冊對方服務、讀取需登入或付費的內容、大量抓取、對方的反爬機制、對方服務條款與個人資料。技能原文的做法是用真實身分、對外動作先經使用者核准、不付款。
+2. **`scripts/teardown.mjs` 的網路行為**：對公開資料來源發 GET（Wayback、crt.sh、SEC EDGAR、CFPB、FDIC、廣告資料庫網址）。唯一帶憑證的請求是使用者自設的 `SCRAPECREATORS_API_KEY`，送往 `api.scrapecreators.com`。
+3. **連線目標來自被研究的網頁**：growthbook 的 `apiHost` 取自目標頁面（限 https、只 GET、不帶憑證），也就是由外部內容決定連線對象（SSRF 類風險）；在本機或內網有管理介面的環境執行時值得知道這點。
+4. **SkillSpector 豁免**（維護用）：本次為這個技能加了 25 筆指紋豁免與 `teardown.mjs` 的 `reviewed_partials`，理由見上；內容雜湊變動時重審。
