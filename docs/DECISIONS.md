@@ -1,5 +1,13 @@
 # 維護決策
 
+## 2026-11-05：ruff 下限改用常態 freshness-hold
+
+**決定**：保留 `ruff>=0.16`，在宣告行加入 `freshness-hold`，移除只評估到 `0.17.2` 的過期暫緩。這是下限政策，不是暫不安裝新版：CI 沒有上限或 lock，安裝時仍可取得現行版；本機已安裝 `0.17.3`。
+
+**理由與證據**：既有暫緩理由已指出 E9、F 與 py39 target 不需要較新下限；本次將其放回常態政策的位置，不提高相容性下限。已讀 [ruff 0.17.3 release notes](https://github.com/astral-sh/ruff/releases/tag/0.17.3)：變更為 preview、UP032 修正、效能與文件，沒有要求調高本 repo 所用規則的下限。
+
+**重新審查條件**：新增 lint 規則、選項或 Python target，或發現 `0.16` 的可重現缺陷時，重新評估最低版本；新增上限或 lock 時也須重新判定。完整 Windows gate 的安全掃描仍須依開發文件使用 Python 3.13 與釘定的 SkillSpector，不能以 freshness 綠燈代替。
+
 ## 2026-08-27：建立 Windows-first 維護型 fork
 
 **決定**：fork `coreyhaines31/marketingskills`，保留 MIT 與完整歷史，預設分支維持 `main` 以降低與上游同步摩擦。本線聚焦繁中公開入口、Windows 開發 gate、Windows CI，以及逐筆審查的上游追蹤。

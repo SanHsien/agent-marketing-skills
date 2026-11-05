@@ -11,6 +11,12 @@ adopt/skip reasoning is recorded in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ---
 
+## 2026-11-05
+
+### Changed
+
+- Keep the `ruff>=0.16` compatibility floor and replace the expired `0.17.2` deferral with a standing `freshness-hold`; CI can still install the current release. Reassess when lint rules or options change. See [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
 ## 2026-10-24
 
 ### Changed (SkillSpector 2.12.0)

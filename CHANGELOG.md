@@ -10,6 +10,12 @@
 
 ---
 
+## 2026-11-05
+
+### 變更
+
+- 保留 `ruff>=0.16` 相容性下限，以常態 `freshness-hold` 取代過期的 `0.17.2` 暫緩；CI 仍可安裝現行版，規則或選項變更時重審。見 [`docs/DECISIONS.md`](docs/DECISIONS.md)。
+
 ## 2026-10-24
 
 ### 變更（SkillSpector 2.12.0）
