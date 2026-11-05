@@ -499,3 +499,11 @@ commit 軸實查無新提交（`e85f3cb` 仍是上游 `main` 頭）。`#896` 在
 2. **`scripts/teardown.mjs` 的網路行為**：對公開資料來源發 GET（Wayback、crt.sh、SEC EDGAR、CFPB、FDIC、廣告資料庫網址）。唯一帶憑證的請求是使用者自設的 `SCRAPECREATORS_API_KEY`，送往 `api.scrapecreators.com`。
 3. **連線目標來自被研究的網頁**：growthbook 的 `apiHost` 取自目標頁面（限 https、只 GET、不帶憑證），也就是由外部內容決定連線對象（SSRF 類風險）；在本機或內網有管理介面的環境執行時值得知道這點。
 4. **SkillSpector 豁免**（維護用）：本次為這個技能加了 25 筆指紋豁免與 `teardown.mjs` 的 `reviewed_partials`，理由見上；內容雜湊變動時重審。
+
+## 2026-11-05：Python 3.9 的 CI 測試矩陣釘在 ubuntu-24.04
+
+**決定**：`.github/workflows/ci.yml` 中矩陣內 `python-version == '3.9'` 的 leg（`runs-on` 以條件式選 runner）改在 `ubuntu-24.04` 執行；其他 Python 版本與 Windows／macOS 不動。
+
+**理由**：`ubuntu-latest` 已換成 Ubuntu 26.04，`actions/setup-python` 在該映像沒有 Python 3.9（官方 versions-manifest 的 3.9.25 只有 22.04、24.04），Set up Python 步驟會失敗：`The version '3.9' with architecture 'x64' was not found for Ubuntu 26.04`。此舉保住既有 Python 3.9 支援宣告的測試，不縮減矩陣。
+
+**重審條件**：`ubuntu-24.04` runner 退役或停止支援 Python 3.9、`setup-python` 補上 26.04 的 3.9 build、或決定放棄 Python 3.9 支援時，移除此釘版。
