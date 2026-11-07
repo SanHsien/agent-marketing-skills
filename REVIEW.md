@@ -83,8 +83,8 @@ pwsh -NoProfile -File tools\dev_check.ps1
 ## 尚未宣稱範圍
 
 - **沒有**用真實客戶落地頁、廣告帳號或 API key 跑任何產品 CLI。
-- **沒有**在 Claude Code / Codex / Cursor 實際安裝並觸發全部 52 個 skill。
+- 只在 Claude Code 實際載入並觸發過 `product-marketing` 與 `copywriting` 兩個 skill（2026-11-08，非互動 `--plugin-dir`；證據 `docs/host-acceptance/2026-11-08-claude-code.md`）。**只宣稱這兩個**：**沒有**觸發其餘 skill，**沒有**在 Codex / Cursor 實際安裝並觸發任何 skill，也**沒有**驗過互動式 `/plugin` 安裝路徑。
 - **沒有**對 `tools/integrations/` 做 HTTP 探活。
 - `dev_check.ps1` **不含** Bandit；CodeQL 是獨立 workflow。
-- **不宣稱**本 fork 有自己的 GitHub Release；產品版本仍跟隨上游 `.claude-plugin/plugin.json`（目前 `2.11.0`）。
+- **不宣稱**本 fork 有自己的 GitHub Release；產品版本仍跟隨上游 `.claude-plugin/plugin.json`（目前 `2.14.0`）。
 - **不宣稱**上游 `validate-skill.yml`（`ubuntu-slim` + 第三方 action）已在本 fork 跑過；本線只閘住它，驗證走 `validate_skills.py`。

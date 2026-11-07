@@ -515,3 +515,17 @@ commit 軸實查無新提交（`e85f3cb` 仍是上游 `main` 頭）。`#896` 在
 **理由**：`ubuntu-latest` 已換成 Ubuntu 26.04，`actions/setup-python` 在該映像沒有 Python 3.9（官方 versions-manifest 的 3.9.25 只有 22.04、24.04），Set up Python 步驟會失敗：`The version '3.9' with architecture 'x64' was not found for Ubuntu 26.04`。此舉保住既有 Python 3.9 支援宣告的測試，不縮減矩陣。
 
 **重審條件**：`ubuntu-24.04` runner 退役或停止支援 Python 3.9、`setup-python` 補上 26.04 的 3.9 build、或決定放棄 Python 3.9 支援時，移除此釘版。
+
+## 2026-11-08：宿主最小技能驗收選 Claude Code，並在同一輪實跑通過
+
+**決定**：宿主驗收（`product-marketing` 加一個相關 skill 的實際觸發）選 **Claude Code**，原因是本 fork 的安裝文件與 plugin 路徑以它為主（`README.md` 安裝段），且是維護者日常宿主。最初把這一列移到中期等維護者開互動 session；同日改為不等維護者，自己用非互動 `claude -p --plugin-dir` 直接做，路線圖列因此刪除。
+
+**為什麼這一輪就能做**：驗收要的是「一個真的載入 skill 的 Claude Code session」並記錄實際讀取與輸出，不要求互動。`claude -p --plugin-dir <工作樹> --output-format stream-json --verbose` 會載入 plugin，並把 Skill 載入、檔案讀寫與最終輸出都寫成事件，證據可保存。先前的判斷（規劃輪次沒有 session，只能巢狀模擬）是錯的：這是一次獨立的真實 session，不是在子 agent 裡模擬。
+
+**結果**：通過。session 依序載入 `marketing-skills:product-marketing` 與 `marketing-skills:copywriting`，寫出 `.agents/product-marketing.md`，再讀它並產出首頁主視覺文案；沒有網路與付費 API 呼叫。載入事件、輸出全文與被讀檔案 SHA 見 `docs/host-acceptance/2026-11-08-claude-code.md`。第一次嘗試因 `--allowedTools`／`--add-dir` 吃掉位置參數而 exit 1（沒有模型呼叫），改由 stdin 送提示詞後成功。
+
+**驗收規格**（沿用，避免日後重新討論）：用一份去識別的產品背景；依序請 session 套用 `product-marketing` 與 `copywriting`；保存 session 的 skill 載入紀錄、輸出全文與被讀檔案的 SHA；不呼叫廣告、郵件或付費 API；證據寫成 `docs/host-acceptance/<日期>-claude-code.md`。
+
+**宣稱範圍**：`REVIEW.md` 〈尚未宣稱範圍〉只改成宣稱這兩個 skill 在 Claude Code 觸發過；其餘 skill、Codex／Cursor 宿主與互動式 `/plugin` 安裝路徑仍未驗。
+
+**重審條件**：`skills/product-marketing/` 或 `skills/copywriting/` 在上游同步後內容改變（git blob 與證據檔所列不同）；Claude Code 的 plugin 載入行為在 README 安裝段被回報失效；或要把宣稱擴到其他 skill／宿主，屆時為該宿主或 skill 另寫一份 `docs/host-acceptance/<日期>-<宿主>.md`。
