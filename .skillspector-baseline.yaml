@@ -454,7 +454,7 @@ fingerprints:
 - hash: sha256:b18657facbaa158959549d0919ee610dc95661b49043311961fd875e1cf0e7f0
   rule_id: LP3
   file: SKILL.md
-  reason: "2026-11-10 重審上游 7c18794：此 skill 附帶 scripts/teardown.mjs 而未宣告 allowed-tools；腳本已重新通讀（1777 行），只對公開來源發 GET 並讀寫使用者以參數指定的 CSV 或 JSON，沒有 child_process、eval 或對未知主機的傳輸。"
+  reason: "2026-11-10 重審上游 7c18794：此 skill 附帶 scripts/teardown.mjs 而未宣告 allowed-tools；腳本已重新通讀（1777 行），只發 GET：寫死的公開 API 主機，加上使用者指定要分析的網域與從該頁取得的 growthbook apiHost；並讀寫使用者以參數指定的 CSV 或 JSON；沒有 child_process、eval，也不送出任何 POST 或憑證以外的資料（`GITHUB_TOKEN` 只送往 api.github.com）。"
 - hash: sha256:69ac864cb50f2173f1cd19ea19f4692ce5003bfff2a5bfd87feba8399e318d13
   rule_id: EA2
   file: SKILL.md

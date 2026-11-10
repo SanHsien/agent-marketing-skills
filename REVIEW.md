@@ -71,7 +71,7 @@ pwsh -NoProfile -File tools\dev_check.ps1
 
 ## 已檢查、不列為 finding
 
-- 產品現況：52 個 `skills/*/` 目錄、66 支 `tools/clis/*.js` CLI（另有輔助檔 `_safe-output.js`）；frontmatter 驗證通過。
+- 產品現況：52 個 `skills/*/` 目錄、66 支 `tools/clis/*.js` CLI（另有輔助檔 `_safe-output.js`）；frontmatter 驗證通過。（2026-08-27 快照；2026-11-10 同步上游 7c18794 後為 53 個 skill，見 `docs/DECISIONS.md`。）
 - Fork overlay Python（`tools/check_*.py`、`tools/validate_skills.py`）無 `os.system`、`shell=True`、`eval(`、`exec(`、`pickle`。`check_upstream_updates.py` 以 argv 列表呼叫 `git`。
 - CLI 憑證只讀 `process.env.*`，倉庫沒有提交 `.env`（`git ls-files` 為 0）。
 - `sync-skills.yml`、`release.yml` 與 `validate-skill.yml` 仍有 `github.repository == 'coreyhaines31/marketingskills'`。
