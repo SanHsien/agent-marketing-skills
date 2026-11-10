@@ -529,3 +529,66 @@ commit 軸實查無新提交（`e85f3cb` 仍是上游 `main` 頭）。`#896` 在
 **宣稱範圍**：`REVIEW.md` 〈尚未宣稱範圍〉只改成宣稱這兩個 skill 在 Claude Code 觸發過；其餘 skill、Codex／Cursor 宿主與互動式 `/plugin` 安裝路徑仍未驗。
 
 **重審條件**：`skills/product-marketing/` 或 `skills/copywriting/` 在上游同步後內容改變（git blob 與證據檔所列不同）；Claude Code 的 plugin 載入行為在 README 安裝段被回報失效；或要把宣稱擴到其他 skill／宿主，屆時為該宿主或 skill 另寫一份 `docs/host-acceptance/<日期>-<宿主>.md`。
+
+## 2026-11-10：上游同步到 `7c18794`（59 commit；PR #953、issue #954）
+
+**範圍與方法**：以上一個水位 `88c79f6` 為 base 對 `88c79f6..7c18794` 做三方套用（`git apply -3`，與 2026-11-02 同法）。上游動到 103 個檔案（+7,387／−323）；排除 5 個本 fork 自有或依政策不收的檔案（`README.md`、`AGENTS.md`、`CONTRIBUTING.md`、`partners.json`、`tools/integrations/livestorm.md`）後，其餘 98 檔進來：96 檔乾淨套用，2 檔衝突（`.gitignore`、`tools/REGISTRY.md`）手動解。合併前對全部新增行掃隱藏內容（`\S\s{40,}\S`、`eval`／`new Function`／`globalThis`／`atob`／`child_process`／`execSync`／`spawn`、100 字元以上 base64／hex、零寬與雙向控制字元、控制碼）：零寬與控制字元、base64／hex、行內長空白均 0 命中；超過 400 字元的新增行 58 行，全是 Markdown／JSON 說明文字；執行相關命中只有 `scripts/trigger-eval.mjs` 的 `spawn('claude', …)`（見下）。
+
+**採用（整批取用）**：上游已合併的 PR #950（description 縮到 500 字元、全 pack 24,000 字元，加 trigger eval，2.14.3）、#952（讓 skill 對建議與判斷類問題也會載入，2.14.8）、#953（判斷類情境，2.14.9）、#945（ads 的「normal variance」定義，`ads`、`marketing-loops`）、#886（`social` 新增 ship-post 參考）、#914（conversion-tracking：cancelled submit 與 thank-you refresh，2.13.10）、#927（Formidable 失敗 AJAX 提交，2.14.1）、#925（reverse-engineer-marketing 橫向模式）、#926（短影音格式研究）及其版本號、`VERSIONS.md`、`.claude-plugin/*`、`.codex-plugin/plugin.json`、`scripts/claude-web-descriptions.json`。合併 commit：`0cdbfb6`（#950）、`83b302e`（#952）、`1646ab0`（#953）、`0054490`（#945）、`f07e2cf`（#886）、`28f0aee`（#914）、`e690ca8`（#927）、`e5f02a9`（#925）、`96798cf`（#926）。這批同時解掉 2026-11-02 條目「等上游合併」的 #914、#925、#926、#927；先前條目中等待或不引用的 #904、#905、#910、#911、#915、#916、#917、#923、#928、#929 實查仍是 open，判定不變。
+
+**Post Bridge 整合指南（`tools/integrations/post-bridge.md`，+97）與 REGISTRY 兩列**：採用。上游維護者自己的 commit（`994c060`，作者 Corey Haines），REGISTRY 列沒有 ◆、`partners.json` 沒有條目，指南內 0 處 partner／sponsor 字樣，只有端點、MCP 與操作；同 2026-11-02 的 scrapecreators。REGISTRY 社群排程段的「Agent recommendation」同步改成「用使用者已有的排程器」。
+
+**依政策略過（`54c021c`，PR #942 Livestorm 上架為 Skill Partner）**：整個 commit 不收，4 個檔案全是夥伴內容：`partners.json` 新增 Livestorm 條目並改 AIsa 的 logo 網址（本 fork 的 `partners.json` 沒有 AIsa 條目，沒有可改之處）、兩份 README 的夥伴卡片、`tools/REGISTRY.md` 的夥伴列與 ◆ 標記、`tools/integrations/livestorm.md` 開頭的 Verified Partner 揭露段。理由同 2026-10-24 的 Converly／Ploy／AIsa／Omnia。本 fork 的 `livestorm.md` 與 REGISTRY 工具表的 livestorm 一列維持原樣（既有的中立指南，不帶 ◆）。
+
+**衝突與取捨**：
+
+| 檔案 | 解法 |
+|---|---|
+| `README.md`、`README.en.md` | 保留本 fork 版（繁中主檔、fork 說明、開發段、回報分流、頁尾都不動）。只把 53 列技能目錄表的描述欄換成上游新版（`AGENTS.md` 允許同步技能目錄表）；Livestorm 卡片不帶 |
+| `AGENTS.md` | 保留本 fork 版。上游這次改的是 description 長度規範（1–1024 → 1–500）、description 寫法指引、trigger eval 用法與 MCP 工具名單；本 fork 的 `AGENTS.md` 是繁中維護指引，沒有這些段落，規範的處理見下 |
+| `CONTRIBUTING.md` | 保留本 fork 版。上游只把 description 上限字樣從 1024 改 500，本 fork 的貢獻說明不是上游產品規格 |
+| `.gitignore` | 兩邊並存：本 fork 的 Python gate 項目後面接上游新增的 `evals/triggers/results/` |
+| `tools/REGISTRY.md` | 套用 post-bridge 兩列與社群排程段建議；`PARTNERS:START/END` 之間維持本 fork 的空夥伴表，不收 Livestorm 夥伴列，工具表的 livestorm 一列不加 ◆ |
+
+**description 上限（500 字元／全 pack 24,000）**：上游把產品 skill 的 description 縮短並訂出自己的上限，檢查在 `scripts/check-versions.mjs`（只在上游的 workflow 執行）。本 fork 沿用 agentskills 規格值 1024（`tools/validate_skills.py`、`docs/SKILL-SPEC.md`），不把 500 加進自己的驗證器，因為產品內容跟隨上游、由上游把關。實測 `node scripts/check-versions.mjs` exit 0，輸出為 `versions consistent across 53 skills (repo 2.14.9); descriptions 18662 chars`；`docs/SKILL-SPEC.md` 補一行說明這個差異。**重審條件**：本 fork 自己新增或改寫 skill description 時先跑 `node scripts/check-versions.mjs`；若本線開始自有 skill，再評估把 500 上限加進 `validate_skills.py`。
+
+**trigger eval（`scripts/trigger-eval.mjs`、`evals/triggers/*`、`tests/clis/trigger-eval.test.cjs`）**：採用檔案，不納入 gate。腳本逐行讀過：唯一的執行點是 `spawn('claude', args)`，以 `claude -p --plugin-dir <本 pack> --setting-sources project --strict-mcp-config --tools Skill --max-turns 1 --no-session-persistence` 跑每個提示詞並解析 stream-json；不載入使用者設定、只開 Skill 工具、120 秒逾時即 `SIGKILL`，輸出只寫 `evals/triggers/results/`（已在 `.gitignore`）。它每個提示詞耗一次已登入 Claude Code 的請求，所以本 fork 的 `dev_check.ps1` 與 CI 不跑，只跑 `tests/clis/trigger-eval.test.cjs`（不含 `spawn`、不呼叫 `claude`）的契約測試，已在 `dev_check.ps1` 的 Node 契約測試之內。**重審條件**：本 fork 要宣稱某個 skill 在 Claude Code 的觸發率時，才實跑 `node scripts/trigger-eval.mjs`，並把結果記進 `docs/host-acceptance/`。
+
+**新的可執行碼**：`skills/reverse-engineer-marketing/scripts/teardown.mjs` 從 1,227 行增為 1,777 行（+551／−1），新增 `jobs`、`reviews`、`adoption`、`compare` 四個指令與「失敗讀取不當成發現」的修正，新增部分逐行讀過：仍無 `child_process`、`eval`、`new Function`；網路只有 GET，新增目標是 Greenhouse／Lever／Ashby 公開職缺 API、`itunes.apple.com` 的搜尋與評論 feed、`api.npmjs.org`、`pypistats.org`、`api.github.com`；新增的唯一憑證是使用者自設的 `GITHUB_TOKEN`／`GH_TOKEN`，硬編碼只送往 `api.github.com`；檔案存取仍只有 `--from` 讀入與 `--out` 寫出。`conversion-tracking` 這批改的是頁面端追蹤 snippet（`generic-ajax-form`、`thank-you-page`、`formidable-forms`）、對應的 GTM detect recipe 與 3 個 `tests/assets/` 測試。
+
+**PR 軸**（十四筆，`gh pr view` 與 `gh pr diff` 對**目前** head 取得；零寬、雙向控制、控制碼、base64／hex、行內長空白均 0 命中）：
+
+| 項目 | 狀態／head | 判定 | 理由與證據 |
+|---|---|---|---|
+| #942、#945、#950、#952、#953 | merged | 隨本次同步進來（#942 依政策略過，見上） | 合併 commit `54c021c`、`0054490`、`0cdbfb6`、`83b302e`、`1646ab0` |
+| #939（Marcora 整合指南，`marcora.md` 加 REGISTRY 列，+68） | open `7ceee037` | 政策性不引用 | PR 內自述作者是該產品創辦人；新增特定廠商服務的整合卡片，屬廠商導流入口，理由同 #897／#898／#905 |
+| #940（Ahel 整合指南，+46） | open `3d8fa7df` | 政策性不引用 | PR 內自述作者在該公司工作；同類 |
+| #941（LurkAPI 整合指南，3 檔 +119／−1，含改 `AGENTS.md`） | open `780beddd` | 政策性不引用 | 特定服務的整合卡片；同類。與 scrapecreators 同領域，但該指南是上游維護者自己的 commit，本條不是 |
+| #943（Parallel 搜尋與擷取 CLI，9 檔 +399／−4，新 `tools/clis/parallel.js`） | open `9df05586` | 政策性不引用 | 新增特定服務的 CLI、整合指南與 REGISTRY 列，並帶 plugin 版本與 `VERSIONS.md` 改動；`tools/clis/` 以上游為準，等上游自己合併後經 commit 軸判斷。測試檔的 `spawn` 是 `node -e` 起子行程，無遠端執行 |
+| #944（cloro 整合與 CLI，6 檔 +397／−4） | open `5bda67d4` | 政策性不引用 | PR 內自述作者在該公司工作；同類 |
+| #946（GoAnyAPI 整合指南、CLI 與測試，5 檔 +575／−1） | open `20855bf3` | 政策性不引用 | 新增特定服務的 CLI 與指南；同類 |
+| #947（SignalShelf 整合指南，+83） | open `e7ccfe3d` | 政策性不引用 | 特定服務的整合卡片，內容是替換 scrapecreators 的 base URL；同類 |
+| #949（AdMakeAI 整合指南，+100） | open `7fcf72e4` | 政策性不引用 | 特定服務的整合卡片；同類 |
+| #951（「listed for free, featured for partners」，`CONTRIBUTING.md`、`tools/PARTNERS.md` 加 +15／−1，上游維護者自己的 PR） | open `a16f5b6f` | 等上游合併 | 只改上游的廠商投稿與夥伴方案規則（月批次審查、使用性門檻、listed 與 featured 的區別）；本 fork 不跑夥伴方案，合併後隨 commit 軸進來即可，不影響本線的略過政策 |
+
+**觸發條件**：上表「政策性不引用」的整合卡片若合併進上游 `main`，經 commit 軸抵達時逐份判斷：上游維護者自己的 commit、無 ◆ 與贊助欄位的中立指南，依 post-bridge、scrapecreators 的前例採用；廠商投稿帶導流或夥伴揭露的，依 2026-10-24 的做法略過，並重新取合併時的內容再掃一次。
+
+**issue 軸**（#930–#938、#948、#954；全部 open）：
+
+| 項目 | 判定 | 理由與證據 |
+|---|---|---|
+| #930（description 以白話開頭並加觸發測試） | 已被合併 PR 涵蓋 | 內容就是 #950／#952／#953 做的事，已隨同步進來；issue 本身在上游仍 open |
+| #931（CI 掃 skill 檔隱藏內容、加 SECURITY 說明） | 不適用 | 提的是上游 `validate-skill.yml` 要加的檢查；本 fork 該 workflow 有 repo 閘門不執行，本線自有隱藏內容審查（每次同步前掃描）與 SkillSpector gate |
+| #932（ads 的平台預設值審計）、#933（seo-audit local-seo）、#934（community-marketing Reddit 參考）、#935／#936／#937（ai-seo 三項）、#938（image 的第三條產品視覺路徑） | 跟隨上游 | 上游維護者提的產品內容擴充；本 fork 不改寫產品 skill，等上游 commit |
+| #954（trigger eval：補上判斷類問題剩下的缺口，上游維護者自己的後續追蹤，建立於本次 commit 審查之後） | 跟隨上游 | 內容是上游下一輪要改 description 與新增 `heldout5.json` 的工作方式說明，沒有指出本 fork 工具或內容的缺陷；其中「全 pack 控制在約 18,700 字元以下」的界線，本次實測 `check-versions.mjs` 回報 18,662，仍在界線內。等上游 commit |
+| #948（外部使用者回報：ads、launch、marketing-plan、referrals 的壞連結、錯誤編號與自相矛盾的 gate 句、給現行模型的建議） | 延後，跟隨上游 | 對照本 fork 樹確認屬實：`skills/ads/SKILL.md:159` 的同檔 wiki 連結指向已搬走的標題、`skills/ads/references/google-ads-audit-checklist.md:81` 的 `conversion-tracking.md` 在 `skills/ads/references/` 不存在、`skills/launch/SKILL.md:380` 的 `#22`／`#23` 與 `ideas-by-category.md` 的編號不符、`skills/launch/SKILL.md:120` 的 gate 句把兩種失敗模式對調、`skills/referrals/SKILL.md:71` 結尾是維護者筆記。都在產品 skill 內，`AGENTS.md` 規定不改寫；且連結不在 `tools/check_links.py` 的掃描範圍（該工具明確排除 `skills/`），不是本 fork 工具能證明的缺陷。**觸發條件**：上游修正 commit 抵達時自動帶入；issue 作者表示願意開 PR，若合併則隨 commit 軸進來 |
+
+**SkillSpector 自我掃描審閱**（SkillSpector 2.12.0，pin 不變）：
+
+- `reviewed_partials`：`reverse-engineer-marketing/scripts/teardown.mjs` 內容雜湊換成新版（`2adfce5…` → `16b89a7…`），理由補上新增指令的通讀紀錄；`site-architecture/SKILL.md` 換成 `2a42c56…`（只差 frontmatter 的 description 與 `metadata.version` 2.1.0 → 2.1.3，內文未動）；`marketing-loops/SKILL.md` 的條目移除，因為 description 改寫後不再含觸發點 `'ranking drop alert,'`，該檔掃描已不再降級（`grep` 該字串：新版 0 筆、`HEAD` 版 1 筆）。
+- 13 個 skill 出現 45 筆未抑制的 finding（reverse-engineer-marketing 24、video 4、attribution 3、ad-creative 2、conversion-tracking 2、marketing-loops 2、product-marketing 2、ai-seo 1、competitor-profiling 1、marketing-plan 1、prospecting 1、revops 1、social 1）。逐筆讀過命中原文，全是先前已審結論的行號或周邊內容移動所致的新指紋（AE1 連帶發現、EA2 的防護條款、RP1 的 `npx` 入門指令、AR2 的分析紀律、AE4 的希臘字母 π）；新增判斷的只有 `social/evals/evals.json` 的『without asking』（ship-post 評測要求不重複提問）與 `teardown.mjs` 新增指令的 4 筆 E1（Ashby、npm 與 GitHub 兩筆；對公開 API 的 GET，唯一憑證僅送 `api.github.com`），SEC 與 FDIC 的另兩筆 E1 是舊判定換行號。用 `skillspector baseline --no-llm` 對 LF 正規化的暫存副本重產指紋，加入 45 筆並逐筆附理由；E1 六筆共用一段核對各主機的理由。
+- 對全部 53 個 skill 重產目前的指紋後，baseline 有 38 筆對不上任何現行 finding（就是上述 finding 的舊版本），刪除；已由既有 `scoped_rules` 壓掉的 12 筆（ad-creative／ai-seo 的 RP1、ads 的 MP3、events 的 E4、marketing-loops 的 EA4、revops 的 RA2）不另加。另有 `site-architecture` 因 partial 雜湊失效而掃描 exit 2（已換雜湊）。重掃這 14 個 skill：全部 exit 0、0 筆未抑制 finding。
+
+**重審條件**：同 2026-11-02 條目——`teardown.mjs` 內容雜湊再變動時重審；`reverse-engineer-marketing` 的已知風險清單不變。
+
+水位：commit `88c79f6` → `7c18794`，PR `929` → `953`，issue `924` → `954`。

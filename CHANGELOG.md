@@ -10,6 +10,12 @@
 
 ---
 
+## 2026-11-10
+
+### 同步
+
+- **上游同步到 `7c18794`（59 commit；PR #953、issue #954）。** 103 個變更檔：98 個進來（96 乾淨套用、`.gitignore` 與 `tools/REGISTRY.md` 手動解衝突），5 個本 fork 自有或依政策不收（兩份 README 只同步技能目錄表）。內容：全部 skill 的 description 縮短並加上 500 字元／24,000 字元上限（上游 2.14.3–2.14.9）、trigger eval 腳本與提示詞集、`conversion-tracking` 兩項追蹤修正、`reverse-engineer-marketing` 新增 `jobs`／`reviews`／`adoption`／`compare`、`social` 的 ship-post、Post Bridge 整合指南。Livestorm 上架（#942）依夥伴政策略過。SkillSpector：`teardown.mjs` 與 `site-architecture/SKILL.md` 的 `reviewed_partials` 雜湊換新、移除不再降級的 `marketing-loops` 條目、45 筆 finding 逐筆審閱收錄、刪除 38 筆過期指紋。見 [`docs/DECISIONS.md`](docs/DECISIONS.md)。
+
 ## 2026-11-05
 
 ### 變更

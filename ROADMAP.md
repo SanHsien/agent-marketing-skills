@@ -5,7 +5,7 @@
 
 ## 現況
 
-本 repo 是行銷 Agent Skills 與零依賴 Node.js CLI 的 Windows 維護線，CLI 契約測試模擬網路，不以真實 API 作 CI（`AGENTS.md`〈專案定位〉、〈技術與資料流〉）。2026-10-29 快照 open PR、安全告警均為 0，CI、CodeQL、Dependency freshness、Upstream check 最近結果為 success；Regression Tests、Release、Sync Skills 與 Validate Agent Skill 因上游 repo 閘門 skipped，issue 因停用而未查到（2026-10-29 `gh` 查詢，`67905a4dc762`）。產品技能清單目前收錄 52 個，中英入口改以清單導向呈現，宿主觸發只驗過 Claude Code 的 `product-marketing` 與 `copywriting` 兩個 skill（2026-11-08，`docs/host-acceptance/2026-11-08-claude-code.md`）；其餘 skill、其他宿主與真實 API 使用不在既有驗收範圍（深掃上游審查報告，2026-10-28；`README.md`、`README.en.md`；`REVIEW.md:83-90`）。
+本 repo 是行銷 Agent Skills 與零依賴 Node.js CLI 的 Windows 維護線，CLI 契約測試模擬網路，不以真實 API 作 CI（`AGENTS.md`〈專案定位〉、〈技術與資料流〉）。2026-10-29 快照 open PR、安全告警均為 0，CI、CodeQL、Dependency freshness、Upstream check 最近結果為 success；Regression Tests、Release、Sync Skills 與 Validate Agent Skill 因上游 repo 閘門 skipped，issue 因停用而未查到（2026-10-29 `gh` 查詢，`67905a4dc762`）。產品技能清單目前收錄 53 個，中英入口改以清單導向呈現，宿主觸發只驗過 Claude Code 的 `product-marketing` 與 `copywriting` 兩個 skill（2026-11-08，`docs/host-acceptance/2026-11-08-claude-code.md`）；其餘 skill、其他宿主與真實 API 使用不在既有驗收範圍（深掃上游審查報告，2026-10-28；`README.md`、`README.en.md`；`REVIEW.md:83-90`）。
 
 ## 近期：可以直接動手
 
@@ -17,7 +17,7 @@
 
 | 項目 | 觸發條件 | 驗收方式 | 建議執行者 | 證據 |
 | --- | --- | --- | --- | --- |
-| 增量審查上游與既有工具指南 | 超過 baseline 水位、已審 PR head 改變，或上游 #904 合併 | 逐檔分類並保留 fork 遮蔽、Windows gate 與 workflow 閘門；記錄採用／略過；`pwsh -NoProfile -File tools/dev_check.ps1` 含 Node 契約與掃描通過才更新水位 | Codex | `tools/upstream_baseline.json`；`docs/DECISIONS.md:421-453`；上游 #904 |
+| 增量審查上游與既有工具指南 | 超過 baseline 水位、已審 PR head 改變，或上游 #904、#951 合併 | 逐檔分類並保留 fork 遮蔽、Windows gate 與 workflow 閘門；記錄採用／略過；`pwsh -NoProfile -File tools/dev_check.ps1` 含 Node 契約與掃描通過才更新水位 | Codex | `tools/upstream_baseline.json`；`docs/DECISIONS.md` 2026-11-10；上游 #904、#951 |
 | 擴充敏感輸出遮蔽契約 | 實際回應帶有未涵蓋的敏感鍵，或需要處理物件鍵名內的秘密 | 先用假秘密重現，定義敏感鍵與值的遮蔽範圍；重疊值、巢狀資料、錯誤訊息與輸出測試通過，合法非敏感值不被誤遮 | Claude Opus | 深掃報告（2026-10-26）〈刻意不修〉；`tools/clis/_safe-output.js:1-32`；`18c2b89` |
 | 單一產品 CLI 的唯讀真實服務驗收 | 維護者有具體工具需求並授權帳號讀取 | 先讀對應指南與最小查詢範圍，只呼叫一次必要唯讀端點；確認欄位、錯誤碼與輸出遮蔽；不記錄憑證，不衍生廣告／郵件寫入 | 維護者 | `REVIEW.md:85-87`；`tools/clis/README.md`；`AGENTS.md` 的客戶與帳號資料限制 |
 

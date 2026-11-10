@@ -68,3 +68,7 @@ README 衝突的解法：上游新英文產品說明翻進 `README.md`，並同�
 ## 2026-10-24：commit `5b2c000` → `e85f3cb`、PR #599–#895、issue #601–#856
 
 逐檔分類同步（取上游 580、刪除 1、三方合併 21、依政策略過 8），不逐 commit 重做。逐項理由、夥伴內容的界線、`reviewed_partials` 機制與 73 筆 finding 的審閱見 [`DECISIONS.md`](DECISIONS.md) 同日條目。open PR 36 筆等合併；#857、#888、#895 為第三方整合指南，合併後依廠商導流政策判斷。
+
+## 2026-11-10：commit `88c79f6` → `7c18794`、PR #930–#953、issue #925–#954
+
+三方套用 59 個 commit（103 個檔案，排除 5 個本 fork 自有或依政策不收的檔案；2 檔手動解衝突）。採用 #886、#914、#925、#926、#927、#945、#950、#952、#953 與 Post Bridge 整合指南；依政策略過 #942（Livestorm 上架為 Skill Partner）；README 只同步技能目錄表。open PR：#939、#940、#941、#943、#944、#946、#947、#949 政策性不引用（特定廠商服務的整合卡片或 CLI），#951 等上游合併。issue：#948 屬實但在產品 skill 內，延後跟隨上游；#954 是上游維護者自己的 trigger eval 後續追蹤，跟隨上游。逐項理由、`reviewed_partials` 更新與 45 筆 finding 審閱見 [`DECISIONS.md`](DECISIONS.md) 同日條目。

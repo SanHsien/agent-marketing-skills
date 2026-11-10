@@ -11,6 +11,12 @@ adopt/skip reasoning is recorded in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ---
 
+## 2026-11-10
+
+### Sync
+
+- **Upstream sync to `7c18794` (59 commits; PR #953, issue #954).** 103 changed files: 98 came in (96 applied cleanly, conflicts in `.gitignore` and `tools/REGISTRY.md` resolved by hand) and 5 were kept as this fork's own or skipped by policy (both READMEs only take the skill catalog table). Content: every skill description shortened under new 500-character and 24,000-character caps (upstream 2.14.3 to 2.14.9), the trigger eval script and prompt sets, two `conversion-tracking` fixes, `jobs`, `reviews`, `adoption` and `compare` in `reverse-engineer-marketing`, the `social` ship-post reference, and a Post Bridge integration guide. The Livestorm listing (#942) was skipped under the partner policy. SkillSpector: `reviewed_partials` hashes renewed for `teardown.mjs` and `site-architecture/SKILL.md`, the `marketing-loops` entry dropped because that file no longer degrades, 45 findings read and recorded, 38 stale fingerprints removed. See [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
 ## 2026-11-05
 
 ### Changed

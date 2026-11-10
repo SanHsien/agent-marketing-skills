@@ -49,3 +49,6 @@ release-title.txt
 
 # SkillSpector self-scan reports (generated locally by tools/dev_check.ps1)
 .skillspector-reports/
+
+# Trigger eval run output
+evals/triggers/results/

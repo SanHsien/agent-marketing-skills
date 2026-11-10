@@ -31,6 +31,8 @@ description: What this skill does and when to use it. Include trigger phrases.
 | `license` | 否 | 預設 MIT |
 | `metadata` | 否 | `version` 放這裡，不要放成 top-level `version` |
 
+本 fork 的驗證器沿用規格值 1024。上游自己的 repo 另訂更嚴的上限（每個 description 500 字元、全 pack 24,000 字元，檢查在 `scripts/check-versions.mjs`），原因是 Claude Code 的技能清單有字元上限，超過的 skill 只剩名稱。自己新增或改寫 description 時先跑 `node scripts/check-versions.mjs`；取捨見 [`DECISIONS.md`](DECISIONS.md) 2026-11-10。
+
 ## 寫作邊界
 
 - 產品語言維持英文。
