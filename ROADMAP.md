@@ -11,13 +11,12 @@
 
 | 項目 | 為什麼 | 驗收方式 | 建議執行者 | 證據 |
 | --- | --- | --- | --- | --- |
-| （目前沒有；宿主驗收已於 2026-11-08 在 Claude Code 完成） | 下一輪從中期表挑條件已成立者，或每週上游增量審查 | — | — | `docs/host-acceptance/2026-11-08-claude-code.md`；`docs/DECISIONS.md` 2026-11-08 |
+| 增量審查上游與既有工具指南 | 觸發條件已成立（2026-11-21 查：上游 #904 於 2026-11-20、#951 於 2026-11-10 合併；`python tools/check_upstream_updates.py --strict` exit 1，baseline `7c18794` 後 225 個 commit）。原條件：超過 baseline 水位、已審 PR head 改變，或上游 #904、#951 合併 | 逐檔分類並保留 fork 遮蔽、Windows gate 與 workflow 閘門；記錄採用／略過；`pwsh -NoProfile -File tools/dev_check.ps1` 含 Node 契約與掃描通過才更新水位 | Codex | `tools/upstream_baseline.json`；`docs/DECISIONS.md` 2026-11-10；上游 #904、#951 |
 
 ## 中期：等條件成立再做
 
 | 項目 | 觸發條件 | 驗收方式 | 建議執行者 | 證據 |
 | --- | --- | --- | --- | --- |
-| 增量審查上游與既有工具指南 | 超過 baseline 水位、已審 PR head 改變，或上游 #904、#951 合併 | 逐檔分類並保留 fork 遮蔽、Windows gate 與 workflow 閘門；記錄採用／略過；`pwsh -NoProfile -File tools/dev_check.ps1` 含 Node 契約與掃描通過才更新水位 | Codex | `tools/upstream_baseline.json`；`docs/DECISIONS.md` 2026-11-10；上游 #904、#951 |
 | 擴充敏感輸出遮蔽契約 | 實際回應帶有未涵蓋的敏感鍵，或需要處理物件鍵名內的秘密 | 先用假秘密重現，定義敏感鍵與值的遮蔽範圍；重疊值、巢狀資料、錯誤訊息與輸出測試通過，合法非敏感值不被誤遮 | Claude Opus | 深掃報告（2026-10-26）〈刻意不修〉；`tools/clis/_safe-output.js:1-32`；`18c2b89` |
 | 單一產品 CLI 的唯讀真實服務驗收 | 維護者有具體工具需求並授權帳號讀取 | 先讀對應指南與最小查詢範圍，只呼叫一次必要唯讀端點；確認欄位、錯誤碼與輸出遮蔽；不記錄憑證，不衍生廣告／郵件寫入 | 維護者 | `REVIEW.md:85-87`；`tools/clis/README.md`；`AGENTS.md` 的客戶與帳號資料限制 |
 
