@@ -1,5 +1,21 @@
 # 維護決策
 
+## 2026-11-24：上游審查受阻，水位不變
+
+**狀態**：未完成逐筆審查，沒有採用、拒絕或已審暫緩的產品更新。本次指令要求受阻時記錄並停止，因此只提交阻擋紀錄，不推送。
+
+**範圍盤點**：在本工作樹 `codex/upstream-1124`、起始 HEAD `a6b08529f2294d9affb5a3b8ca09eb2e9876b032` 執行 `python tools/check_upstream_updates.py`，exit **0**（未指定 `--strict`，不代表沒有待審項目）。檢查器列出 baseline `7c187944fa63d149879459ba53ef4fd3c0364c50` 至 [上游 `8fd2fcade2fd6629026e9dfe6d133b55b36968b9`](https://github.com/coreyhaines31/marketingskills/commit/8fd2fcade2fd6629026e9dfe6d133b55b36968b9) 的 **236 個 commit**、PR 水位 #953 之後 **63 筆 PR**（至 [#1061](https://github.com/coreyhaines31/marketingskills/pull/1061)）、issue 水位 #954 之後 **40 筆 issue**（至 [#1057](https://github.com/coreyhaines31/marketingskills/issues/1057)）。另取得上游分支 head 清單，但尚未完成分支差異審查。PR 檔案 patch 與 issue 內容已取回，取回不等於已審。
+
+| 項目 | 本次處置 | 原因／恢復條件 |
+| --- | --- | --- |
+| commit、PR、issue、分支 | 未審完，不作逐筆決策 | 先恢復本工作樹的安全掃描環境，再從原 baseline 逐筆審查；採用項目必須有修正前失敗、修正後通過的測試 |
+| `tools/upstream_baseline.json` | 完全不動 | Windows canonical gate 未通過，且逐筆審查尚未完成；盤點上限不可當作已審水位 |
+| Agent 指引檢查 | 僅完成本地維護規則與 primary 聲明來源檢查 | 已讀本 fork `AGENTS.md`；primary 為 operator-attested with verified user-level provenance（`gpt-6.2-sol/medium`），不是 runtime-verified；上游 `AGENTS.md` 內容差異尚未完成判定，不宣稱 agent runtime smoke 通過 |
+
+**Gate**：`pwsh -NoProfile -File tools/dev_check.ps1` exit **1**。Python 編譯、Ruff、pytest、skill 驗證、Node 語法、Node 契約測試（1,486 passed、0 failed）與維護文件連結檢查均已完成。到 `tools/dev_check.ps1:131` 因 Python 環境缺少 SkillSpector 停止：`Required SkillSpector self-scan cannot run because the Python package is unavailable. Install requirements-security.txt before running this canonical gate.` 安全掃描沒有執行，不能宣稱完整 gate 通過；以上結果是在本次紀錄文件修改前取得。
+
+**恢復條件**：依 `docs/DEVELOPMENT.md` 在目前工作樹建立本地驗證環境並安裝 `requirements-dev.txt`、`requirements-security.txt`，不安裝全域工具；接續完整審查與必要測試，完整 gate exit 0 後才推進已實際審查的水位。唯一後續工作列在 `ROADMAP.md`。
+
 ## 2026-11-05：ruff 下限改用常態 freshness-hold
 
 **決定**：保留 `ruff>=0.16`，在宣告行加入 `freshness-hold`，移除只評估到 `0.17.2` 的過期暫緩。這是下限政策，不是暫不安裝新版：CI 沒有上限或 lock，安裝時仍可取得現行版；本機已安裝 `0.17.3`。

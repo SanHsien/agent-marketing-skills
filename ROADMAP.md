@@ -1,9 +1,11 @@
 # 路線圖
 
 > 本 repo 後續工作的單一真相源。做完一項，就在同一個 commit 刪掉那一列；新工作只加在這裡。
-> 現況段的數字是 2026-10-29 依 `main` `67905a4dc762` 查的快照，開工前先重查 GitHub。
+> 本輪現況更新於 2026-11-24，起始 HEAD `a6b08529f2294d9affb5a3b8ca09eb2e9876b032`；下文 GitHub CI／告警數字仍是標明日期的歷史快照。
 
 ## 現況
+
+2026-11-24：上游盤點至 `8fd2fcade2fd6629026e9dfe6d133b55b36968b9`，原 baseline 後有 236 個 commit、63 筆 PR、40 筆 issue 待逐筆審查。Windows gate exit 1：目前 Python 環境缺少 SkillSpector，安全掃描未執行；依本輪受阻停止規則保留原 baseline（commit `7c18794`、PR #953、issue #954）。沒有採用產品更新，也未推送；阻擋與已完成檢查見 `docs/DECISIONS.md` 2026-11-24 條目。
 
 本 repo 是行銷 Agent Skills 與零依賴 Node.js CLI 的 Windows 維護線，CLI 契約測試模擬網路，不以真實 API 作 CI（`AGENTS.md`〈專案定位〉、〈技術與資料流〉）。2026-10-29 快照 open PR、安全告警均為 0，CI、CodeQL、Dependency freshness、Upstream check 最近結果為 success；Regression Tests、Release、Sync Skills 與 Validate Agent Skill 因上游 repo 閘門 skipped，issue 因停用而未查到（2026-10-29 `gh` 查詢，`67905a4dc762`）。產品技能清單目前收錄 53 個，中英入口改以清單導向呈現，宿主觸發只驗過 Claude Code 的 `product-marketing` 與 `copywriting` 兩個 skill（2026-11-08，`docs/host-acceptance/2026-11-08-claude-code.md`）；其餘 skill、其他宿主與真實 API 使用不在既有驗收範圍（深掃上游審查報告，2026-10-28；`README.md`、`README.en.md`；`REVIEW.md:83-90`）。
 
@@ -11,7 +13,7 @@
 
 | 項目 | 為什麼 | 驗收方式 | 建議執行者 | 證據 |
 | --- | --- | --- | --- | --- |
-| 增量審查上游與既有工具指南 | 觸發條件已成立（2026-11-21 查：上游 #904 於 2026-11-20、#951 於 2026-11-10 合併；`python tools/check_upstream_updates.py --strict` exit 1，baseline `7c18794` 後 225 個 commit）。原條件：超過 baseline 水位、已審 PR head 改變，或上游 #904、#951 合併 | 逐檔分類並保留 fork 遮蔽、Windows gate 與 workflow 閘門；記錄採用／略過；`pwsh -NoProfile -File tools/dev_check.ps1` 含 Node 契約與掃描通過才更新水位 | Codex | `tools/upstream_baseline.json`；`docs/DECISIONS.md` 2026-11-10；上游 #904、#951 |
+| 恢復本工作樹驗證環境，接續增量審查上游與既有工具指南 | 2026-11-24 已盤點 236 個 commit、63 筆 PR、40 筆 issue；gate 因缺少 SkillSpector exit 1，逐筆審查未完成。原觸發條件仍成立（含已合併 #904、#951） | 先依開發文件在本工作樹安裝本地依賴；逐筆審查四個面向並保留 fork 遮蔽、Windows gate 與 workflow 閘門；採用項目有前後測試；完整 `pwsh -NoProfile -File tools/dev_check.ps1` exit 0 後才更新已審水位 | Codex | `tools/upstream_baseline.json`；`docs/DECISIONS.md` 2026-11-24；`docs/DEVELOPMENT.md` |
 
 ## 中期：等條件成立再做
 
