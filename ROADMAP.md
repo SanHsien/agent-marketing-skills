@@ -5,7 +5,7 @@
 
 ## 現況
 
-2026-11-25：已完成 236 個 commit、63 筆 PR、40 筆 issue、59 個分支的決策清冊；本地 Python 3.13／SkillSpector 釘版環境已恢復，採用 22 組 CLI 修正、驗證工具與 Livestorm 名稱修正，產品 skill 與 2.14.28 版本同步依條件暫緩。完整 Windows gate exit 0（53 skill 安全掃描無新增 finding），已審 baseline 推至上述 SHA、PR #1061、issue #1057，並保存 59 個分支 head、25 個 open PR 監看。逐項來源、理由與前後測試見 `docs/DECISIONS.md` 同日條目。本輪只提交目前分支，不推送。
+2026-11-25：已完成 236 個 commit、63 筆 PR、40 筆 issue、59 個分支的決策清冊；本地 Python 3.13／SkillSpector 釘版環境已恢復，採用 22 組 CLI 修正、驗證工具與 Livestorm 名稱修正，產品 skill 與 2.14.28 版本同步依條件暫緩。完整 Windows gate exit 0（53 skill 安全掃描無新增 finding），已審 baseline 推至上述 SHA、PR #1061、issue #1057，並保存 59 個分支 head、25 個 open PR 監看。逐項來源、理由與前後測試見 `docs/DECISIONS.md` 同日條目。修正已提交 `843cb9d2ae9845aa29353260c12011fbb51f2ee4`；本輪只提交目前分支，不推送。
 
 本 repo 是行銷 Agent Skills 與零依賴 Node.js CLI 的 Windows 維護線，CLI 契約測試模擬網路，不以真實 API 作 CI（`AGENTS.md`〈專案定位〉、〈技術與資料流〉）。2026-10-29 快照 open PR、安全告警均為 0，CI、CodeQL、Dependency freshness、Upstream check 最近結果為 success；Regression Tests、Release、Sync Skills 與 Validate Agent Skill 因上游 repo 閘門 skipped，issue 因停用而未查到（2026-10-29 `gh` 查詢，`67905a4dc762`）。產品技能清單目前收錄 53 個，中英入口改以清單導向呈現，宿主觸發只驗過 Claude Code 的 `product-marketing` 與 `copywriting` 兩個 skill（2026-11-08，`docs/host-acceptance/2026-11-08-claude-code.md`）；其餘 skill、其他宿主與真實 API 使用不在既有驗收範圍（深掃上游審查報告，2026-10-28；`README.md`、`README.en.md`；`REVIEW.md:83-90`）。
 

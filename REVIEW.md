@@ -1,7 +1,7 @@
 # Repository review（Windows-first）
 
 - Review date: 2026-11-25（下文 2026-08-27 CI 數字是歷史證據）
-- Review baseline: 見本檔「已修」對應 commit；R-05／R-07 維持不改
+- Review baseline: `843cb9d2ae9845aa29353260c12011fbb51f2ee4`；R-05／R-07 維持不改
 - Upstream reviewed through: `8fd2fcade2fd6629026e9dfe6d133b55b36968b9`
 - Upstream watermarks: PR / issue `reviewed_pr_through` / `reviewed_issue_through` = **1061 / 1057**
 - Primary environment: Windows 11、PowerShell、Python 3.13.14（本機）、Node.js 26.12.1；CI Ubuntu Python 3.9–3.14，Windows canonical security gate Python 3.13
@@ -21,12 +21,12 @@ Windows CI 在 overlay 首推（`ff62783`）因 `CLAUDE.md` 仍是 git symlink �
 
 | ID | 嚴重度 | Finding | 修復 |
 |---|---|---|---|
-| R-16 | P2 | 22 組 CLI 缺少 HTTP 拒絕狀態、參數／路由／上限／布林值處理，mock 前測 131 fail。 | 採上游修正及對應契約、指南；保留 fork 輸出遮蔽。2026-11-25，修復 commit 待本輪提交後回填。 |
-| R-17 | P2 | official-validator 用 `valid` 子字串把 `Validation failed` 也判通過。 | 改讀 exit code；離線 bad-skill regression 修前失敗、修後通過。2026-11-25，修復 commit 待本輪提交後回填。 |
-| R-18 | P2 | trigger-eval 把登入／API 錯誤結果算成模型回答。 | stream fixture 鎖定 error 結果，`error_max_turns` 保留正常 trigger 語義；未呼叫真實模型。2026-11-25，修復 commit 待本輪提交後回填。 |
-| R-19 | P3 | Livestorm Relevant Skills 指向不存在的產品名稱。 | 改用 events／emails／co-marketing／content-strategy，先驗證舊名失敗，再驗證檔案實存。2026-11-25，修復 commit 待本輪提交後回填。 |
-| R-20 | P3 | link checker 越界測試假設暫存目錄必在 repo 外，TEMP 留在工作樹時誤紅。 | 測試明確設定合成 ROOT，生產 checker 的根目錄邊界不變；修前 1 fail、修後 1 pass。2026-11-25，修復 commit 待本輪提交後回填。 |
-| R-21 | P3 | 新上游 hidden-content 測試在 Windows 無權建立 file symlink，且作業系統禁止控制字元檔名。 | 用 junction 保留不追蹤連結的驗證；非法檔名案例限定可建立它的平台，不跳過 checker 或 git hooks。2026-11-25，修復 commit 待本輪提交後回填。 |
+| R-16 | P2 | 22 組 CLI 缺少 HTTP 拒絕狀態、參數／路由／上限／布林值處理，mock 前測 131 fail。 | 採上游修正及對應契約、指南；保留 fork 輸出遮蔽。2026-11-25，修復 commit `843cb9d2ae9845aa29353260c12011fbb51f2ee4`。 |
+| R-17 | P2 | official-validator 用 `valid` 子字串把 `Validation failed` 也判通過。 | 改讀 exit code；離線 bad-skill regression 修前失敗、修後通過。2026-11-25，修復 commit `843cb9d2ae9845aa29353260c12011fbb51f2ee4`。 |
+| R-18 | P2 | trigger-eval 把登入／API 錯誤結果算成模型回答。 | stream fixture 鎖定 error 結果，`error_max_turns` 保留正常 trigger 語義；未呼叫真實模型。2026-11-25，修復 commit `843cb9d2ae9845aa29353260c12011fbb51f2ee4`。 |
+| R-19 | P3 | Livestorm Relevant Skills 指向不存在的產品名稱。 | 改用 events／emails／co-marketing／content-strategy，先驗證舊名失敗，再驗證檔案實存。2026-11-25，修復 commit `843cb9d2ae9845aa29353260c12011fbb51f2ee4`。 |
+| R-20 | P3 | link checker 越界測試假設暫存目錄必在 repo 外，TEMP 留在工作樹時誤紅。 | 測試明確設定合成 ROOT，生產 checker 的根目錄邊界不變；修前 1 fail、修後 1 pass。2026-11-25，修復 commit `843cb9d2ae9845aa29353260c12011fbb51f2ee4`。 |
+| R-21 | P3 | 新上游 hidden-content 測試在 Windows 無權建立 file symlink，且作業系統禁止控制字元檔名。 | 用 junction 保留不追蹤連結的驗證；非法檔名案例限定可建立它的平台，不跳過 checker 或 git hooks。2026-11-25，修復 commit `843cb9d2ae9845aa29353260c12011fbb51f2ee4`。 |
 | R-01 | P1 | 上游 `CLAUDE.md` 是 git symlink。Windows `core.symlinks=false` 時，`git add` 把檔案正文寫進 symlink target；GitHub Windows runner 回 `unable to create symlink CLAUDE.md: Filename too long`，整個 job 停在 checkout。 | 改存 mode `100644` 一般檔。`tests/test_docs.py::test_tracked_files_are_not_git_symlinks` 掃描 `git ls-files -s`，禁止 `120000`。見 [`docs/DECISIONS.md`](docs/DECISIONS.md)。 |
 | R-02 | P2 | `tools/check_links.py` 對相對路徑只做 `.exists()`，解析到 repo 根目錄以外的路徑不會被拒絕。 | `_missing_relative` 用 `resolved.is_relative_to(ROOT)`；失敗記「連結逃出 repo 根目錄」。`test_check_links_rejects_path_outside_repo` 鎖行為。 |
 | R-03 | P3 | `AGENTS.md` 文件責任清單沒有 `REVIEW.md`。 | 補上「風險快照，不是 bug log」，並把本檔列入文件責任。 |

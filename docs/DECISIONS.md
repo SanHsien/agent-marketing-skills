@@ -38,6 +38,8 @@
 
 **Gate 記錄**：`pwsh -NoProfile -File tools/dev_check.ps1` exit **0**。Python 153 passed（8 subtests passed）、53 skill 格式檢查、67 CLI 語法、Node 1,784 tests（1,783 pass、0 fail、1 個 Windows 不支援檔名案例 skip）、22 份維護文件連結與全部 53 skill 安全掃描通過；無新增 finding。gate log SHA256 `11a2b2bfc9171a5efb95d0161ae5d6f9a5266ba74bdd300178ef7bef883866f9`。通過後才將 baseline 推至 commit `8fd2fcade2fd6629026e9dfe6d133b55b36968b9`、PR #1061、issue #1057，並保存 59 branch heads、25 open PR 的 head/state。未重跑已通過的安全掃描；水位／結果文件修改後另跑相關 Python 與文件檢查。重複檔案進度查詢曾被 Anti-Doom-Loop Guard 阻擋，之後只等待原 gate session，沒有停用或繞過 hooks。
 
+**落地與水位複核**：修正提交 `843cb9d2ae9845aa29353260c12011fbb51f2ee4`；水位更新後完整 Python 測試 153 passed（8 subtests passed）、文件連結檢查通過。`python tools/check_upstream_updates.py --strict --repo-dir .skillspector-reports/review.git` exit **0**：commit／PR／issue 無待審增量，59 branch heads 與 25 個監看 PR 的 head/state 均未變動。下一筆提交只回填本次修復 SHA 與這份證據，未改程式、產品 skill、掃描 baseline 或依賴。
+
 ### PR：63 筆（各筆含來源、狀態、已讀 head 與觸發條件）
 
 | PR | 狀態／head | 決策 | 具體差異、理由／觸發條件 |
