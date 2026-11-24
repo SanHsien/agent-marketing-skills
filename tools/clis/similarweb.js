@@ -36,6 +36,7 @@ async function api(method, path, body, version = 'v1') {
     },
     body: body ? JSON.stringify(body) : undefined,
   })
+  if (res.status >= 400) process.exitCode = 1
   const text = await res.text()
   try {
     return JSON.parse(text)
@@ -192,7 +193,7 @@ async function main() {
       if (!args.start) { result = { error: '--start required (YYYY-MM)' }; break }
       if (!args.end) { result = { error: '--end required (YYYY-MM)' }; break }
       const params = new URLSearchParams({ start_date: args.start, end_date: args.end })
-      result = await api('GET', `/website/${encodeURIComponent(domain)}/geo/traffic-by-country?${params.toString()}`)
+      result = await api('GET', `/website/${encodeURIComponent(domain)}/geo/traffic-by-country?${params.toString()}`, undefined, 'v4')
       break
     }
 

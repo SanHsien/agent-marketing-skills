@@ -5,6 +5,19 @@ const { pathToFileURL } = require('node:url');
 
 const load = () => import(pathToFileURL(path.join(__dirname, '..', '..', 'scripts', 'trigger-eval.mjs')).href);
 
+test('auth and API error results cannot count as successful routing answers', async () => {
+  const { skillsInvoked, score } = await load();
+  for (const subtype of ['success', 'error_during_execution']) {
+    const parsed = skillsInvoked(JSON.stringify({ type: 'result', subtype, is_error: true, result: 'Not logged in' }));
+    assert.equal(parsed.failure, 'Not logged in');
+    for (const expect of [[], ['cro']]) {
+      assert.equal(score({ expect }, parsed.skills, 'marketing-skills', Boolean(parsed.failure)).outcome, 'error');
+    }
+  }
+  const limited = skillsInvoked(JSON.stringify({ type: 'result', subtype: 'error_max_turns', is_error: true }));
+  assert.equal(limited.failure, null);
+});
+
 test('skillsInvoked reads Skill tool calls and cost from stream-json', async () => {
   const { skillsInvoked } = await load();
   const stream = [
@@ -13,7 +26,7 @@ test('skillsInvoked reads Skill tool calls and cost from stream-json', async () 
     'not json',
     JSON.stringify({ type: 'result', total_cost_usd: 0.05 }),
   ].join('\n');
-  assert.deepEqual(skillsInvoked(stream), { skills: ['marketing-skills:cro'], cost: 0.05, finished: true, text: 'hi' });
+  assert.deepEqual(skillsInvoked(stream), { skills: ['marketing-skills:cro'], cost: 0.05, finished: true, failure: null, text: 'hi' });
   assert.equal(skillsInvoked('').finished, false);
 });
 

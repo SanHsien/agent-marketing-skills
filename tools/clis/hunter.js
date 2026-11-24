@@ -35,6 +35,7 @@ async function api(method, path, body) {
     },
     body: body ? JSON.stringify(body) : undefined,
   })
+  if (res.status >= 400) process.exitCode = 1
   const text = await res.text()
   try {
     return JSON.parse(text)
@@ -190,7 +191,7 @@ async function main() {
         case 'get': {
           const id = args.id
           if (!id) { result = { error: '--id required' }; break }
-          result = await api('GET', `/campaigns/${id}`)
+          result = await api('GET', `/sequences/${encodeURIComponent(id)}`)
           break
         }
         case 'start': {
@@ -202,7 +203,7 @@ async function main() {
         case 'pause': {
           const id = args.id
           if (!id) { result = { error: '--id required' }; break }
-          result = await api('POST', `/campaigns/${id}/pause`)
+          result = await api('POST', `/sequences/${encodeURIComponent(id)}/pause`)
           break
         }
         default:

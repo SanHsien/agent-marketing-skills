@@ -29,6 +29,12 @@ python tools\check_upstream_updates.py --strict
 
 Baseline 代表「已審查」，不代表「全部已合併」。
 
+## 2026-11-25：增量清冊完成，部分採用
+
+已審原水位之後的 236 commits、63 PR、40 issues，以及 59 個分支 head，上限 main `8fd2fcade2fd6629026e9dfe6d133b55b36968b9`、PR #1061、issue #1057。逐筆來源、理由與暫緩條件見 [`DECISIONS.md`](DECISIONS.md) 同日條目。
+
+採用 22 組 CLI 與維護修正，產品 skill／plugin 版本維持原版，沒有整批同步到 2.14.28。本輪完整 Windows gate exit 0 後才更新 baseline；25 個 open PR 的 head／state 以 `monitored` 保存，分支以 `reviewed_branch_heads` 保存。後續工作只列 [`ROADMAP.md`](../ROADMAP.md)。
+
 README 衝突的解法：上游新英文產品說明翻進 `README.md`，並同步 `README.en.md`。作者宣傳、贊助 CTA、個人事業連結略過。技能目錄表可同步。來源與授權 credit 留在 README 與 `NOTICE.md`。
 
 `sync-skills.yml`、`release.yml` 與 `validate-skill.yml` 已加上 `github.repository == 'coreyhaines31/marketingskills'`。merge 上游時若這三支 workflow 被重寫，必須把閘門加回去。本 fork 的 skill 驗證走 `tools/validate_skills.py`（在 `ci.yml` / `dev_check.ps1`）。

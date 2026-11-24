@@ -218,11 +218,20 @@ def test_tracked_files_are_not_git_symlinks() -> None:
     assert symlinks == [], f"git symlink 會讓 Windows checkout 失敗: {symlinks}"
 
 
-def test_check_links_rejects_path_outside_repo(tmp_path: Path) -> None:
+def test_check_links_rejects_path_outside_repo(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(check_links, "ROOT", tmp_path / "repo")
     doc = tmp_path / "note.md"
     doc.write_text("[here](.)\n", encoding="utf-8")
     problems = check_links.check_document(doc)
     assert any("逃出" in item for item in problems)
+
+
+def test_livestorm_relevant_skills_are_installed_product_names() -> None:
+    guide = (ROOT / "tools/integrations/livestorm.md").read_text(encoding="utf-8")
+    related = guide.split("## Relevant Skills", 1)[1]
+    names = re.findall(r"^- ([a-z][a-z-]+)$", related, re.MULTILINE)
+    assert names
+    assert all((ROOT / "skills" / name / "SKILL.md").is_file() for name in names)
 
 
 def test_canonical_gate_runs_the_node_cli_contract_tests_ci_runs() -> None:

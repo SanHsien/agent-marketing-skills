@@ -1,9 +1,197 @@
 {
   "repo": "https://github.com/coreyhaines31/marketingskills.git",
   "branch": "main",
-  "reviewed_through": "7c187944fa63d149879459ba53ef4fd3c0364c50",
-  "reviewed_date": "2026-11-10",
-  "notes": "Fork overlay established at upstream merge of PR #569 (partner program rules). No product commits adopted beyond the fork point. Subsequent upstream commits, PRs, and issues require review. 2026-08-30：commit 水位推進到 e55de88、PR 569 → 571。#571（Converly 因未付款下架）採用——本 fork 的 REGISTRY 原本替一個連上游都下架的廠商掛 Verified Partner 背書，而本線與該廠商毫無商業關係；#570（往 repo 塞加密貨幣交易 app）與本 repo 主題無關且上游未合併，不引用。理由見 docs/DECISIONS.md 同日條目。2026-09-11：commit 水位推進到 5b2c000、PR 571 → 583、issue 維持 569（實查為空）。d4ff28a（Converly 二次上架）與 4fbe11f/88de9fd/5cd4a7e（Ploy 上架三部曲）略過——付款清償的是上游與廠商的贊助關係，不是本 fork 的，維持既有的贊助商 CTA 略過政策。5b2c000（ai-seo 2.5.0）cherry-pick 採用——純產品內容與版本號更新，無 README/REGISTRY/gate 衝突。PR #572/#573/#575/#580/#581/#582/#583 全部 OPEN 未合併，暫緩；#580/#581 的連結修正經查證不落在 tools/check_links.py 的掃描範圍（該工具明確排除 skills/ 與 tools/integrations/），不構成『本 fork 工具能證明的缺陷』。理由見 docs/DECISIONS.md 同日條目。 2026-09-15：commit 與 issue 軸實查無新項目；PR 583 → 588。#586（Glasser 整合指南）與 #587（AIPM registry 徽章）不引用——第三方廠商導流，與 Converly／Ploy 同一類政策。#588（tools/clis/README.md 補完 CLI 目錄）暫緩至合併，純文件對齊且非本 fork 工具能證明的缺陷。理由見 docs/DECISIONS.md 同日條目。 2026-09-30：PR 588 → 598、issue 569 → 600；commit 軸無新增。無採用項目，皆為上游未合併或產品內容，等 commit 軸抵達。理由見 docs/DECISIONS.md 同日條目。 2026-10-24：commit 5b2c000 → e85f3cb（693 commit／613 檔）、PR 598 → 895、issue 600 → 856。逐檔分類：取上游 580（含 conversion-tracking、link-building）、刪除 1、三方合併 21（7 支 CLI 保留輸出遮蔽）、依夥伴政策略過 8（AIsa、Omnia、Converly、Ploy）。產品 skill 內的 ◆ 夥伴提及依「不改寫產品 skill」保留。新增三支上游 workflow 的 repo 閘門；gate 新增綁檔案雜湊的 reviewed_partials；73 筆新 finding 逐筆審閱收錄；SkillSpector pin 改 fe7adc7。理由見 docs/DECISIONS.md 同日條目。 2026-10-26：commit 維持 e85f3cb（實查無新提交）、PR 895 → 898、issue 856 → 899。無採用項目。#897（HeyReagent 整合指南，head 55cbc92，2 檔 +127/-1）與 #898（Adlicio 整合指南，head 9381397，2 檔 +129）皆為第三方廠商導流，與 Glasser／Converly／Ploy 同一類，政策性不引用；兩筆依判準八取當下 head 掃描，無行內超長空白夾帶、eval、base64 或不可見字元。#899 是第三方網站的『AI 輔助報告已刊出』通知，與本 fork 的產品、工具、gate 無關，不適用。#896 在上游不存在（issue 與 PR 皆查無）。理由見 docs/DECISIONS.md 同日條目。 2026-11-02：commit 水位推進到 88c79f6（45 commit，三方套用，AGENTS.md／README.md 保留本 fork 版並補技能目錄列）；PR 909 → 929、issue 899 → 924。採用 reverse-engineer-marketing 2.14.0 與 SavvyCal、scrapecreators 指南；#916、#917 廠商導流政策性不引用，其餘 open PR 等上游合併。理由見 docs/DECISIONS.md 同日條目。 2026-11-10：commit 水位推進到 7c18794（59 commit，三方套用；AGENTS.md、CONTRIBUTING.md、README.md 保留本 fork 版，README 只同步技能目錄表）；PR 929 → 953、issue 924 → 954。採用 #886、#914、#925、#926、#927、#945、#950、#952、#953 與 Post Bridge 整合指南；#942（Livestorm 上架）依夥伴政策略過；#939、#940、#941、#943、#944、#946、#947、#949 為特定廠商的整合卡片或 CLI，政策性不引用；#951 等上游合併；issue #948 屬實但在產品 skill 內，跟隨上游；#954 是上游維護者自己的 trigger eval 後續追蹤，跟隨上游。理由見 docs/DECISIONS.md 同日條目。",
-  "reviewed_pr_through": 953,
-  "reviewed_issue_through": 954
+  "reviewed_through": "8fd2fcade2fd6629026e9dfe6d133b55b36968b9",
+  "reviewed_date": "2026-11-25",
+  "notes": "Fork overlay established at upstream merge of PR #569 (partner program rules). No product commits adopted beyond the fork point. Subsequent upstream commits, PRs, and issues require review. 2026-08-30：commit 水位推進到 e55de88、PR 569 → 571。#571（Converly 因未付款下架）採用——本 fork 的 REGISTRY 原本替一個連上游都下架的廠商掛 Verified Partner 背書，而本線與該廠商毫無商業關係；#570（往 repo 塞加密貨幣交易 app）與本 repo 主題無關且上游未合併，不引用。理由見 docs/DECISIONS.md 同日條目。2026-09-11：commit 水位推進到 5b2c000、PR 571 → 583、issue 維持 569（實查為空）。d4ff28a（Converly 二次上架）與 4fbe11f/88de9fd/5cd4a7e（Ploy 上架三部曲）略過——付款清償的是上游與廠商的贊助關係，不是本 fork 的，維持既有的贊助商 CTA 略過政策。5b2c000（ai-seo 2.5.0）cherry-pick 採用——純產品內容與版本號更新，無 README/REGISTRY/gate 衝突。PR #572/#573/#575/#580/#581/#582/#583 全部 OPEN 未合併，暫緩；#580/#581 的連結修正經查證不落在 tools/check_links.py 的掃描範圍（該工具明確排除 skills/ 與 tools/integrations/），不構成『本 fork 工具能證明的缺陷』。理由見 docs/DECISIONS.md 同日條目。 2026-09-15：commit 與 issue 軸實查無新項目；PR 583 → 588。#586（Glasser 整合指南）與 #587（AIPM registry 徽章）不引用——第三方廠商導流，與 Converly／Ploy 同一類政策。#588（tools/clis/README.md 補完 CLI 目錄）暫緩至合併，純文件對齊且非本 fork 工具能證明的缺陷。理由見 docs/DECISIONS.md 同日條目。 2026-09-30：PR 588 → 598、issue 569 → 600；commit 軸無新增。無採用項目，皆為上游未合併或產品內容，等 commit 軸抵達。理由見 docs/DECISIONS.md 同日條目。 2026-10-24：commit 5b2c000 → e85f3cb（693 commit／613 檔）、PR 598 → 895、issue 600 → 856。逐檔分類：取上游 580（含 conversion-tracking、link-building）、刪除 1、三方合併 21（7 支 CLI 保留輸出遮蔽）、依夥伴政策略過 8（AIsa、Omnia、Converly、Ploy）。產品 skill 內的 ◆ 夥伴提及依「不改寫產品 skill」保留。新增三支上游 workflow 的 repo 閘門；gate 新增綁檔案雜湊的 reviewed_partials；73 筆新 finding 逐筆審閱收錄；SkillSpector pin 改 fe7adc7。理由見 docs/DECISIONS.md 同日條目。 2026-10-26：commit 維持 e85f3cb（實查無新提交）、PR 895 → 898、issue 856 → 899。無採用項目。#897（HeyReagent 整合指南，head 55cbc92，2 檔 +127/-1）與 #898（Adlicio 整合指南，head 9381397，2 檔 +129）皆為第三方廠商導流，與 Glasser／Converly／Ploy 同一類，政策性不引用；兩筆依判準八取當下 head 掃描，無行內超長空白夾帶、eval、base64 或不可見字元。#899 是第三方網站的『AI 輔助報告已刊出』通知，與本 fork 的產品、工具、gate 無關，不適用。#896 在上游不存在（issue 與 PR 皆查無）。理由見 docs/DECISIONS.md 同日條目。 2026-11-02：commit 水位推進到 88c79f6（45 commit，三方套用，AGENTS.md／README.md 保留本 fork 版並補技能目錄列）；PR 909 → 929、issue 899 → 924。採用 reverse-engineer-marketing 2.14.0 與 SavvyCal、scrapecreators 指南；#916、#917 廠商導流政策性不引用，其餘 open PR 等上游合併。理由見 docs/DECISIONS.md 同日條目。 2026-11-10：commit 水位推進到 7c18794（59 commit，三方套用；AGENTS.md、CONTRIBUTING.md、README.md 保留本 fork 版，README 只同步技能目錄表）；PR 929 → 953、issue 924 → 954。採用 #886、#914、#925、#926、#927、#945、#950、#952、#953 與 Post Bridge 整合指南；#942（Livestorm 上架）依夥伴政策略過；#939、#940、#941、#943、#944、#946、#947、#949 為特定廠商的整合卡片或 CLI，政策性不引用；#951 等上游合併；issue #948 屬實但在產品 skill 內，跟隨上游；#954 是上游維護者自己的 trigger eval 後續追蹤，跟隨上游。理由見 docs/DECISIONS.md 同日條目。 2026-11-25：逐項審查 236 commits、63 PR、40 issues、59 branches；採用 22 組 CLI 修正與 #956/#977/#978、#1011 的 Livestorm 名稱修正。產品 skills 與版本維持既有內容，未完整同步 2.14.28；各項暫緩觸發條件、廠商導流拒收理由與驗收見 docs/DECISIONS.md 同日條目。open PR head/state 另以 monitored 保存。",
+  "reviewed_pr_through": 1061,
+  "reviewed_issue_through": 1057,
+  "reviewed_branch_heads": {
+    "development": "8d8098d0231922e704cecbb7c3dced6016939feb",
+    "docs/aisa-integration": "846847a51d329ed73e697a0a58c77483da03e97c",
+    "docs/free-vs-featured-tool-guides": "fd0c528ae4a87f320e68caa243666bc2f3a04f54",
+    "feature/1041-port-fork-rules": "a1c701c4bdf36bb287f8900bd693d4eaea634620",
+    "feature/1042-segment-sequences": "687398dbd36c7369633979be5c433ccbc5b988d2",
+    "feature/1051-1054-cold-email-experiments": "6253638ee491dd61a368aca9a2dcc9dedbddbadd",
+    "feature/1055-prospecting-experiments": "40be89030f0138b98d2faa4a32a60e0c96e3cdb9",
+    "feature/487-pricing-ai-readiness": "74013892b6c2908e3d2acb8b99a8b9aa34eb7d9e",
+    "feature/498-rowbound-enrichment": "0a886c4e370f892fc9b06e6d7bfe86365bf34f0c",
+    "feature/781-aisa-partner": "92e4bd4ef77d52bea7dadccf81bd49aae3dec35b",
+    "feature/ab-test-growth-experiments": "c4cb25cb6c20e6de9e8685fecd0495566de00a89",
+    "feature/add-rb2b-tool": "42ac956cb77409883404a20436d183ab9bba0d3f",
+    "feature/add-sparktoro": "b902ed2d79220fdbe6b2edaae2a47fa17f1f0c88",
+    "feature/ads-operating-check": "660f26065466d16e906f63c72e6421e78119b5f3",
+    "feature/agent-checkout-and-code-rendered-video": "c5e39a3e0a5c3d41f264ef2f39abae13bb0dd7a6",
+    "feature/ai-seo-measurement": "b8c1cd0699e148c47a6c8647aa7231b6bc8a1ee4",
+    "feature/ai-seo-pricing-md": "47db68aaba72a3e25c5750752c059b131de30e95",
+    "feature/benchmark-skill-hardening": "8a98c108a744dcacde86465479292bc6eb54014f",
+    "feature/brand-voice-learnings-ledger": "0e59abb7ff9c62234529c2315f9d3c2db0b97321",
+    "feature/conversion-tracking-reference": "f23b665461ad372fa8079ee8e6b829b95c9b8f59",
+    "feature/conversion-tracking-skill": "00823073456f602f1d065edf744fdce13fa0842e",
+    "feature/copy-diagnosis-build-a-writer": "158bd3af27b00323d5a950c033efa0256f7aa426",
+    "feature/copy-editing-content-refresh": "bb54a76215b94872ad85b2d9ef7720b2c9626bf8",
+    "feature/copy-editing-expert-panel": "314230b6dbfaabfe8854c685cc09e26832b59c62",
+    "feature/eval-framework-phase0": "f75e37206c6543a98f62554c8e261ede583a8505",
+    "feature/image-skill": "ea06638493ccd978d9c32a4f5be2d6ccfcc95d92",
+    "feature/new-connector-tools": "a2e646c2e6b4dc26e0179f10d04b7fd2b932a570",
+    "feature/newsletter-sponsorships-utm-matrix": "3ec78860f1f1823c8983dd9a2c4a493035879cbe",
+    "feature/no-slop-skill": "5339aadfcf5355bef0b2d7a6bbd791dc82b1bac1",
+    "feature/reverse-engineer-marketing": "79eb93ba4ff9ca7644a3ba32e047a7a1678ee50d",
+    "feature/short-form-video-reference": "0ec3146b6ecdc1a2c1da26565b5f3121f720abf8",
+    "feature/skill-description-optimization": "8c8090ed92292558250362278921c1a3068ce2ad",
+    "feature/skill-evals": "926c624d07c8f9708a0866326a458030a8b1d41c",
+    "feature/skill-renames": "8b82f733b60e8b9532d302ec0e4ec339d8061e77",
+    "feature/skill-writing-audit": "b325e41c91ff974b4bc8946c31192e17c38241f5",
+    "feature/social-content-repurposing": "330d220acaf82178aee1b8944d4e7f971d826c13",
+    "feature/video-skill": "207026cc0ae4634e5f7dbe6041aa1733b519c278",
+    "fix/270-marketplace-source-schema": "09031bb185f9480e72b912ed5688476730546b1f",
+    "fix/650-conditional-tracking-pointer": "b72697ef6949dbcfb86018f123e7fd462f7f53e3",
+    "fix/960-skills-guard-false-positives": "a6df23b661ec49af4a164b14404564b3ea68fae4",
+    "fix/ad-creative-static-formats": "c23b05613faa193e2e047ba1ad0e65983302f0e1",
+    "fix/aso-audit-cleanup": "ae770a99bd60b96f9e7e6b78ece0cc85c5599b23",
+    "fix/aso-audit-content-additions": "7df49f2be8a124d247fc2a5af9b84251a32e92c2",
+    "fix/cli-security-hardening": "9698318a30114e51fb820223e445675f1ce4d58e",
+    "fix/community-content-additions": "9f9c2d6f59e8dacac0b2a47fed38ce8f5888441b",
+    "fix/community-marketing-cleanup": "c832d917d32eacf571fb81743ca8ebf7a08fd7a1",
+    "fix/converly-partner-livestorm-skills": "d90bcd8ef5b224a9954798352e96c7ff73c9ffe5",
+    "fix/directory-submissions-listing-kit": "310ebb96a9cb185de6648fcbb2b4f01844f41a38",
+    "fix/learnings-ledger-copywriting-ads": "348bb2e5865b5996603550c3e1aca47e0437c806",
+    "fix/marketplace-plugin-paths": "2ea0f0c2c7b50963dcd3f8401574d0892696cd0a",
+    "fix/merge-competitor-profiling": "a45a348b08731235497c4001d204ec84ea8b2843",
+    "fix/merge-directory-submissions": "cafdd38e5865bfcbb3ee37b06084e3c67319696a",
+    "fix/platform-limits-cleanup": "dba857087051a19498c848bf92fbdcfd357076a8",
+    "fix/savvycal-cli-filters": "ad8f50dc713a32403efca9b7b615822930543238",
+    "integrations/cloro": "d22ebfc9fc6922ad1c07d6954ec5e5900eebbe95",
+    "main": "8fd2fcade2fd6629026e9dfe6d133b55b36968b9",
+    "nudge/magister-distribution-poc": "5eef8d7ed7c8b54ca3c2ff6e920b9ab56a0bddc8",
+    "release/v1.6.0": "4874fe8979134ff428ee2e564b8b20c5855515c3",
+    "release/v1.7.0": "e8623ad57dd1f139e5923b19536d77e4abd37cfa"
+  },
+  "monitored": [
+    {
+      "item": "pr#989",
+      "head": "66eed43d50eae0b62148bd4a054350945be43313",
+      "state": "open"
+    },
+    {
+      "item": "pr#1020",
+      "head": "9c1d9baf01ae1217c7aee03b8c3b56a220cea8aa",
+      "state": "open"
+    },
+    {
+      "item": "pr#1021",
+      "head": "b774943a8c67cd7e8c006d48b4eeab6c77b4ca32",
+      "state": "open"
+    },
+    {
+      "item": "pr#1022",
+      "head": "b603bdd26d8b9f84ec1bc7f627a4946b6fd15729",
+      "state": "open"
+    },
+    {
+      "item": "pr#1024",
+      "head": "cbd6aea2dfc45d7452add4a003fe823ca8f96725",
+      "state": "open"
+    },
+    {
+      "item": "pr#1025",
+      "head": "48273f27d931754c8ca3cfe50d3f6980de82b2c8",
+      "state": "open"
+    },
+    {
+      "item": "pr#1026",
+      "head": "68c87bd72a9e2d5210efb3dd0c0e9add0f62c4cc",
+      "state": "open"
+    },
+    {
+      "item": "pr#1027",
+      "head": "41f8b1fbb1e2d175c7c363fecd401a31cb5451d6",
+      "state": "open"
+    },
+    {
+      "item": "pr#1028",
+      "head": "3ad6677a63e015ad9b1370c7334ab15e1f3985f0",
+      "state": "open"
+    },
+    {
+      "item": "pr#1031",
+      "head": "93e7979017e2155a360795051d5218dd52ea2071",
+      "state": "open"
+    },
+    {
+      "item": "pr#1032",
+      "head": "a67d503e6df19200fe97957a521f056e869f0142",
+      "state": "open"
+    },
+    {
+      "item": "pr#1033",
+      "head": "665eac9d435d944d3a2d8f103736fe29260b6f3d",
+      "state": "open"
+    },
+    {
+      "item": "pr#1034",
+      "head": "13a677706f5c7772401e8ee256965703b18cc519",
+      "state": "open"
+    },
+    {
+      "item": "pr#1035",
+      "head": "0004b6d84a0775c706d57f91b25e0a94b8a1d20a",
+      "state": "open"
+    },
+    {
+      "item": "pr#1036",
+      "head": "73df942095a583cf007bbac4d4eb2e5f1b9484f3",
+      "state": "open"
+    },
+    {
+      "item": "pr#1037",
+      "head": "db37632cbd9d8bb8ff49c24137bceb522d62c4e4",
+      "state": "open"
+    },
+    {
+      "item": "pr#1038",
+      "head": "83e3999f3a2a49d95a570289e1618d0e8834179d",
+      "state": "open"
+    },
+    {
+      "item": "pr#1039",
+      "head": "030db9ad078a72967911f38bfc9fbb1b715d8540",
+      "state": "open"
+    },
+    {
+      "item": "pr#1040",
+      "head": "52fe2dc77a3c9f72fea9378dc563d80b9a701aca",
+      "state": "open"
+    },
+    {
+      "item": "pr#1043",
+      "head": "a1c701c4bdf36bb287f8900bd693d4eaea634620",
+      "state": "open"
+    },
+    {
+      "item": "pr#1044",
+      "head": "687398dbd36c7369633979be5c433ccbc5b988d2",
+      "state": "open"
+    },
+    {
+      "item": "pr#1058",
+      "head": "40be89030f0138b98d2faa4a32a60e0c96e3cdb9",
+      "state": "open"
+    },
+    {
+      "item": "pr#1059",
+      "head": "6253638ee491dd61a368aca9a2dcc9dedbddbadd",
+      "state": "open"
+    },
+    {
+      "item": "pr#1060",
+      "head": "497ac0c19160465d242f0e1cec27778eded46989",
+      "state": "open"
+    },
+    {
+      "item": "pr#1061",
+      "head": "b19e1fc04d65e89d00a7f82a591eba814b82efa5",
+      "state": "open"
+    }
+  ]
 }

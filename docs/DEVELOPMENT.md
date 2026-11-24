@@ -79,6 +79,12 @@ CI 在 Ubuntu 跑 3.9–3.14，並加一個 Windows Python 3.13 job 跑完整 ca
 
 `tools/check_dependency_freshness.py` 把 `requirements-dev.txt` 宣告的每一筆直接依賴拿去對 PyPI 現行版本，`.github/workflows/dependency-freshness.yml` 每月跑一次。紅燈只有兩條誠實出口：`# freshness-hold:`（常態政策）或 `.github/dependency-deferrals.json` 的 `deferredLatest`（會過期）。調高宣告下限來讓報告變綠不是出口。
 
+## 工作樹內驗證
+
+若任務限制所有寫入只能留在工作樹，將該子行程的 `TEMP`、`TMP` 與 Bash 的 `TMPDIR` 指向工作樹內忽略目錄，再跑原 gate。SkillSpector 是由 Python 匯入，只有把 `skillspector.exe` 放進 PATH 不夠；應使用本地 `.venv` 的釘版依賴或明確的 `-SkillSpectorPython`。
+
+另可執行離線 `bash tests/run-official-validator-regression.sh`，驗證 official-validator 正確拒絕 bad-skill；不需要安裝或登入宿主。新 hidden checker 的單元測試已隨 Node 契約進入 gate。要掃目前檔案時，先用 `tools/stage_scan_input.py` 建 git-aware 的 `skills/`、`tools/` 副本，再把 `scripts/check-hidden-content.mjs` 與 allowlist 放入副本的 `scripts/` 執行；直接掃工作目錄會把 gitignored `.pyc` 當成 NUL 命中。這不取代 SkillSpector gate。
+
 ## 不要做的事
 
 - 不要把產品 `SKILL.md` 改寫成維護索引。
