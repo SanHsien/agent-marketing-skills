@@ -5,7 +5,7 @@
 - Upstream reviewed through: `8fd2fcade2fd6629026e9dfe6d133b55b36968b9`
 - Upstream watermarks: PR / issue `reviewed_pr_through` / `reviewed_issue_through` = **1061 / 1057**
 - Primary environment: Windows 11、PowerShell、Python 3.13.14（本機）、Node.js 26.12.1；CI Ubuntu Python 3.9–3.14，Windows canonical security gate Python 3.13
-- Status: 維護骨架可用；產品 `skills/`、`tools/clis/`、`tools/integrations/`、`.claude-plugin/` 未改寫；fork 可修的 R-01～R-04、R-06 已修
+- Status: 維護骨架可用；產品 `skills/`、`.claude-plugin/` 未改寫，`tools/clis/`、`tools/integrations/` 已按條件採用上游修正（R-16～R-19，2026-11-25 `843cb9d`）；fork 可修的 R-01～R-04、R-06 已修
 
 ## 結論
 

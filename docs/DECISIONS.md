@@ -464,6 +464,8 @@ main 祖先用祖先判斷去重；非祖先逐支列出相對 merge-base 的實
 
 ## 2026-11-24：上游審查受阻，水位不變
 
+> **已被取代**：受阻原因（工作樹缺 SkillSpector）於 2026-11-25 排除，逐筆審查完成、baseline 推進到 `8fd2fca`、gate exit 0，結論以 `843cb9d`／`96f1f41` 的記錄為準。本段只留作歷史。
+
 **狀態**：未完成逐筆審查，沒有採用、拒絕或已審暫緩的產品更新。本次指令要求受阻時記錄並停止，因此只提交阻擋紀錄，不推送。
 
 **範圍盤點**：在本工作樹 `codex/upstream-1124`、起始 HEAD `a6b08529f2294d9affb5a3b8ca09eb2e9876b032` 執行 `python tools/check_upstream_updates.py`，exit **0**（未指定 `--strict`，不代表沒有待審項目）。檢查器列出 baseline `7c187944fa63d149879459ba53ef4fd3c0364c50` 至 [上游 `8fd2fcade2fd6629026e9dfe6d133b55b36968b9`](https://github.com/coreyhaines31/marketingskills/commit/8fd2fcade2fd6629026e9dfe6d133b55b36968b9) 的 **236 個 commit**、PR 水位 #953 之後 **63 筆 PR**（至 [#1061](https://github.com/coreyhaines31/marketingskills/pull/1061)）、issue 水位 #954 之後 **40 筆 issue**（至 [#1057](https://github.com/coreyhaines31/marketingskills/issues/1057)）。另取得上游分支 head 清單，但尚未完成分支差異審查。PR 檔案 patch 與 issue 內容已取回，取回不等於已審。
